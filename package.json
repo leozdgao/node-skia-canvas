@@ -1,0 +1,23 @@
+{
+  "name": "node-skia",
+  "version": "1.0.0",
+  "description": "Canvas work on node.js base skia.",
+  "main": "hello.js",
+  "scripts": {
+    "build:dev": "cmake-js configure -D && cmake-js compile -D"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leozdgao/node-skia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/leozdgao/node-skia/issues"
+  },
+  "homepage": "https://github.com/leozdgao/node-skia#readme",
+  "dependencies": {
+    "node-addon-api": "^3.1.0"
+  }
+}
