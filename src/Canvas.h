@@ -8,7 +8,7 @@ public:
     static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
 
 private:
-    explicit Canvas();
+    explicit Canvas(int width, int height);
     ~Canvas();
 
     static inline napi_value Constructor(napi_env env);
