@@ -2,6 +2,8 @@
 
 #include <napi.h>
 
+#include "include/core/SkSurface.h"
+
 class Canvas {
 public:
     static napi_value Init(napi_env env, napi_value exports);
@@ -19,4 +21,8 @@ private:
 
     napi_env env_;
     napi_ref wrapper_;
+
+    int width_;
+    int height_;
+    sk_sp<SkSurface> rasterSurface_;
 };

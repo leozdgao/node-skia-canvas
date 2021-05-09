@@ -1,14 +1,24 @@
 #include <iostream>
+
+#include "include/core/SkCanvas.h"
+#include "include/core/SkSurface.h"
+
 #include "Canvas.h"
+#include "CanvasRenderingContext2D.h"
+#include "helpers.h"
 
 Canvas::Canvas(int width, int height) {
+    width_ = width;
+    height_ = height;
 
+    rasterSurface_ = SkSurface::MakeRasterN32Premul(width_, height_);
 }
 
 Canvas::~Canvas() {
     napi_delete_reference(env_, wrapper_);
 }
 
+// Binding 初始化层，定义如何向上暴露 API
 napi_value Canvas::Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_value cls;
@@ -47,11 +57,7 @@ napi_value Canvas::New(napi_env env, napi_callback_info info) {
     std::cout << "[] Call New" << std::endl;
 
     napi_status status;
-    napi_value target;
-    status = napi_get_new_target(env, info, &target);
-    assert(status == napi_ok);
-
-    bool is_constructor = target != nullptr;
+    bool is_constructor = node_skia_helpers::is_called_by_new(env, info);
 
     std::cout << "[] isConstructor " << is_constructor << std::endl;
 
@@ -86,6 +92,21 @@ void Canvas::Destructor(napi_env env, void* nativeObject, void* finalize_hint) {
 
 napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
     std::cout << "[] get context" << std::endl;
+    napi_status status;
+    size_t argc = 1;
+    napi_value argv[1];
+    size_t str_len;
+    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+
+    char cc[128];
+    status = napi_get_value_string_utf8(env, argv[0], cc, 128, &str_len);
+    std::string str = "2d";
+    
+    std::cout << (str == std::string(cc)) << std::endl;
+
+    // std::cout << "after " << hh << std::endl;
+
+    std::cout << "[] get context with params " << cc << " length " << str_len << std::endl;
 }
 
 napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {

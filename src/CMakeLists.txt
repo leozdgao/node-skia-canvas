@@ -1,14 +1,15 @@
 
-# if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#     set(CMAKE_CXX_FLAGS "${FLAGS}")
-#     include_directories("/System/Library/Frameworks/")
-#     find_library(APP_SERVICES_LIBRARY ApplicationServices)
-# endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_CXX_FLAGS "${FLAGS}")
+    include_directories("/System/Library/Frameworks/")
+    find_library(APP_SERVICES_LIBRARY ApplicationServices)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 file(GLOB SOURCE_FILES
     "init.cc"
     "Canvas.cc"
     "CanvasRenderingContext2D.cc"
+    "helpers.cc"
 )
 
 

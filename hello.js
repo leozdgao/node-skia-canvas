@@ -10,7 +10,7 @@ const c = new Canvas();
 console.log(c);
 
 c.toBuffer();
-c.getContext();
+c.getContext('2d');
 
 
 // setTimeout(() => {
