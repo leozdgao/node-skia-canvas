@@ -25,4 +25,6 @@ private:
     int width_;
     int height_;
     sk_sp<SkSurface> rasterSurface_;
+
+    napi_value ctx_;
 };

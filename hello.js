@@ -10,7 +10,14 @@ const c = new Canvas();
 console.log(c);
 
 c.toBuffer();
-c.getContext('2d');
+const ctx = c.getContext('2d');
+
+console.log(ctx);
+ctx.fillText();
+
+const ctx0 = c.getContext('2d');
+const ctx1 = c.getContext('2d');
+const ctx2 = c.getContext('2d');
 
 
 // setTimeout(() => {

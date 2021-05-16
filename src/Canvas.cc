@@ -23,8 +23,8 @@ napi_value Canvas::Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_value cls;
     napi_property_descriptor properties[] = {
-        { "getContext", 0, GetContext, 0, 0, 0, napi_default, 0 },
-        { "toBuffer", 0, ToBuffer, 0, 0, 0, napi_default, 0 }
+        DECLARE_NAPI_METHOD("getContext", GetContext),
+        DECLARE_NAPI_METHOD("toBuffer", ToBuffer),
     };
 
     status = napi_define_class(env, "Canvas", NAPI_AUTO_LENGTH, New, nullptr, 2, properties, &cls);
@@ -95,18 +95,21 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
     napi_status status;
     size_t argc = 1;
     napi_value argv[1];
-    size_t str_len;
-    status = napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr);
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
 
-    char cc[128];
-    status = napi_get_value_string_utf8(env, argv[0], cc, 128, &str_len);
-    std::string str = "2d";
+    std::string cc = node_skia_helpers::get_utf8_string(env, argv[0]);
+
+    std::cout << "[] get context with params " << cc << " length " << cc.size() << std::endl;
+
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
+    if (canvas->ctx_ == nullptr) {
+        status = CanvasRenderingContext2D::NewInstance(env, &canvas->ctx_);
+    }
     
-    std::cout << (str == std::string(cc)) << std::endl;
-
-    // std::cout << "after " << hh << std::endl;
-
-    std::cout << "[] get context with params " << cc << " length " << str_len << std::endl;
+    return canvas->ctx_;
 }
 
 napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {
