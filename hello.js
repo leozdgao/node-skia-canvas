@@ -1,3 +1,4 @@
+const fs = require('fs');
 const { Canvas } = require('./build/Debug/node-skia.node');
 
 // console.log(mod.hello('5yasudjfas'))
@@ -6,20 +7,14 @@ const { Canvas } = require('./build/Debug/node-skia.node');
 
 // console.log(mod)
 
-const c = new Canvas();
+const c = new Canvas(300, 300);
 console.log(c);
 
-c.toBuffer();
+// c.toBuffer();
 const ctx = c.getContext('2d');
 
-console.log(ctx);
-ctx.fillText();
+console.log('context', ctx);
+// ctx.fillText('123123123');
 
-const ctx0 = c.getContext('2d');
-const ctx1 = c.getContext('2d');
-const ctx2 = c.getContext('2d');
-
-
-// setTimeout(() => {
-//     console.log('another loop')
-// }, 1000);
+const buffer = c.toBuffer();
+fs.writeFileSync('a.png', Buffer.from(buffer));

@@ -87,11 +87,10 @@ napi_value Canvas::New(napi_env env, napi_callback_info info) {
 }
 
 void Canvas::Destructor(napi_env env, void* nativeObject, void* finalize_hint) {
-    std::cout << "[] Call destructor" << std::endl;
+    
 }
 
 napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
-    std::cout << "[] get context" << std::endl;
     napi_status status;
     size_t argc = 1;
     napi_value argv[1];
@@ -107,11 +106,30 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
 
     if (canvas->ctx_ == nullptr) {
         status = CanvasRenderingContext2D::NewInstance(env, &canvas->ctx_);
+
+        CanvasRenderingContext2D* inner_ctx;
+        status = napi_unwrap(env, canvas->ctx_, reinterpret_cast<void**>(&inner_ctx));
+        inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
     }
     
     return canvas->ctx_;
 }
 
 napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {
-    std::cout << "[] to buffer" << std::endl;
+    napi_status status;
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+    SkCanvas* c = canvas->rasterSurface_->getCanvas();
+    sk_sp<SkImage> img(canvas->rasterSurface_->makeImageSnapshot());
+    sk_sp<SkData> png(img->encodeToData());
+
+    napi_value buf;
+    status = napi_create_buffer_copy(env, png->size(), png->data(), nullptr, &buf); // 为什么必须是 buffer copy？
+
+    assert(status == napi_ok);
+
+    return buf;
 }

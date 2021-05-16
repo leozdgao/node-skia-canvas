@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include <include/core/SkTextBlob.h>
+
 #include "CanvasRenderingContext2D.h"
 #include "helpers.h"
 
@@ -90,6 +92,29 @@ void CanvasRenderingContext2D::Destructor(napi_env env, void* nativeObject, void
     reinterpret_cast<CanvasRenderingContext2D*>(nativeObject)->~CanvasRenderingContext2D();
 }
 
+void CanvasRenderingContext2D::SetCanvas(SkCanvas* canvas) {
+    canvas_ = canvas;
+};
+
 napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
-    std::cout << "Calling drawText" << std::endl;
+    napi_status status;
+    napi_value result;
+
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    // string input = node_skia_helpers::get_utf8_string(env, argv[0]);
+    auto text = SkTextBlob::MakeFromString("input.data()", SkFont(nullptr, 18));
+
+    // std::cout << "get intput " << input << std::endl;
+
+    SkPaint paint;
+    ctx->canvas_->drawTextBlob(text.get(), 50, 25, paint);
+
+    // return result;
 }
