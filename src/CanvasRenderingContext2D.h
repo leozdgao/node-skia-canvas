@@ -19,10 +19,13 @@ private:
     ~CanvasRenderingContext2D();
 
     static napi_value FillText(napi_env env, napi_callback_info info);
+    static napi_value GetFillStyle(napi_env env, napi_callback_info info);
+    static napi_value SetFillStyle(napi_env env, napi_callback_info info);
 
     napi_env env_;
     napi_ref wrapper_;
 
     SkCanvas* canvas_;
+    SkPaint paint_;
 };
 

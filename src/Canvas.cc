@@ -82,7 +82,7 @@ napi_value Canvas::New(napi_env env, napi_callback_info info) {
 
         return ctx;
     } else {
-
+        // 也去支持工厂方式构造
     }
 }
 
@@ -104,7 +104,11 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
     Canvas* canvas;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
 
-    if (canvas->ctx_ == nullptr) {
+    napi_valuetype ctx_type;
+    status = napi_typeof(env, canvas->ctx_, &ctx_type);
+
+    // NOTE: 这里判断 == nullptr 会有问题，后续挖一下为什么
+    if (ctx_type != napi_object) {
         status = CanvasRenderingContext2D::NewInstance(env, &canvas->ctx_);
 
         CanvasRenderingContext2D* inner_ctx;

@@ -14,7 +14,9 @@ console.log(c);
 const ctx = c.getContext('2d');
 
 console.log('context', ctx);
-// ctx.fillText('123123123');
+ctx.fillText('It`s OK');
+
+console.log(ctx.fillStyle);
 
 const buffer = c.toBuffer();
-fs.writeFileSync('a.png', Buffer.from(buffer));
+fs.writeFileSync('temp_a.png', Buffer.from(buffer));

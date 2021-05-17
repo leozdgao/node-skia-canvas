@@ -16,11 +16,12 @@ CanvasRenderingContext2D::~CanvasRenderingContext2D() {
 napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_property_descriptor properties[] = {
-        DECLARE_NAPI_METHOD("fillText", FillText)
+        DECLARE_NAPI_METHOD("fillText", FillText),
+        DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 1, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 2, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -108,13 +109,44 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    // string input = node_skia_helpers::get_utf8_string(env, argv[0]);
-    auto text = SkTextBlob::MakeFromString("input.data()", SkFont(nullptr, 18));
+    string input = node_skia_helpers::get_utf8_string(env, argv[0]);
+    auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
 
-    // std::cout << "get intput " << input << std::endl;
+    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_);
+}
 
-    SkPaint paint;
-    ctx->canvas_->drawTextBlob(text.get(), 50, 25, paint);
+napi_value CanvasRenderingContext2D::GetFillStyle(napi_env env, napi_callback_info info) {
+    napi_status status;
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
 
-    // return result;
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    SkColor4f color = ctx->paint_.getColor4f();
+
+    napi_value result, r, g, b, a;
+    status = napi_create_array(env, &result);
+    status = napi_create_double(env, color.fR, &r);
+    status = napi_create_double(env, color.fG, &g);
+    status = napi_create_double(env, color.fB, &b);
+    status = napi_create_double(env, color.fA, &a);
+
+    status = napi_set_element(env, result, 0, r);
+    status = napi_set_element(env, result, 1, g);
+    status = napi_set_element(env, result, 2, b);
+    status = napi_set_element(env, result, 3, a);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_info info) {
+    napi_status status;
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+
 }
