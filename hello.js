@@ -14,9 +14,15 @@ console.log(c);
 const ctx = c.getContext('2d');
 
 console.log('context', ctx);
+console.log(ctx.fillStyle);
+ctx.fillStyle = "red";
+console.log(ctx.fillStyle);
+
 ctx.fillText('It`s OK');
 
-console.log(ctx.fillStyle);
+ctx.fillStyle = "blue";
+
+ctx.fillText('aaaa');
 
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));
