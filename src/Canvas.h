@@ -16,8 +16,13 @@ private:
     static inline napi_value Constructor(napi_env env);
     static napi_value New(napi_env env, napi_callback_info info);
 
+    static napi_value GetWidth(napi_env env, napi_callback_info info);
+    static napi_value SetWidth(napi_env env, napi_callback_info info);
+    static napi_value GetHeight(napi_env env, napi_callback_info info);
+    static napi_value SetHeight(napi_env env, napi_callback_info info);
     static napi_value GetContext(napi_env env, napi_callback_info info);
     static napi_value ToBuffer(napi_env env, napi_callback_info info);
+    
 
     napi_env env_;
     napi_ref wrapper_;

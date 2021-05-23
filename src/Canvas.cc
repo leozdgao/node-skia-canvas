@@ -23,11 +23,13 @@ napi_value Canvas::Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_value cls;
     napi_property_descriptor properties[] = {
+        DECLARE_NAPI_PROPERTY("width", GetWidth, SetWidth),
+        DECLARE_NAPI_PROPERTY("height", GetHeight, SetHeight),
         DECLARE_NAPI_METHOD("getContext", GetContext),
         DECLARE_NAPI_METHOD("toBuffer", ToBuffer),
     };
 
-    status = napi_define_class(env, "Canvas", NAPI_AUTO_LENGTH, New, nullptr, 2, properties, &cls);
+    status = napi_define_class(env, "Canvas", NAPI_AUTO_LENGTH, New, nullptr, 4, properties, &cls);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -54,12 +56,8 @@ napi_value Canvas::Init(napi_env env, napi_value exports) {
 }
 
 napi_value Canvas::New(napi_env env, napi_callback_info info) {
-    std::cout << "[] Call New" << std::endl;
-
     napi_status status;
     bool is_constructor = node_skia_helpers::is_called_by_new(env, info);
-
-    std::cout << "[] isConstructor " << is_constructor << std::endl;
 
     if (is_constructor) {
         // 通过 new 的方式调用
@@ -90,6 +88,42 @@ void Canvas::Destructor(napi_env env, void* nativeObject, void* finalize_hint) {
     
 }
 
+napi_value Canvas::GetWidth(napi_env env, napi_callback_info info) {
+    napi_status status;
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
+    napi_value result;
+    status = napi_create_int32(env, canvas->width_, &result);
+
+    return result;
+}
+
+napi_value Canvas::SetWidth(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
+    napi_status status;
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
+    napi_value result;
+    status = napi_create_int32(env, canvas->height_, &result);
+
+    return result;
+}
+
+napi_value Canvas::SetHeight(napi_env env, napi_callback_info info) {
+
+}
+
 napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
     napi_status status;
     size_t argc = 1;
@@ -98,8 +132,6 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
     status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
 
     std::string cc = node_skia_helpers::get_utf8_string(env, argv[0]);
-
-    std::cout << "[] get context with params " << cc << " length " << cc.size() << std::endl;
 
     Canvas* canvas;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
