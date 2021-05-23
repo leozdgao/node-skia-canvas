@@ -15,12 +15,16 @@ const ctx = c.getContext('2d');
 
 console.log('context', ctx);
 console.log(ctx.fillStyle);
-ctx.fillStyle = "red";
+ctx.fillStyle = "yellowgreen";
 console.log(ctx.fillStyle);
 
 ctx.fillText('It`s OK');
 
-ctx.fillStyle = "yellowgreen";
+ctx.fillStyle = "rgba(0x46,0x82,0xb4)";
+ctx.fillStyle = "#4682b4"
+ctx.fillStyle = "hsl(120, 1, 0.5)";
+
+console.log(ctx.fillStyle.map(i => (Math.floor(i * 255)).toString(16)));
 
 ctx.fillText('aaaa');
 

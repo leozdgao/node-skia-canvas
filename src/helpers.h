@@ -1,9 +1,11 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <napi.h>
 
 using std::string;
+using std::vector;
 
 #define DECLARE_NAPI_METHOD(name, func)  { \
     name /* utf8name */, \
@@ -39,6 +41,13 @@ using std::string;
 }
 
 namespace node_skia_helpers {
+    struct FunctionExpression {
+        string name;
+        vector<string> params;
+    };
+
     bool is_called_by_new(napi_env env, napi_callback_info info);
     string get_utf8_string(napi_env env, napi_value value);
+
+    FunctionExpression parse_func_str(string &str);
 }

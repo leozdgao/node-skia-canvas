@@ -1,8 +1,13 @@
 #include <string>
+#include <regex>
 #include <napi.h>
-#include "util.h"
+#include "helpers.h"
 
 using std::string;
+using std::smatch;
+using std::sregex_token_iterator;
+using std::regex;
+using std::regex_match;
 
 namespace node_skia_helpers {
     // 判断调用是否是通过 new 来调用构造函数的
@@ -28,5 +33,26 @@ namespace node_skia_helpers {
         assert(status == napi_ok);
 
         return string(buf);
+    }
+
+    FunctionExpression parse_func_str(string &str) {
+        FunctionExpression result;
+        regex regx = regex("^([^(]+)\\((.+)\\)$");
+        smatch sm;
+        string params_str;
+
+        if (regex_match(str, sm, regx)) {
+            result.name = sm[1];
+            params_str = sm[2];
+
+            regex split_regx = regex("\\s*,\\s*");
+
+            result.params = vector<string>(
+                sregex_token_iterator(params_str.begin(), params_str.end(), split_regx, -1),
+                sregex_token_iterator()
+            );
+        };
+
+        return result;
     }
 }
