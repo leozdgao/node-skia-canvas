@@ -9,7 +9,7 @@ file(GLOB SOURCE_FILES
     "init.cc"
     "Canvas.cc"
     "CanvasRenderingContext2D.cc"
-    "color.cc"
+    "ColorParser.cc"
     "helpers.cc"
 )
 

@@ -3,7 +3,7 @@
 #include <include/core/SkTextBlob.h>
 
 #include "CanvasRenderingContext2D.h"
-#include "color.h"
+#include "ColorParser.h"
 #include "helpers.h"
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
@@ -149,19 +149,10 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
 
     string fill_style = node_skia_helpers::get_utf8_string(env, argv[0]);
-    auto iter = node_skia_color::semantic_color_map.find(fill_style);
-    SkColor fill_style_color;
-
-    std::cout << fill_style << node_skia_color::semantic_color_map["red"] << std::endl;
-
-    if (iter == node_skia_color::semantic_color_map.end()) {
-        std::cout << "Not Found" << std::endl;
-    } else {
-        fill_style_color = iter->second;
-    }
+    SkColor4f fill_style_color = node_skia_color::SkColorParser::rgba_from_string(fill_style);
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->paint_.setColor(fill_style_color);
+    ctx->paint_.setColor4f(fill_style_color);
 }

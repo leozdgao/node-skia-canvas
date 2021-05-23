@@ -20,7 +20,7 @@ console.log(ctx.fillStyle);
 
 ctx.fillText('It`s OK');
 
-ctx.fillStyle = "blue";
+ctx.fillStyle = "yellowgreen";
 
 ctx.fillText('aaaa');
 
