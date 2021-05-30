@@ -90,8 +90,7 @@ void Canvas::Destructor(napi_env env, void* nativeObject, void* finalize_hint) {
 
 napi_value Canvas::GetWidth(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
     Canvas* canvas;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
@@ -104,10 +103,7 @@ napi_value Canvas::GetWidth(napi_env env, napi_callback_info info) {
 
 napi_value Canvas::SetWidth(napi_env env, napi_callback_info info) {
     napi_status status;
-    size_t argc = 1;
-    napi_value argv[1];
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
+    GET_CB_INFO(env, info, status, 1)
 
     int32_t width;
     status = napi_get_value_int32(env, argv[0], &width);
@@ -123,8 +119,7 @@ napi_value Canvas::SetWidth(napi_env env, napi_callback_info info) {
 
 napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
     Canvas* canvas;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
@@ -137,10 +132,7 @@ napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
 
 napi_value Canvas::SetHeight(napi_env env, napi_callback_info info) {
     napi_status status;
-    size_t argc = 1;
-    napi_value argv[1];
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
+    GET_CB_INFO(env, info, status, 1)
 
     int32_t height;
     status = napi_get_value_int32(env, argv[0], &height);

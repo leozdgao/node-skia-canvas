@@ -22,12 +22,8 @@ console.log(ctx.fillStyle.map(i => (Math.floor(i * 255)).toString(16)));
 
 ctx.fillText('aaaa');
 
-c.width = 500;
-ctx.fillText('nm');
-
-
-c.height = 500;
-ctx.fillText('nm');
+ctx.fillStyle = "red";
+ctx.fillRect(100, 100, 50, 50);
 
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));

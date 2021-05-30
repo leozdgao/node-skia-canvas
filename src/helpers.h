@@ -7,6 +7,16 @@
 using std::string;
 using std::vector;
 
+#define GET_CB_INFO_WITHOUT_ARG(env, info, status) \ 
+    napi_value jsthis; \
+    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr); \
+
+#define GET_CB_INFO(env, info, status, arg_count) \
+    size_t argc = arg_count; \
+    napi_value argv[arg_count]; \
+    napi_value jsthis; \
+    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr); \
+
 #define DECLARE_NAPI_METHOD(name, func)  { \
     name /* utf8name */, \
     0 /* name */, \

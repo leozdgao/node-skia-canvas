@@ -17,12 +17,15 @@ CanvasRenderingContext2D::~CanvasRenderingContext2D() {
 napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     napi_status status;
     napi_property_descriptor properties[] = {
-        DECLARE_NAPI_METHOD("fillText", FillText),
+        // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
+        // methods
+        DECLARE_NAPI_METHOD("fillRect", FillRect),
+        DECLARE_NAPI_METHOD("fillText", FillText)
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 2, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 3, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -98,28 +101,11 @@ void CanvasRenderingContext2D::SetCanvas(SkCanvas* canvas) {
     canvas_ = canvas;
 };
 
-napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
-    napi_status status;
-    napi_value result;
-
-    size_t argc = 1;
-    napi_value argv[1];
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
-
-    CanvasRenderingContext2D* ctx;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
-
-    string input = node_skia_helpers::get_utf8_string(env, argv[0]);
-    auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
-
-    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_);
-}
+// ================================== Properties ==================================
 
 napi_value CanvasRenderingContext2D::GetFillStyle(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
@@ -143,10 +129,7 @@ napi_value CanvasRenderingContext2D::GetFillStyle(napi_env env, napi_callback_in
 
 napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value jsthis;
-    size_t argc = 1;
-    napi_value argv[1];
-    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
+    GET_CB_INFO(env, info, status, 1)
 
     string fill_style = node_skia_helpers::get_utf8_string(env, argv[0]);
     SkColor4f fill_style_color = W3CSkColorParser::rgba_from_string(fill_style);
@@ -155,4 +138,37 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     ctx->paint_.setColor4f(fill_style_color);
+}
+
+// ================================== Methods ==================================
+
+napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y, w, h;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+    status = napi_get_value_double(env, argv[2], &w);
+    status = napi_get_value_double(env, argv[3], &h);
+
+    SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+    ctx->canvas_->drawRect(rect, ctx->paint_);
+}
+
+napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    string input = node_skia_helpers::get_utf8_string(env, argv[0]);
+    auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
+
+    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_);
 }
