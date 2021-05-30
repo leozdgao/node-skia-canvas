@@ -32,9 +32,11 @@ ctx.strokeRect(100, 200, 50, 50);
 console.log('strokeStyle', ctx.strokeStyle);
 
 console.log('lineWidth', ctx.lineWidth);
-ctx.lineWidth = 1;
+ctx.lineWidth = 5;
 
 ctx.strokeRect(200, 200, 50, 50);
+
+ctx.clearRect(120, 120, 20, 20);
 
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));

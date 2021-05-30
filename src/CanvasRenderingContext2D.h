@@ -36,6 +36,7 @@ private:
 
     // ================================== Methods ==================================
 
+    static napi_value ClearRect(napi_env env, napi_callback_info info);
     static napi_value FillRect(napi_env env, napi_callback_info info);
     static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`
     static napi_value FillText(napi_env env, napi_callback_info info);

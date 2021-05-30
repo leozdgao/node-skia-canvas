@@ -27,6 +27,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         // methods
+        DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
@@ -216,6 +217,26 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
 }
 
 // ================================== Methods ==================================
+
+napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y, w, h;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+    status = napi_get_value_double(env, argv[2], &w);
+    status = napi_get_value_double(env, argv[3], &h);
+
+    SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+    SkPaint p = SkPaint();
+    p.setBlendMode(SkBlendMode::kClear);
+
+    ctx->canvas_->drawRect(rect, p);
+}
 
 napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info info) {
     napi_status status;
