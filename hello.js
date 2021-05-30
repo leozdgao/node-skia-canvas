@@ -22,5 +22,14 @@ console.log(ctx.fillStyle.map(i => (Math.floor(i * 255)).toString(16)));
 
 ctx.fillText('aaaa');
 
+c.width = 500;
+ctx.fillText('nm');
+
+
+c.height = 500;
+ctx.fillText('nm');
+
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));
+
+console.log('over~')

@@ -103,7 +103,22 @@ napi_value Canvas::GetWidth(napi_env env, napi_callback_info info) {
 }
 
 napi_value Canvas::SetWidth(napi_env env, napi_callback_info info) {
+    napi_status status;
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
 
+    int32_t width;
+    status = napi_get_value_int32(env, argv[0], &width);
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
+    canvas->width_ = width;
+    canvas->rasterSurface_ = SkSurface::MakeRasterN32Premul(canvas->width_, canvas->height_);
+    canvas->inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
+
+    return nullptr;
 }
 
 napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
@@ -121,7 +136,22 @@ napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
 }
 
 napi_value Canvas::SetHeight(napi_env env, napi_callback_info info) {
+    napi_status status;
+    size_t argc = 1;
+    napi_value argv[1];
+    napi_value jsthis;
+    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
 
+    int32_t height;
+    status = napi_get_value_int32(env, argv[0], &height);
+    Canvas* canvas;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
+    canvas->height_ = height;
+    canvas->rasterSurface_ = SkSurface::MakeRasterN32Premul(canvas->width_, canvas->height_);
+    canvas->inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
+
+    return nullptr;
 }
 
 napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
@@ -145,6 +175,7 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
 
         CanvasRenderingContext2D* inner_ctx;
         status = napi_unwrap(env, canvas->ctx_, reinterpret_cast<void**>(&inner_ctx));
+        canvas->inner_ctx = inner_ctx;
         inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
     }
     

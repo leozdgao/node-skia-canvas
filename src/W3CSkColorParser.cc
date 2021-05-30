@@ -246,8 +246,6 @@ SkColor4f W3CSkColorParser::rgba_from_hex_string(string &str) {
     string hex_color_str = str[0] == '#' ? str.substr(1) : str;
     size_t len = hex_color_str.size();
     SkColor color = SK_ColorBLACK;
-
-    std::cout << hex_color_str << std::endl;
     
     switch (len) {
         // RRGGBBAA
@@ -266,9 +264,6 @@ SkColor4f W3CSkColorParser::rgba_from_hex_string(string &str) {
         };
         // RRGGBB
         case 6: {
-            std::cout << (h(hex_color_str[0]) << 4) + h(hex_color_str[1]) << std::endl;
-            std::cout << (h(hex_color_str[2]) << 4) + h(hex_color_str[3]) << std::endl;
-            std::cout << (h(hex_color_str[4]) << 4) + h(hex_color_str[5]) << std::endl;
             color = SkColorSetARGB(
                 // A
                 0xFF,
@@ -392,8 +387,6 @@ SkColor4f W3CSkColorParser::rgba_from_hsl_expr(string &str) {
         float s = params_len >= 2 ? stof(expr.params[1], nullptr) : 1;
         float l = params_len >= 3 ? stof(expr.params[2], nullptr) : 0.5;
         float h = (6 * h_deg) / 360.0f, m1, m2;
-
-        std::cout << h << ' ' << s << ' ' << l << std::endl;
 
         if (l<=0.5)
             m2=l*(s+1);
