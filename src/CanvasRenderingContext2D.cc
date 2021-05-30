@@ -8,6 +8,11 @@
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
     // 初始化 ctx 内部绘制状态
+    paint_for_fill_ = SkPaint();
+    paint_for_fill_.setStyle(SkPaint::kFill_Style);
+
+    paint_for_stroke_ = SkPaint();
+    paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
 }
 
 CanvasRenderingContext2D::~CanvasRenderingContext2D() {
@@ -19,13 +24,19 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
         // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
+        DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
+        DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         // methods
         DECLARE_NAPI_METHOD("fillRect", FillRect),
-        DECLARE_NAPI_METHOD("fillText", FillText)
+        DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
+        DECLARE_NAPI_METHOD("fillText", FillText),
+        DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
+        DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
+        DECLARE_NAPI_METHOD("strokeText", StrokeText),
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 3, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 8, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -110,7 +121,7 @@ napi_value CanvasRenderingContext2D::GetFillStyle(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    SkColor4f color = ctx->paint_.getColor4f();
+    SkColor4f color = ctx->paint_for_fill_.getColor4f();
 
     napi_value result, r, g, b, a;
     status = napi_create_array(env, &result);
@@ -137,7 +148,71 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->paint_.setColor4f(fill_style_color);
+    ctx->paint_for_fill_.setColor4f(fill_style_color);
+}
+
+napi_value CanvasRenderingContext2D::GetLineWidth(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    double v = ctx->paint_for_stroke_.getStrokeWidth();
+    status = napi_create_double(env, v, &result);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetLineWidth(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double line_width;
+    status = napi_get_value_double(env, argv[0], &line_width);
+    
+    ctx->paint_for_stroke_.setStrokeWidth(line_width);
+}
+
+napi_value CanvasRenderingContext2D::GetStrokeStyle(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    SkColor4f color = ctx->paint_for_stroke_.getColor4f();
+
+    napi_value result, r, g, b, a;
+    status = napi_create_array(env, &result);
+    status = napi_create_double(env, color.fR, &r);
+    status = napi_create_double(env, color.fG, &g);
+    status = napi_create_double(env, color.fB, &b);
+    status = napi_create_double(env, color.fA, &a);
+
+    status = napi_set_element(env, result, 0, r);
+    status = napi_set_element(env, result, 1, g);
+    status = napi_set_element(env, result, 2, b);
+    status = napi_set_element(env, result, 3, a);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    string stroke_style = node_skia_helpers::get_utf8_string(env, argv[0]);
+    SkColor4f stroke_style_color = W3CSkColorParser::rgba_from_string(stroke_style);
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->paint_for_stroke_.setColor4f(stroke_style_color);
 }
 
 // ================================== Methods ==================================
@@ -157,7 +232,11 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
 
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
-    ctx->canvas_->drawRect(rect, ctx->paint_);
+    ctx->canvas_->drawRect(rect, ctx->paint_for_fill_);
+}
+
+napi_value CanvasRenderingContext2D::FillWithPath2D(napi_env env, napi_callback_info info) {
+
 }
 
 napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
@@ -170,5 +249,31 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     string input = node_skia_helpers::get_utf8_string(env, argv[0]);
     auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
 
-    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_);
+    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_for_fill_);
+}
+
+napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y, w, h;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+    status = napi_get_value_double(env, argv[2], &w);
+    status = napi_get_value_double(env, argv[3], &h);
+
+    SkRect rect = SkRect::MakeXYWH(x, y, w, h);
+
+    ctx->canvas_->drawRect(rect, ctx->paint_for_stroke_);
+}
+
+napi_value CanvasRenderingContext2D::StrokeWithPath2D(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info info) {
+
 }

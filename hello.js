@@ -25,6 +25,17 @@ ctx.fillText('aaaa');
 ctx.fillStyle = "red";
 ctx.fillRect(100, 100, 50, 50);
 
+console.log('strokeStyle', ctx.strokeStyle);
+
+ctx.strokeStyle = "blue";
+ctx.strokeRect(100, 200, 50, 50);
+console.log('strokeStyle', ctx.strokeStyle);
+
+console.log('lineWidth', ctx.lineWidth);
+ctx.lineWidth = 1;
+
+ctx.strokeRect(200, 200, 50, 50);
+
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));
 

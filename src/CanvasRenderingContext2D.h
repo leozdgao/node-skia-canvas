@@ -22,17 +22,26 @@ private:
     napi_ref wrapper_;
 
     SkCanvas* canvas_;
-    SkPaint paint_;
+    SkPaint paint_for_fill_;
+    SkPaint paint_for_stroke_;
 
     // ================================== Properties ==================================
 
     static napi_value GetFillStyle(napi_env env, napi_callback_info info);
     static napi_value SetFillStyle(napi_env env, napi_callback_info info);
+    static napi_value GetLineWidth(napi_env env, napi_callback_info info);
+    static napi_value SetLineWidth(napi_env env, napi_callback_info info);
+    static napi_value GetStrokeStyle(napi_env env, napi_callback_info info);
+    static napi_value SetStrokeStyle(napi_env env, napi_callback_info info);
 
     // ================================== Methods ==================================
 
     static napi_value FillRect(napi_env env, napi_callback_info info);
+    static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`
     static napi_value FillText(napi_env env, napi_callback_info info);
+    static napi_value StrokeRect(napi_env env, napi_callback_info info);
+    static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`
+    static napi_value StrokeText(napi_env env, napi_callback_info info);
 
 };
 
