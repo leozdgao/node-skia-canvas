@@ -35,6 +35,6 @@ private:
     /**
      * `napi_unwrap` will failed with `napi_invalid_arg` in Canvas instance callback
      */
-    napi_value ctx_;
-    CanvasRenderingContext2D* inner_ctx;
+    napi_value ctx_ = nullptr;
+    CanvasRenderingContext2D* inner_ctx = nullptr;
 };

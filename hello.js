@@ -41,4 +41,14 @@ ctx.clearRect(120, 120, 20, 20);
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));
 
+console.log(ctx.measureText('123'));
+
+// console.log(ctx.textAlign);
+// ctx.textAlign = 'center';
+
+// console.log(ctx.textAlign);
+console.log(ctx.textBaseline);
+ctx.textBaseline = 'top';
+console.log(ctx.measureText('123'));
+
 console.log('over~')

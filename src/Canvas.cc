@@ -7,10 +7,7 @@
 #include "CanvasRenderingContext2D.h"
 #include "helpers.h"
 
-Canvas::Canvas(int width, int height) {
-    width_ = width;
-    height_ = height;
-
+Canvas::Canvas(int width, int height): width_(width), height_(height) {
     rasterSurface_ = SkSurface::MakeRasterN32Premul(width_, height_);
 }
 

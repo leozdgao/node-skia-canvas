@@ -3,8 +3,11 @@
 #include <include/core/SkTextBlob.h>
 
 #include "CanvasRenderingContext2D.h"
+#include "StyleParser.h"
 #include "W3CSkColorParser.h"
 #include "helpers.h"
+
+using node_skia::StyleParser;
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
     // 初始化 ctx 内部绘制状态
@@ -13,6 +16,12 @@ CanvasRenderingContext2D::CanvasRenderingContext2D() {
 
     paint_for_stroke_ = SkPaint();
     paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
+
+    pargf_style_ = ParagraphStyle();
+    text_style_ = TextStyle();
+    text_style_.setFontSize(10);
+    text_style_.setFontFamilies({ SkString("sans-serif") });
+    text_baseline_ = TextBaseline::Alphabetic;
 }
 
 CanvasRenderingContext2D::~CanvasRenderingContext2D() {
@@ -26,6 +35,8 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
         DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
+        DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
+        DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
         // methods
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
@@ -34,10 +45,11 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
         DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
         DECLARE_NAPI_METHOD("strokeText", StrokeText),
+        DECLARE_NAPI_METHOD("measureText", MeasureText),
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 8, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 13, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -216,6 +228,64 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
     ctx->paint_for_stroke_.setColor4f(stroke_style_color);
 }
 
+napi_value CanvasRenderingContext2D::GetTextAlign(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    TextAlign align = ctx->pargf_style_.getTextAlign();
+    string align_name = StyleParser::fromTextAlignToStr(align);
+
+    napi_value result;
+    napi_create_string_utf8(env, align_name.c_str(), align_name.size(), &result);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetTextAlign(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    string text_align = node_skia_helpers::get_utf8_string(env, argv[0]);
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    
+    ctx->pargf_style_.setTextAlign(StyleParser::fromStrToTextAlign(text_align));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetTextBaseline(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    TextBaseline baseline = ctx->text_baseline_;
+    string baseline_name = StyleParser::fromTextBaselineToStr(baseline);
+
+    napi_value result;
+    napi_create_string_utf8(env, baseline_name.c_str(), baseline_name.size(), &result);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetTextBaseline(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    string text_baseline = node_skia_helpers::get_utf8_string(env, argv[0]);
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    
+    ctx->text_baseline_ = StyleParser::fromStrToTextBaseline(text_baseline);
+
+    return nullptr;
+}
+
 // ================================== Methods ==================================
 
 napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info info) {
@@ -297,4 +367,49 @@ napi_value CanvasRenderingContext2D::StrokeWithPath2D(napi_env env, napi_callbac
 
 napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info info) {
 
+}
+
+napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    string text = node_skia_helpers::get_utf8_string(env, argv[0]);
+    SkFontMetrics font_metrics;
+    ctx->text_style_.getFontMetrics(&font_metrics);
+    // 新基线到原基线的距离
+    float offset = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, ctx->text_baseline_);
+    auto base_hang = TextBaseline::Hanging;
+    float hang = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, base_hang) - offset;
+    auto base_ideo = TextBaseline::Ideographic;
+    float ideo = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, base_ideo) - offset;
+    // 原基线需要偏移的距离
+    float norm = 0 - offset;
+    float ascent = norm - font_metrics.fAscent;
+    float descent = font_metrics.fDescent - norm;
+    
+
+    // FIXME: font
+    // sk_sp<SkTextBlob> tb = SkTextBlob::MakeFromString(text.data(), SkFont(nullptr, 10));
+    // SkRect bounds = tb->bounds();
+
+    napi_value text_metrics, v_norm, v_ascent, v_descent, v_hang, v_ideo;
+    status = napi_create_double(env, norm, &v_norm);
+    status = napi_create_double(env, ascent, &v_ascent);
+    status = napi_create_double(env, descent, &v_descent);
+    status = napi_create_double(env, hang, &v_hang);
+    status = napi_create_double(env, ideo, &v_ideo);
+
+    status = napi_create_object(env, &text_metrics);
+    status = napi_set_named_property(env, text_metrics, "actualBoundingBoxAscent", v_ascent);
+    status = napi_set_named_property(env, text_metrics, "actualBoundingBoxDescent", v_descent);
+    status = napi_set_named_property(env, text_metrics, "emHeightAscent", v_ascent);
+    status = napi_set_named_property(env, text_metrics, "emHeightDescent", v_descent);
+    status = napi_set_named_property(env, text_metrics, "hangingBaseline", v_hang);
+    status = napi_set_named_property(env, text_metrics, "alphabeticBaseline", v_norm);
+    status = napi_set_named_property(env, text_metrics, "ideographicBaseline", v_ideo);
+
+    return text_metrics;
 }
