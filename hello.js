@@ -7,8 +7,8 @@ const c = new Canvas(500, 500);
 console.log(c.width, c.height);
 const ctx = c.getContext('2d');
 
-// ctx.fillStyle = '#FFF';
-// ctx.fillRect(0, 0, 500, 500);
+ctx.fillStyle = '#FFF';
+ctx.fillRect(0, 0, 500, 500);
 
 // console.log('context', ctx);
 // console.log(ctx.fillStyle);
@@ -70,28 +70,50 @@ const ctx = c.getContext('2d');
 /* ctx.fillStyle = 'blue' */
 
 /* ctx.fill() */
-ctx.beginPath()
-ctx.moveTo(10, 10)
-ctx.lineTo(100, 10)
-ctx.lineTo(100, 100)
-ctx.rect(10, 10, 40, 40)
-ctx.lineWidth = 2
-ctx.closePath()
+// ctx.beginPath()
+// ctx.moveTo(10, 10)
+// ctx.lineTo(100, 10)
+// ctx.lineTo(100, 100)
+// ctx.rect(10, 10, 40, 40)
+// ctx.lineWidth = 2
+// ctx.closePath()
 
-ctx.beginPath()
-ctx.lineTo(100, 50)
-ctx.rect(10, 70, 80, 40)
-ctx.fillStyle = 'red'
-ctx.arc(200, 100, 5, 180, 360, false)
-ctx.lineTo(100, 200)
+// ctx.beginPath()
+// ctx.lineTo(100, 50)
+// ctx.rect(10, 70, 80, 40)
+// ctx.fillStyle = 'red'
+// ctx.arc(200, 100, 5, 180, 360, false)
+// ctx.lineTo(100, 200)
 
-ctx.fill()
+// ctx.fill()
 
-ctx.stroke()
+// ctx.stroke()
 // ctx.strokeStyle = 'blue'
 // ctx.lineWidth = 1
 // ctx.strokeRect(0, 100, 400, 1)
 
+// ctx.globalAlpha = 0.2;
+
+ctx.fillStyle = '#FD0';
+ctx.fillRect(0, 0, 75, 75);
+ctx.fillStyle = '#6C0';
+ctx.fillRect(75, 0, 75, 75);
+ctx.fillStyle = '#09F';
+ctx.fillRect(0, 75, 75, 75);
+ctx.fillStyle = '#F30';
+ctx.fillRect(75, 75, 75, 75);
+ctx.fillStyle = '#FFF';
+
+// Set transparency value
+ctx.globalAlpha = 0.2;
+
+// Draw transparent circles
+for (let i = 0; i < 7; i++) {
+    // FIXME: not work
+  ctx.beginPath();
+  ctx.arc(75, 75, 10 + 10 * i, 0, Math.PI * 2, true);
+  ctx.fill();
+}
 
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_a.png', Buffer.from(buffer));

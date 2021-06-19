@@ -36,6 +36,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
         // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
+        DECLARE_NAPI_PROPERTY("globalAlpha", GetGlobalAlpha, SetGlobalAlpha),
         DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
@@ -64,7 +65,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 25, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 26, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -176,7 +177,40 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
+    // FIXME: if input value has alpha
+    fill_style_color.fA = ctx->global_alpha_ * fill_style_color.fA;
+
     ctx->paint_for_fill_.setColor4f(fill_style_color);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetGlobalAlpha(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    status = napi_create_double(env, ctx->global_alpha_, &result);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetGlobalAlpha(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double alpha = 1;
+    status = napi_get_value_double(env, argv[0], &alpha);
+    
+    ctx->global_alpha_ = alpha;
+    ctx->paint_for_fill_.setAlphaf(alpha);
+    ctx->paint_for_stroke_.setAlphaf(alpha);
 
     return nullptr;
 }
@@ -243,6 +277,8 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    stroke_style_color.fA = ctx->global_alpha_ * stroke_style_color.fA;
 
     ctx->paint_for_stroke_.setColor4f(stroke_style_color);
 

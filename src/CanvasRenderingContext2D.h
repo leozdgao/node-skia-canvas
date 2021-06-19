@@ -60,6 +60,7 @@ private:
     // state for fill & stroke
     SkPaint paint_for_fill_;
     SkPaint paint_for_stroke_;
+    double global_alpha_ = 1;
 
     // state for text
     ParagraphStyle pargf_style_;
@@ -70,6 +71,8 @@ private:
 
     static napi_value GetFillStyle(napi_env env, napi_callback_info info);
     static napi_value SetFillStyle(napi_env env, napi_callback_info info);
+    static napi_value GetGlobalAlpha(napi_env env, napi_callback_info info);
+    static napi_value SetGlobalAlpha(napi_env env, napi_callback_info info);
     static napi_value GetLineWidth(napi_env env, napi_callback_info info);
     static napi_value SetLineWidth(napi_env env, napi_callback_info info);
     static napi_value GetStrokeStyle(napi_env env, napi_callback_info info);
