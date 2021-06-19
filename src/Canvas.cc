@@ -173,14 +173,27 @@ napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
 
 napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {
     napi_status status;
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, nullptr, nullptr, &jsthis, nullptr);
+    GET_CB_INFO(env, info, status, 2)
+
+    // TODO: ouptut config argv[1]
+    SkEncodedImageFormat sk_format = SkEncodedImageFormat::kPNG;
+
+    if (argc >= 1) {
+        string mime_type_str = node_skia_helpers::get_utf8_string(env, argv[0]);
+
+        if (mime_type_str == "image/jpeg") {
+            sk_format = SkEncodedImageFormat::kJPEG;
+        } else if (mime_type_str == "image/png") {
+            sk_format = SkEncodedImageFormat::kPNG;
+        }
+    }
 
     Canvas* canvas;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+
     SkCanvas* c = canvas->rasterSurface_->getCanvas();
     sk_sp<SkImage> img(canvas->rasterSurface_->makeImageSnapshot());
-    sk_sp<SkData> png(img->encodeToData());
+    sk_sp<SkData> png(img->encodeToData(sk_format, 100));
 
     napi_value buf;
     status = napi_create_buffer_copy(env, png->size(), png->data(), nullptr, &buf); // 为什么必须是 buffer copy？

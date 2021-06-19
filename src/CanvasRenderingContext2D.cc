@@ -20,7 +20,8 @@ CanvasRenderingContext2D::CanvasRenderingContext2D() {
     pargf_style_ = ParagraphStyle();
     text_style_ = TextStyle();
     text_style_.setFontSize(10);
-    text_style_.setFontFamilies({ SkString("sans-serif") });
+    sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
+    text_style_.setTypeface(face);
     text_baseline_ = TextBaseline::Alphabetic;
 }
 
@@ -39,6 +40,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
         // methods
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
+        DECLARE_NAPI_METHOD("drawImage", DrawImage),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
@@ -49,7 +51,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 13, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 14, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -308,6 +310,43 @@ napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info 
     ctx->canvas_->drawRect(rect, p);
 }
 
+napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 9)
+    // img, sx, sy, sW, sH, dx, dy, dW, dH
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double sx, sy, sW, sH, dx, dy, dW, dH;
+    void* data;
+    size_t len;
+
+    status = napi_get_buffer_info(env, argv[0], &data, &len);
+    status = napi_get_value_double(env, argv[1], &sx);
+    status = napi_get_value_double(env, argv[2], &sy);
+    status = napi_get_value_double(env, argv[3], &sW);
+    status = napi_get_value_double(env, argv[4], &sH);
+    status = napi_get_value_double(env, argv[5], &dx);
+    status = napi_get_value_double(env, argv[6], &dy);
+    status = napi_get_value_double(env, argv[7], &dW);
+    status = napi_get_value_double(env, argv[8], &dH);
+
+    sk_sp<SkImage> img = SkImage::MakeFromEncoded(
+        SkData::MakeWithoutCopy(data, len)
+    );
+    SkRect src = SkRect();
+    src.setXYWH(sx, sy, sW, sH);
+    SkRect dist = SkRect();
+    dist.setXYWH(dx, dy, dW, dH);
+
+    SkSamplingOptions sample_options = SkSamplingOptions();
+
+    ctx->canvas_->drawImageRect(img, src, dist, sample_options, &ctx->paint_for_fill_, SkCanvas::kFast_SrcRectConstraint);
+
+    return nullptr;
+}
+
 napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 4)
@@ -369,6 +408,7 @@ napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info
 
 }
 
+// FIXME: It's really complex, do it later
 napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 1)
@@ -389,7 +429,6 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     float norm = 0 - offset;
     float ascent = norm - font_metrics.fAscent;
     float descent = font_metrics.fDescent - norm;
-    
 
     // FIXME: font
     // sk_sp<SkTextBlob> tb = SkTextBlob::MakeFromString(text.data(), SkFont(nullptr, 10));
@@ -403,13 +442,19 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     status = napi_create_double(env, ideo, &v_ideo);
 
     status = napi_create_object(env, &text_metrics);
-    status = napi_set_named_property(env, text_metrics, "actualBoundingBoxAscent", v_ascent);
-    status = napi_set_named_property(env, text_metrics, "actualBoundingBoxDescent", v_descent);
+    // status = napi_set_named_property(env, text_metrics, "actualBoundingBoxAscent", v_ascent);
+    // status = napi_set_named_property(env, text_metrics, "actualBoundingBoxDescent", v_descent);
     status = napi_set_named_property(env, text_metrics, "emHeightAscent", v_ascent);
     status = napi_set_named_property(env, text_metrics, "emHeightDescent", v_descent);
     status = napi_set_named_property(env, text_metrics, "hangingBaseline", v_hang);
     status = napi_set_named_property(env, text_metrics, "alphabeticBaseline", v_norm);
     status = napi_set_named_property(env, text_metrics, "ideographicBaseline", v_ideo);
+
+    sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
+    auto font = SkFont(face, 10);
+
+    auto txt = SkTextBlob::MakeFromString(text.c_str(), font);
+    ctx->canvas_->drawTextBlob(txt, 10, 10, ctx->paint_for_fill_);
 
     return text_metrics;
 }

@@ -1,11 +1,14 @@
 const fs = require('fs');
 const { Canvas } = require('./build/Debug/node-skia.node');
 
-const c = new Canvas(300, 300);
+const c = new Canvas(500, 500);
 
 
 console.log(c.width, c.height);
 const ctx = c.getContext('2d');
+
+// ctx.fillStyle = '#FFF';
+// ctx.fillRect(0, 0, 500, 500);
 
 console.log('context', ctx);
 console.log(ctx.fillStyle);
@@ -38,17 +41,27 @@ ctx.strokeRect(200, 200, 50, 50);
 
 ctx.clearRect(120, 120, 20, 20);
 
-const buffer = c.toBuffer();
-fs.writeFileSync('temp_a.png', Buffer.from(buffer));
 
-console.log(ctx.measureText('123'));
+ctx.fillStyle = '#000'
+console.log(ctx.measureText('123xfg'));
 
-// console.log(ctx.textAlign);
-// ctx.textAlign = 'center';
+console.log(ctx.textAlign);
+ctx.textAlign = 'center';
 
-// console.log(ctx.textAlign);
+console.log(ctx.textAlign);
 console.log(ctx.textBaseline);
 ctx.textBaseline = 'top';
 console.log(ctx.measureText('123'));
+
+
+
+const img = fs.readFileSync('./examples/leize.jpeg');
+ctx.drawImage(img, 0, 0, 1044, 1045, 200, 200, 300, 300);
+
+
+
+
+const buffer = c.toBuffer();
+fs.writeFileSync('temp_a.png', Buffer.from(buffer));
 
 console.log('over~')
