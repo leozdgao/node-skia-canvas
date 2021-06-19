@@ -3,14 +3,36 @@
 #include <napi.h>
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
+#include "include/core/SkPath.h"
 #include "modules/skparagraph/include/ParagraphStyle.h"
 #include "modules/skparagraph/include/TextStyle.h"
 #include "StyleParser.h"
 
 using skia::textlayout::ParagraphStyle;
 using skia::textlayout::TextStyle;
-
 using node_skia::TextBaseline;
+
+// enum class PathInstrumentType {
+//     Rect, Arc, Ellipse, Line
+// };
+
+// struct PathState {
+//     SkPoint start = SkPoint::Make(0, 0);
+//     vector<PathInstrument> instruments = {};
+// };
+
+// struct PathInstrument {
+//     PathInstrumentType type;
+//     SkPoint start;
+//     SkPoint end;
+//     SkScalar radiusX;
+//     SkScalar radiusY;
+//     SkScalar rotation;
+//     SkScalar startAngle;
+//     SkScalar endAngle;
+//     bool counterclockwise = false;
+// };
+
 
 class CanvasRenderingContext2D {
 public:
@@ -30,6 +52,10 @@ private:
     napi_ref wrapper_;
 
     SkCanvas* canvas_;
+
+    // state for path
+    SkPath path_;
+    SkPoint* last_move_point_ = nullptr;
 
     // state for fill & stroke
     SkPaint paint_for_fill_;
@@ -55,11 +81,22 @@ private:
 
     // ================================== Methods ==================================
 
+    static napi_value Arc(napi_env env, napi_callback_info info);
+    static napi_value ArcTo(napi_env env, napi_callback_info info);
+    static napi_value BeginPath(napi_env env, napi_callback_info info);
+    static napi_value BezierCurveTo(napi_env env, napi_callback_info info);
     static napi_value ClearRect(napi_env env, napi_callback_info info);
+    static napi_value ClosePath(napi_env env, napi_callback_info info);
     static napi_value DrawImage(napi_env env, napi_callback_info info);
+    static napi_value Fill(napi_env env, napi_callback_info info);
     static napi_value FillRect(napi_env env, napi_callback_info info);
     static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`
     static napi_value FillText(napi_env env, napi_callback_info info);
+    static napi_value LineTo(napi_env env, napi_callback_info info);
+    static napi_value MoveTo(napi_env env, napi_callback_info info);
+    static napi_value QuadraticCurveTo(napi_env env, napi_callback_info info);
+    static napi_value Rect(napi_env env, napi_callback_info info);
+    static napi_value Stroke(napi_env env, napi_callback_info info);
     static napi_value StrokeRect(napi_env env, napi_callback_info info);
     static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`
     static napi_value StrokeText(napi_env env, napi_callback_info info);

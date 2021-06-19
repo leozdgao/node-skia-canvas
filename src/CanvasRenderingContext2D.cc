@@ -13,9 +13,11 @@ CanvasRenderingContext2D::CanvasRenderingContext2D() {
     // 初始化 ctx 内部绘制状态
     paint_for_fill_ = SkPaint();
     paint_for_fill_.setStyle(SkPaint::kFill_Style);
+    paint_for_fill_.setAntiAlias(true);
 
     paint_for_stroke_ = SkPaint();
     paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
+    paint_for_fill_.setAntiAlias(true);
 
     pargf_style_ = ParagraphStyle();
     text_style_ = TextStyle();
@@ -39,11 +41,22 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
         DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
         // methods
+        DECLARE_NAPI_METHOD("arc", Arc),
+        DECLARE_NAPI_METHOD("arcTo", ArcTo),
+        DECLARE_NAPI_METHOD("beginPath", BeginPath),
+        DECLARE_NAPI_METHOD("bezierCurveTo", BezierCurveTo),
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
+        DECLARE_NAPI_METHOD("closePath", ClosePath),
         DECLARE_NAPI_METHOD("drawImage", DrawImage),
+        DECLARE_NAPI_METHOD("fill", Fill),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
+        DECLARE_NAPI_METHOD("lineTo", LineTo),
+        DECLARE_NAPI_METHOD("moveTo", MoveTo),
+        DECLARE_NAPI_METHOD("quadraticCurveTo", QuadraticCurveTo),
+        DECLARE_NAPI_METHOD("rect", Rect),
+        DECLARE_NAPI_METHOD("stroke", Stroke),
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
         DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
         DECLARE_NAPI_METHOD("strokeText", StrokeText),
@@ -51,7 +64,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 14, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 25, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -164,6 +177,8 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     ctx->paint_for_fill_.setColor4f(fill_style_color);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetLineWidth(napi_env env, napi_callback_info info) {
@@ -191,6 +206,8 @@ napi_value CanvasRenderingContext2D::SetLineWidth(napi_env env, napi_callback_in
     status = napi_get_value_double(env, argv[0], &line_width);
     
     ctx->paint_for_stroke_.setStrokeWidth(line_width);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetStrokeStyle(napi_env env, napi_callback_info info) {
@@ -228,6 +245,8 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     ctx->paint_for_stroke_.setColor4f(stroke_style_color);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetTextAlign(napi_env env, napi_callback_info info) {
@@ -290,6 +309,93 @@ napi_value CanvasRenderingContext2D::SetTextBaseline(napi_env env, napi_callback
 
 // ================================== Methods ==================================
 
+napi_value CanvasRenderingContext2D::Arc(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 5)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y, radius, start_angle, end_angle;
+
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+    status = napi_get_value_double(env, argv[2], &radius);
+    status = napi_get_value_double(env, argv[3], &start_angle);
+    status = napi_get_value_double(env, argv[4], &end_angle);
+
+    double ax = x + radius;
+    double ay = y - radius;
+
+    SkRect oval = SkRect::MakeXYWH(ax, ay, radius * 2, radius * 2);
+    SkPoint move_point = SkPoint::Make(x, y);
+
+    if (ctx->last_move_point_ && move_point != *ctx->last_move_point_) {
+        ctx->path_.lineTo(move_point);
+    }
+
+    ctx->path_.moveTo(move_point);
+    ctx->last_move_point_ = &move_point;
+
+    ctx->path_.arcTo(oval, start_angle, end_angle - start_angle, true);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::ArcTo(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 5)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x1, y1, x2, y2, radius;
+
+    status = napi_get_value_double(env, argv[0], &x1);
+    status = napi_get_value_double(env, argv[1], &y1);
+    status = napi_get_value_double(env, argv[2], &x2);
+    status = napi_get_value_double(env, argv[3], &y2);
+    status = napi_get_value_double(env, argv[4], &radius);
+
+    ctx->path_.arcTo(SkPoint::Make(x1, y1), SkPoint::Make(x2, y2), radius);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::BeginPath(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->path_.reset();
+    ctx->last_move_point_ = nullptr;
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::BezierCurveTo(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 6)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double cp1x, cp1y, cp2x, cp2y, x, y;
+
+    status = napi_get_value_double(env, argv[0], &cp1x);
+    status = napi_get_value_double(env, argv[1], &cp1y);
+    status = napi_get_value_double(env, argv[2], &cp2x);
+    status = napi_get_value_double(env, argv[3], &cp2y);
+    status = napi_get_value_double(env, argv[4], &x);
+    status = napi_get_value_double(env, argv[5], &y);
+
+    ctx->path_.cubicTo(SkPoint::Make(cp1x, cp1y), SkPoint::Make(cp2x, cp2y), SkPoint::Make(x, y));
+
+    return nullptr;
+}
+
 napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 4)
@@ -308,6 +414,20 @@ napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info 
     p.setBlendMode(SkBlendMode::kClear);
 
     ctx->canvas_->drawRect(rect, p);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::ClosePath(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->path_.close();
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info info) {
@@ -347,6 +467,18 @@ napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info 
     return nullptr;
 }
 
+napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->canvas_->drawPath(ctx->path_, ctx->paint_for_fill_);
+
+    return nullptr;
+}
+
 napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 4)
@@ -363,10 +495,12 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
     ctx->canvas_->drawRect(rect, ctx->paint_for_fill_);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::FillWithPath2D(napi_env env, napi_callback_info info) {
-
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
@@ -380,6 +514,101 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
 
     ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_for_fill_);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    if (ctx->last_move_point_) {
+        double x, y;
+        status = napi_get_value_double(env, argv[0], &x);
+        status = napi_get_value_double(env, argv[1], &y);
+
+        ctx->path_.lineTo(SkPoint::Make(x, y));
+    }
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::MoveTo(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+
+    SkPoint move_point = SkPoint::Make(x, y);
+    ctx->last_move_point_ = &move_point;
+    ctx->path_.moveTo(move_point);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::QuadraticCurveTo(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    
+    double cpx, cpy, x, y;
+    status = napi_get_value_double(env, argv[0], &cpx);
+    status = napi_get_value_double(env, argv[1], &cpy);
+    status = napi_get_value_double(env, argv[2], &x);
+    status = napi_get_value_double(env, argv[3], &y);
+
+    ctx->path_.quadTo(SkPoint::Make(cpx, cpy), SkPoint::Make(x, y));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Rect(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y, w, h;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+    status = napi_get_value_double(env, argv[2], &w);
+    status = napi_get_value_double(env, argv[3], &h);
+
+    SkPoint move_point = SkPoint::Make(x, y);
+
+    if (ctx->last_move_point_ && move_point != *ctx->last_move_point_) {
+        ctx->path_.lineTo(move_point);
+    }
+
+    ctx->path_.moveTo(move_point);
+    ctx->last_move_point_ = &move_point;
+
+    ctx->path_.addRect(SkRect::MakeXYWH(x, y, w, h));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Stroke(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->canvas_->drawPath(ctx->path_, ctx->paint_for_stroke_);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info info) {
@@ -398,14 +627,16 @@ napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
     ctx->canvas_->drawRect(rect, ctx->paint_for_stroke_);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::StrokeWithPath2D(napi_env env, napi_callback_info info) {
-
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info info) {
-
+    return nullptr;
 }
 
 // FIXME: It's really complex, do it later
