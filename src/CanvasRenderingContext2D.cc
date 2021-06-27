@@ -10,25 +10,32 @@
 using node_skia::StyleParser;
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
-    // 初始化 ctx 内部绘制状态
-    paint_for_fill_ = SkPaint();
-    paint_for_fill_.setStyle(SkPaint::kFill_Style);
-    paint_for_fill_.setAntiAlias(true);
-
-    paint_for_stroke_ = SkPaint();
-    paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
-    paint_for_fill_.setAntiAlias(true);
-
-    pargf_style_ = ParagraphStyle();
-    text_style_ = TextStyle();
-    text_style_.setFontSize(10);
-    sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
-    text_style_.setTypeface(face);
-    text_baseline_ = TextBaseline::Alphabetic;
+    init_canvas_state();
 }
 
 CanvasRenderingContext2D::~CanvasRenderingContext2D() {
     napi_delete_reference(env_, wrapper_);
+}
+
+void CanvasRenderingContext2D::init_canvas_state() {
+    CanvasState init_state = CanvasState();
+    init_state.paint_for_fill_ = SkPaint();
+    init_state.paint_for_fill_.setStyle(SkPaint::kFill_Style);
+    init_state.paint_for_fill_.setAntiAlias(true);
+
+    init_state.paint_for_stroke_ = SkPaint();
+    init_state.paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
+    init_state.paint_for_fill_.setAntiAlias(true);
+
+    init_state.pargf_style_ = ParagraphStyle();
+    init_state.text_style_ = TextStyle();
+    init_state.text_style_.setFontSize(10);
+
+    sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
+    init_state.text_style_.setTypeface(face);
+    init_state.text_baseline_ = TextBaseline::Alphabetic;
+
+    states_.push(init_state);
 }
 
 napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
@@ -57,6 +64,8 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("moveTo", MoveTo),
         DECLARE_NAPI_METHOD("quadraticCurveTo", QuadraticCurveTo),
         DECLARE_NAPI_METHOD("rect", Rect),
+        DECLARE_NAPI_METHOD("restore", Restore),
+        DECLARE_NAPI_METHOD("save", Save),
         DECLARE_NAPI_METHOD("stroke", Stroke),
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
         DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
@@ -65,7 +74,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 26, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 28, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -150,7 +159,7 @@ napi_value CanvasRenderingContext2D::GetFillStyle(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    SkColor4f color = ctx->paint_for_fill_.getColor4f();
+    SkColor4f color = ctx->states_.top().paint_for_fill_.getColor4f();
 
     napi_value result, r, g, b, a;
     status = napi_create_array(env, &result);
@@ -178,9 +187,9 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     // FIXME: if input value has alpha
-    fill_style_color.fA = ctx->global_alpha_ * fill_style_color.fA;
+    fill_style_color.fA = ctx->states_.top().global_alpha_ * fill_style_color.fA;
 
-    ctx->paint_for_fill_.setColor4f(fill_style_color);
+    ctx->states_.top().paint_for_fill_.setColor4f(fill_style_color);
 
     return nullptr;
 }
@@ -193,7 +202,7 @@ napi_value CanvasRenderingContext2D::GetGlobalAlpha(napi_env env, napi_callback_
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
     napi_value result;
 
-    status = napi_create_double(env, ctx->global_alpha_, &result);
+    status = napi_create_double(env, ctx->states_.top().global_alpha_, &result);
 
     return result;
 }
@@ -208,9 +217,9 @@ napi_value CanvasRenderingContext2D::SetGlobalAlpha(napi_env env, napi_callback_
     double alpha = 1;
     status = napi_get_value_double(env, argv[0], &alpha);
     
-    ctx->global_alpha_ = alpha;
-    ctx->paint_for_fill_.setAlphaf(alpha);
-    ctx->paint_for_stroke_.setAlphaf(alpha);
+    ctx->states_.top().global_alpha_ = alpha;
+    ctx->states_.top().paint_for_fill_.setAlphaf(alpha);
+    ctx->states_.top().paint_for_stroke_.setAlphaf(alpha);
 
     return nullptr;
 }
@@ -223,7 +232,7 @@ napi_value CanvasRenderingContext2D::GetLineWidth(napi_env env, napi_callback_in
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
     napi_value result;
 
-    double v = ctx->paint_for_stroke_.getStrokeWidth();
+    double v = ctx->states_.top().paint_for_stroke_.getStrokeWidth();
     status = napi_create_double(env, v, &result);
 
     return result;
@@ -239,7 +248,7 @@ napi_value CanvasRenderingContext2D::SetLineWidth(napi_env env, napi_callback_in
     double line_width;
     status = napi_get_value_double(env, argv[0], &line_width);
     
-    ctx->paint_for_stroke_.setStrokeWidth(line_width);
+    ctx->states_.top().paint_for_stroke_.setStrokeWidth(line_width);
 
     return nullptr;
 }
@@ -251,7 +260,7 @@ napi_value CanvasRenderingContext2D::GetStrokeStyle(napi_env env, napi_callback_
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    SkColor4f color = ctx->paint_for_stroke_.getColor4f();
+    SkColor4f color = ctx->states_.top().paint_for_stroke_.getColor4f();
 
     napi_value result, r, g, b, a;
     status = napi_create_array(env, &result);
@@ -278,9 +287,9 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    stroke_style_color.fA = ctx->global_alpha_ * stroke_style_color.fA;
+    stroke_style_color.fA = ctx->states_.top().global_alpha_ * stroke_style_color.fA;
 
-    ctx->paint_for_stroke_.setColor4f(stroke_style_color);
+    ctx->states_.top().paint_for_stroke_.setColor4f(stroke_style_color);
 
     return nullptr;
 }
@@ -292,7 +301,7 @@ napi_value CanvasRenderingContext2D::GetTextAlign(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    TextAlign align = ctx->pargf_style_.getTextAlign();
+    TextAlign align = ctx->states_.top().pargf_style_.getTextAlign();
     string align_name = StyleParser::fromTextAlignToStr(align);
 
     napi_value result;
@@ -309,7 +318,7 @@ napi_value CanvasRenderingContext2D::SetTextAlign(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
     
-    ctx->pargf_style_.setTextAlign(StyleParser::fromStrToTextAlign(text_align));
+    ctx->states_.top().pargf_style_.setTextAlign(StyleParser::fromStrToTextAlign(text_align));
 
     return nullptr;
 }
@@ -321,7 +330,7 @@ napi_value CanvasRenderingContext2D::GetTextBaseline(napi_env env, napi_callback
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    TextBaseline baseline = ctx->text_baseline_;
+    TextBaseline baseline = ctx->states_.top().text_baseline_;
     string baseline_name = StyleParser::fromTextBaselineToStr(baseline);
 
     napi_value result;
@@ -338,7 +347,7 @@ napi_value CanvasRenderingContext2D::SetTextBaseline(napi_env env, napi_callback
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
     
-    ctx->text_baseline_ = StyleParser::fromStrToTextBaseline(text_baseline);
+    ctx->states_.top().text_baseline_ = StyleParser::fromStrToTextBaseline(text_baseline);
 
     return nullptr;
 }
@@ -366,14 +375,14 @@ napi_value CanvasRenderingContext2D::Arc(napi_env env, napi_callback_info info) 
     SkRect oval = SkRect::MakeXYWH(ax, ay, radius * 2, radius * 2);
     SkPoint move_point = SkPoint::Make(x, y);
 
-    if (ctx->last_move_point_ && move_point != *ctx->last_move_point_) {
-        ctx->path_.lineTo(move_point);
+    if (ctx->states_.top().last_move_point_ && move_point != *ctx->states_.top().last_move_point_) {
+        ctx->states_.top().path_.lineTo(move_point);
     }
 
-    ctx->path_.moveTo(move_point);
-    ctx->last_move_point_ = &move_point;
+    ctx->states_.top().path_.moveTo(move_point);
+    ctx->states_.top().last_move_point_ = &move_point;
 
-    ctx->path_.arcTo(oval, start_angle, end_angle - start_angle, true);
+    ctx->states_.top().path_.arcTo(oval, start_angle, end_angle - start_angle, true);
 
     return nullptr;
 }
@@ -393,7 +402,7 @@ napi_value CanvasRenderingContext2D::ArcTo(napi_env env, napi_callback_info info
     status = napi_get_value_double(env, argv[3], &y2);
     status = napi_get_value_double(env, argv[4], &radius);
 
-    ctx->path_.arcTo(SkPoint::Make(x1, y1), SkPoint::Make(x2, y2), radius);
+    ctx->states_.top().path_.arcTo(SkPoint::Make(x1, y1), SkPoint::Make(x2, y2), radius);
 
     return nullptr;
 }
@@ -405,8 +414,8 @@ napi_value CanvasRenderingContext2D::BeginPath(napi_env env, napi_callback_info 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->path_.reset();
-    ctx->last_move_point_ = nullptr;
+    ctx->states_.top().path_.reset();
+    ctx->states_.top().last_move_point_ = nullptr;
 
     return nullptr;
 }
@@ -427,7 +436,7 @@ napi_value CanvasRenderingContext2D::BezierCurveTo(napi_env env, napi_callback_i
     status = napi_get_value_double(env, argv[4], &x);
     status = napi_get_value_double(env, argv[5], &y);
 
-    ctx->path_.cubicTo(SkPoint::Make(cp1x, cp1y), SkPoint::Make(cp2x, cp2y), SkPoint::Make(x, y));
+    ctx->states_.top().path_.cubicTo(SkPoint::Make(cp1x, cp1y), SkPoint::Make(cp2x, cp2y), SkPoint::Make(x, y));
 
     return nullptr;
 }
@@ -461,7 +470,7 @@ napi_value CanvasRenderingContext2D::ClosePath(napi_env env, napi_callback_info 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->path_.close();
+    ctx->states_.top().path_.close();
 
     return nullptr;
 }
@@ -498,7 +507,7 @@ napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info 
 
     SkSamplingOptions sample_options = SkSamplingOptions();
 
-    ctx->canvas_->drawImageRect(img, src, dist, sample_options, &ctx->paint_for_fill_, SkCanvas::kFast_SrcRectConstraint);
+    ctx->canvas_->drawImageRect(img, src, dist, sample_options, &ctx->states_.top().paint_for_fill_, SkCanvas::kFast_SrcRectConstraint);
 
     return nullptr;
 }
@@ -510,7 +519,7 @@ napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info)
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->canvas_->drawPath(ctx->path_, ctx->paint_for_fill_);
+    ctx->canvas_->drawPath(ctx->states_.top().path_, ctx->states_.top().paint_for_fill_);
 
     return nullptr;
 }
@@ -530,7 +539,7 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
 
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
-    ctx->canvas_->drawRect(rect, ctx->paint_for_fill_);
+    ctx->canvas_->drawRect(rect, ctx->states_.top().paint_for_fill_);
 
     return nullptr;
 }
@@ -549,7 +558,7 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     string input = node_skia_helpers::get_utf8_string(env, argv[0]);
     auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
 
-    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->paint_for_fill_);
+    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->states_.top().paint_for_fill_);
 
     return nullptr;
 }
@@ -561,12 +570,12 @@ napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info inf
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    if (ctx->last_move_point_) {
+    if (ctx->states_.top().last_move_point_) {
         double x, y;
         status = napi_get_value_double(env, argv[0], &x);
         status = napi_get_value_double(env, argv[1], &y);
 
-        ctx->path_.lineTo(SkPoint::Make(x, y));
+        ctx->states_.top().path_.lineTo(SkPoint::Make(x, y));
     }
 
     return nullptr;
@@ -584,8 +593,8 @@ napi_value CanvasRenderingContext2D::MoveTo(napi_env env, napi_callback_info inf
     status = napi_get_value_double(env, argv[1], &y);
 
     SkPoint move_point = SkPoint::Make(x, y);
-    ctx->last_move_point_ = &move_point;
-    ctx->path_.moveTo(move_point);
+    ctx->states_.top().last_move_point_ = &move_point;
+    ctx->states_.top().path_.moveTo(move_point);
 
     return nullptr;
 }
@@ -603,7 +612,7 @@ napi_value CanvasRenderingContext2D::QuadraticCurveTo(napi_env env, napi_callbac
     status = napi_get_value_double(env, argv[2], &x);
     status = napi_get_value_double(env, argv[3], &y);
 
-    ctx->path_.quadTo(SkPoint::Make(cpx, cpy), SkPoint::Make(x, y));
+    ctx->states_.top().path_.quadTo(SkPoint::Make(cpx, cpy), SkPoint::Make(x, y));
 
     return nullptr;
 }
@@ -623,14 +632,42 @@ napi_value CanvasRenderingContext2D::Rect(napi_env env, napi_callback_info info)
 
     SkPoint move_point = SkPoint::Make(x, y);
 
-    if (ctx->last_move_point_ && move_point != *ctx->last_move_point_) {
-        ctx->path_.lineTo(move_point);
+    if (ctx->states_.top().last_move_point_ && move_point != *ctx->states_.top().last_move_point_) {
+        ctx->states_.top().path_.lineTo(move_point);
     }
 
-    ctx->path_.moveTo(move_point);
-    ctx->last_move_point_ = &move_point;
+    ctx->states_.top().path_.moveTo(move_point);
+    ctx->states_.top().last_move_point_ = &move_point;
 
-    ctx->path_.addRect(SkRect::MakeXYWH(x, y, w, h));
+    ctx->states_.top().path_.addRect(SkRect::MakeXYWH(x, y, w, h));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Restore(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    
+    if (ctx->states_.size() > 1) {
+        ctx->states_.pop();
+    }
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Save(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    // 所谓的保持状态，即是 Copy 当前状态并压栈
+    
+    CanvasState new_state = ctx->states_.top();
+    ctx->states_.push(new_state);
 
     return nullptr;
 }
@@ -642,7 +679,7 @@ napi_value CanvasRenderingContext2D::Stroke(napi_env env, napi_callback_info inf
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->canvas_->drawPath(ctx->path_, ctx->paint_for_stroke_);
+    ctx->canvas_->drawPath(ctx->states_.top().path_, ctx->states_.top().paint_for_stroke_);
 
     return nullptr;
 }
@@ -662,7 +699,7 @@ napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info
 
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
-    ctx->canvas_->drawRect(rect, ctx->paint_for_stroke_);
+    ctx->canvas_->drawRect(rect, ctx->states_.top().paint_for_stroke_);
 
     return nullptr;
 }
@@ -685,9 +722,9 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
 
     string text = node_skia_helpers::get_utf8_string(env, argv[0]);
     SkFontMetrics font_metrics;
-    ctx->text_style_.getFontMetrics(&font_metrics);
+    ctx->states_.top().text_style_.getFontMetrics(&font_metrics);
     // 新基线到原基线的距离
-    float offset = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, ctx->text_baseline_);
+    float offset = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, ctx->states_.top().text_baseline_);
     auto base_hang = TextBaseline::Hanging;
     float hang = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, base_hang) - offset;
     auto base_ideo = TextBaseline::Ideographic;
@@ -721,7 +758,7 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     auto font = SkFont(face, 10);
 
     auto txt = SkTextBlob::MakeFromString(text.c_str(), font);
-    ctx->canvas_->drawTextBlob(txt, 10, 10, ctx->paint_for_fill_);
+    ctx->canvas_->drawTextBlob(txt, 10, 10, ctx->states_.top().paint_for_fill_);
 
     return text_metrics;
 }

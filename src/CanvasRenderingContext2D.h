@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stack>
 #include <napi.h>
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
@@ -8,30 +9,28 @@
 #include "modules/skparagraph/include/TextStyle.h"
 #include "StyleParser.h"
 
+using std::stack;
 using skia::textlayout::ParagraphStyle;
 using skia::textlayout::TextStyle;
 using node_skia::TextBaseline;
 
-// enum class PathInstrumentType {
-//     Rect, Arc, Ellipse, Line
-// };
 
-// struct PathState {
-//     SkPoint start = SkPoint::Make(0, 0);
-//     vector<PathInstrument> instruments = {};
-// };
+struct CanvasState
+{
+    // state for path
+    SkPath path_;
+    SkPoint* last_move_point_ = nullptr;
 
-// struct PathInstrument {
-//     PathInstrumentType type;
-//     SkPoint start;
-//     SkPoint end;
-//     SkScalar radiusX;
-//     SkScalar radiusY;
-//     SkScalar rotation;
-//     SkScalar startAngle;
-//     SkScalar endAngle;
-//     bool counterclockwise = false;
-// };
+    // state for fill & stroke
+    SkPaint paint_for_fill_;
+    SkPaint paint_for_stroke_;
+    double global_alpha_ = 1;
+
+    // state for text
+    ParagraphStyle pargf_style_;
+    TextStyle text_style_;
+    TextBaseline text_baseline_;
+};
 
 
 class CanvasRenderingContext2D {
@@ -53,19 +52,9 @@ private:
 
     SkCanvas* canvas_;
 
-    // state for path
-    SkPath path_;
-    SkPoint* last_move_point_ = nullptr;
+    stack<CanvasState> states_;
 
-    // state for fill & stroke
-    SkPaint paint_for_fill_;
-    SkPaint paint_for_stroke_;
-    double global_alpha_ = 1;
-
-    // state for text
-    ParagraphStyle pargf_style_;
-    TextStyle text_style_;
-    TextBaseline text_baseline_;
+    void init_canvas_state();
 
     // ================================== Properties ==================================
 
@@ -99,6 +88,8 @@ private:
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value QuadraticCurveTo(napi_env env, napi_callback_info info);
     static napi_value Rect(napi_env env, napi_callback_info info);
+    static napi_value Restore(napi_env env, napi_callback_info info);
+    static napi_value Save(napi_env env, napi_callback_info info);
     static napi_value Stroke(napi_env env, napi_callback_info info);
     static napi_value StrokeRect(napi_env env, napi_callback_info info);
     static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`
