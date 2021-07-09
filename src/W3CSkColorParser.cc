@@ -195,6 +195,10 @@ SkColor4f W3CSkColorParser::rgba_from_string(string &str) {
     return SkColor4f::FromColor(SK_ColorBLACK);
 };
 
+void W3CSkColorParser::color_mix_with_alpha(SkColor4f &color, double alpha) {
+    color.fA = color.fA * alpha;
+};
+
 int W3CSkColorParser::h(char c) {
   switch (c) {
     case '0':

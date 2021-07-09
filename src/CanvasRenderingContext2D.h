@@ -24,7 +24,7 @@ struct CanvasState
     // state for fill & stroke
     SkPaint paint_for_fill_;
     SkPaint paint_for_stroke_;
-    double global_alpha_ = 1;
+    double global_alpha_ = 1.0;
 
     // state for text
     ParagraphStyle pargf_style_;
@@ -77,6 +77,7 @@ private:
     static napi_value ArcTo(napi_env env, napi_callback_info info);
     static napi_value BeginPath(napi_env env, napi_callback_info info);
     static napi_value BezierCurveTo(napi_env env, napi_callback_info info);
+    static napi_value CreatePattern(napi_env env, napi_callback_info info);
     static napi_value ClearRect(napi_env env, napi_callback_info info);
     static napi_value ClosePath(napi_env env, napi_callback_info info);
     static napi_value DrawImage(napi_env env, napi_callback_info info);

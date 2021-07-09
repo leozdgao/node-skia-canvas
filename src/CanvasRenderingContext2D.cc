@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 
@@ -54,6 +52,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("arcTo", ArcTo),
         DECLARE_NAPI_METHOD("beginPath", BeginPath),
         DECLARE_NAPI_METHOD("bezierCurveTo", BezierCurveTo),
+        DECLARE_NAPI_METHOD("createPattern", CreatePattern),
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("closePath", ClosePath),
         DECLARE_NAPI_METHOD("drawImage", DrawImage),
@@ -189,8 +188,7 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    // FIXME: if input value has alpha
-    fill_style_color.fA = ctx->states_.top().global_alpha_ * fill_style_color.fA;
+    W3CSkColorParser::color_mix_with_alpha(fill_style_color, ctx->states_.top().global_alpha_);
 
     ctx->states_.top().paint_for_fill_.setColor4f(fill_style_color);
 
@@ -442,6 +440,19 @@ napi_value CanvasRenderingContext2D::BezierCurveTo(napi_env env, napi_callback_i
     ctx->states_.top().path_.cubicTo(SkPoint::Make(cp1x, cp1y), SkPoint::Make(cp2x, cp2y), SkPoint::Make(x, y));
 
     return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::CreatePattern(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    napi_value result;
+    
+
+    return result;
 }
 
 napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info info) {

@@ -22,6 +22,7 @@ private:
     static SkColor4f rgba_from_hsla_expr(string &str);
 
 public:
+    static void color_mix_with_alpha(SkColor4f &color, double alpha);
     static SkColor4f rgba_from_string(string &str);
 };
 
