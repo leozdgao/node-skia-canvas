@@ -31,26 +31,18 @@ Napi::Value Image::GetHeight(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Image::GetSource(const Napi::CallbackInfo& info) {
-  // napi_value result;
-  // napi_status status;
-  // void* data;
-  // status = napi_create_buffer_copy(info.Env(), this->len_, &this->data_, &data, &result);
-
-  // return Napi::Value::From(info.Env(), result);
-  // return Napi::Buffer<void>::New(info.Env(), this->data_, this->len_);
+  return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)data_, len_);
 }
 
 void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) {
   napi_status status;
-  void* data;
-  size_t len;
 
-  status = napi_get_buffer_info(info.Env(), value, &data, &len);
-  data_ = data;
-  len_ = len;
+  Napi::Buffer buffer = value.As<Napi::Buffer<unsigned char>>();
+  data_ = buffer.Data();
+  len_ = buffer.Length();
 
   sk_sp<SkImage> img = SkImage::MakeFromEncoded(
-      SkData::MakeWithoutCopy(data, len)
+      SkData::MakeWithoutCopy(data_, len_)
   );
 
   width_ = img->width();
