@@ -1,3 +1,4 @@
+#include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 
 #include "CanvasRenderingContext2D.h"
@@ -59,8 +60,10 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("fillRect", FillRect),
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
+        DECLARE_NAPI_METHOD("getImageData", GetImageData),
         DECLARE_NAPI_METHOD("lineTo", LineTo),
         DECLARE_NAPI_METHOD("moveTo", MoveTo),
+        DECLARE_NAPI_METHOD("putImageData", PutImageData),
         DECLARE_NAPI_METHOD("quadraticCurveTo", QuadraticCurveTo),
         DECLARE_NAPI_METHOD("rect", Rect),
         DECLARE_NAPI_METHOD("restore", Restore),
@@ -73,7 +76,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 29, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 31, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -575,6 +578,29 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     return nullptr;
 }
 
+napi_value CanvasRenderingContext2D::GetImageData(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    int sx, sy, sw, sh;
+    status = napi_get_value_int32(env, argv[0], &sx);
+    status = napi_get_value_int32(env, argv[1], &sy);
+    status = napi_get_value_int32(env, argv[2], &sw);
+    status = napi_get_value_int32(env, argv[3], &sh);
+
+    void* data;
+    SkImageInfo image_info = SkImageInfo::MakeN32Premul(sw, sh);
+    ctx->canvas_->readPixels(image_info, data, 32, sx, sy);
+
+    napi_value result;
+    status = napi_create_arraybuffer(env, image_info.width() * image_info.height() * image_info.bytesPerPixel(), &data, &result);
+
+    return result;
+}
+
 napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 2)
@@ -582,7 +608,7 @@ napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info inf
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    if (ctx->states_.top().last_move_point_) {
+    if (ctx->states_.top().last_move_point_ != nullptr) {
         double x, y;
         status = napi_get_value_double(env, argv[0], &x);
         status = napi_get_value_double(env, argv[1], &y);
@@ -607,6 +633,29 @@ napi_value CanvasRenderingContext2D::MoveTo(napi_env env, napi_callback_info inf
     SkPoint move_point = SkPoint::Make(x, y);
     ctx->states_.top().last_move_point_ = &move_point;
     ctx->states_.top().path_.moveTo(move_point);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::PutImageData(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 5)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    void* data;
+    size_t len;
+    int sw, sh, dx, dy;
+    
+    status = napi_get_arraybuffer_info(env, argv[0], &data, &len);
+    status = napi_get_value_int32(env, argv[1], &sw);
+    status = napi_get_value_int32(env, argv[2], &sh);
+    status = napi_get_value_int32(env, argv[3], &dx);
+    status = napi_get_value_int32(env, argv[4], &dy);
+
+    SkImageInfo image_info = SkImageInfo::MakeN32Premul(sw, sh);
+    ctx->canvas_->writePixels(image_info, data, 32, dx, dy);
 
     return nullptr;
 }
@@ -665,6 +714,7 @@ napi_value CanvasRenderingContext2D::Restore(napi_env env, napi_callback_info in
     
     if (ctx->states_.size() > 1) {
         ctx->states_.pop();
+        ctx->canvas_->restore();
     }
 
     return nullptr;
@@ -680,6 +730,7 @@ napi_value CanvasRenderingContext2D::Save(napi_env env, napi_callback_info info)
     
     CanvasState new_state = ctx->states_.top();
     ctx->states_.push(new_state);
+    ctx->canvas_->save();
 
     return nullptr;
 }
