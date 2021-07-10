@@ -73,7 +73,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 28, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 29, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -447,6 +447,7 @@ napi_value CanvasRenderingContext2D::CreatePattern(napi_env env, napi_callback_i
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     napi_value result;
+    // 判断输入是一个 Image
     
 
     return result;

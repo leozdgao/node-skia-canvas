@@ -10,6 +10,7 @@ file(GLOB SOURCE_FILES
     "Canvas.cc"
     "CanvasRenderingContext2D.cc"
     "helpers.cc"
+    "Image.cc"
     "StyleParser.cc"
     "TextMetrics.cc"
     "W3CSkColorParser.cc"

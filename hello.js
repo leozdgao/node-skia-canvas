@@ -1,8 +1,16 @@
 const fs = require('fs');
-const { Canvas } = require('./build/Debug/node-skia.node');
+const { Canvas, Image } = require('./build/Debug/node-skia.node');
 
 const c = new Canvas(500, 500);
 
+
+const imgData = fs.readFileSync('./examples/leize.jpeg');
+const image = new Image();
+image.src = imgData;
+console.log(image.src)
+console.log('=== images', image.width, image.height);
+
+// fs.writeFileSync('lzlz.jpg', image.src);
 
 console.log(c.width, c.height);
 const ctx = c.getContext('2d');
