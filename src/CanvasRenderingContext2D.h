@@ -100,6 +100,7 @@ private:
     static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`
     static napi_value FillText(napi_env env, napi_callback_info info);
     static napi_value GetImageData(napi_env env, napi_callback_info info);
+    static napi_value GetLineDash(napi_env env, napi_callback_info info);
     static napi_value LineTo(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value PutImageData(napi_env env, napi_callback_info info);

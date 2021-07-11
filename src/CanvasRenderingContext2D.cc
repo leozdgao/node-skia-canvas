@@ -69,6 +69,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
         DECLARE_NAPI_METHOD("getImageData", GetImageData),
+        DECLARE_NAPI_METHOD("getLineDash", GetLineDash),
         DECLARE_NAPI_METHOD("lineTo", LineTo),
         DECLARE_NAPI_METHOD("moveTo", MoveTo),
         DECLARE_NAPI_METHOD("putImageData", PutImageData),
@@ -85,7 +86,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 37, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 38, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -729,6 +730,23 @@ napi_value CanvasRenderingContext2D::GetImageData(napi_env env, napi_callback_in
     ctx->canvas_->readPixels(image_info, data->writable_data(), image_info.minRowBytes(), sx, sy);
 
     return ImageData::CreateInstance(env, image_info.width(), image_info.height(), data->writable_data());
+}
+
+napi_value CanvasRenderingContext2D::GetLineDash(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    vector<SkScalar> intervals = ctx->states_.top().intervals;
+    Napi::Array array = Napi::Array::New(env, intervals.size());
+
+    for (int i = 0, l = intervals.size(); i < l; i++) {
+        array.Set(i, intervals[i]);
+    }
+
+    return array;
 }
 
 napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info info) {

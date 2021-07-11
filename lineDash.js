@@ -15,6 +15,8 @@ ctx.fillRect(0, 0, 300, 300);
 // ctx.lineTo(300, 50);
 // ctx.stroke();
 
+// console.log(ctx.getLineDash());
+
 // console.log(ctx.lineCap, ctx.lineJoin, ctx.lineDashOffset, ctx.miterLimit);
 
 // // Solid line
@@ -55,24 +57,24 @@ ctx.fillRect(0, 0, 300, 300);
 
 
 // Draw guides
-ctx.strokeStyle = '#09f';
-ctx.lineWidth   = 2;
-ctx.strokeRect(-5, 50, 160, 50);
+// ctx.strokeStyle = '#09f';
+// ctx.lineWidth   = 2;
+// ctx.strokeRect(-5, 50, 160, 50);
 
 // Set line styles
-ctx.strokeStyle = '#000';
-ctx.lineWidth = 10;
+// ctx.strokeStyle = '#000';
+// ctx.lineWidth = 10;
 
-ctx.miterLimit = 6;
+// ctx.miterLimit = 6;
 
 // Draw lines
-ctx.beginPath();
-ctx.moveTo(0, 100);
-for (i = 0; i < 24 ; i++) {
-  var dy = i % 2 == 0 ? 25 : -25;
-  ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
-}
-ctx.stroke();
+// ctx.beginPath();
+// ctx.moveTo(0, 100);
+// for (i = 0; i < 24 ; i++) {
+//   var dy = i % 2 == 0 ? 25 : -25;
+//   ctx.lineTo(Math.pow(i, 1.5) * 2, 75 + dy);
+// }
+// ctx.stroke();
 
 const buffer = c.toBuffer();
 fs.writeFileSync('temp_line_dash.png', Buffer.from(buffer));
