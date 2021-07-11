@@ -53,6 +53,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("arcTo", ArcTo),
         DECLARE_NAPI_METHOD("beginPath", BeginPath),
         DECLARE_NAPI_METHOD("bezierCurveTo", BezierCurveTo),
+        DECLARE_NAPI_METHOD("createImageData", CreateImageData),
         DECLARE_NAPI_METHOD("createPattern", CreatePattern),
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("closePath", ClosePath),
@@ -77,7 +78,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 31, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 32, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -441,6 +442,22 @@ napi_value CanvasRenderingContext2D::BezierCurveTo(napi_env env, napi_callback_i
     ctx->states_.top().path_.cubicTo(SkPoint::Make(cp1x, cp1y), SkPoint::Make(cp2x, cp2y), SkPoint::Make(x, y));
 
     return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::CreateImageData(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    int width, height;
+
+    status = napi_get_value_int32(env, argv[0], &width);
+    status = napi_get_value_int32(env, argv[1], &height);
+
+    SkImageInfo image_info = SkImageInfo::Make(SkISize::Make(width, height), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+    sk_sp<SkData> data(SkData::MakeUninitialized(image_info.minRowBytes() * image_info.height()));
+    sk_bzero(data->writable_data(), image_info.minRowBytes() * image_info.height());
+
+    return ImageData::CreateInstance(env, width, height, data->writable_data());
 }
 
 napi_value CanvasRenderingContext2D::CreatePattern(napi_env env, napi_callback_info info) {

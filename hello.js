@@ -140,6 +140,9 @@ console.log(data.width, data.height, data.data);
 
 ctx.putImageData(data, 0, 0);
 
+const dd = ctx.createImageData(2, 2);
+console.log(dd.width, dd.height, dd.data);
+
 // for (let i = 0, l = data.byteLength; i < l; i++) {
     // console.log(data)
     // console.log(data[i])
