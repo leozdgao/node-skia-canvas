@@ -11,6 +11,7 @@ file(GLOB SOURCE_FILES
     "CanvasRenderingContext2D.cc"
     "helpers.cc"
     "Image.cc"
+    "ImageData.cc"
     "StyleParser.cc"
     "TextMetrics.cc"
     "W3CSkColorParser.cc"

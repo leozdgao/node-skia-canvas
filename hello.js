@@ -135,7 +135,10 @@ ctx.restore();
 
 ctx.fillRect(200, 300, 60, 80);
 
-// const data = ctx.getImageData(200, 200, 300, 300);
+const data = ctx.getImageData(200, 200, 300, 300);
+console.log(data.width, data.height, data.data);
+
+ctx.putImageData(data, 0, 0);
 
 // for (let i = 0, l = data.byteLength; i < l; i++) {
     // console.log(data)

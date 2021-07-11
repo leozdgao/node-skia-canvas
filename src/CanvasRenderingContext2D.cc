@@ -2,6 +2,7 @@
 #include <include/core/SkTextBlob.h>
 
 #include "CanvasRenderingContext2D.h"
+#include "ImageData.h"
 #include "StyleParser.h"
 #include "W3CSkColorParser.h"
 #include "helpers.h"
@@ -591,14 +592,12 @@ napi_value CanvasRenderingContext2D::GetImageData(napi_env env, napi_callback_in
     status = napi_get_value_int32(env, argv[2], &sw);
     status = napi_get_value_int32(env, argv[3], &sh);
 
-    void* data;
-    SkImageInfo image_info = SkImageInfo::MakeN32Premul(sw, sh);
-    ctx->canvas_->readPixels(image_info, data, 32, sx, sy);
+    SkImageInfo image_info = SkImageInfo::Make(SkISize::Make(sw, sh), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+    sk_sp<SkData> data(SkData::MakeUninitialized(image_info.minRowBytes() * image_info.height()));
+    sk_bzero(data->writable_data(), image_info.minRowBytes() * image_info.height());
+    ctx->canvas_->readPixels(image_info, data->writable_data(), image_info.minRowBytes(), sx, sy);
 
-    napi_value result;
-    status = napi_create_arraybuffer(env, image_info.width() * image_info.height() * image_info.bytesPerPixel(), &data, &result);
-
-    return result;
+    return ImageData::CreateInstance(env, image_info.width(), image_info.height(), data->writable_data());
 }
 
 napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info info) {
@@ -639,23 +638,20 @@ napi_value CanvasRenderingContext2D::MoveTo(napi_env env, napi_callback_info inf
 
 napi_value CanvasRenderingContext2D::PutImageData(napi_env env, napi_callback_info info) {
     napi_status status;
-    GET_CB_INFO(env, info, status, 5)
+    GET_CB_INFO(env, info, status, 3)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    void* data;
-    size_t len;
-    int sw, sh, dx, dy;
+    int dx, dy;
+    ImageData* imgData;
     
-    status = napi_get_arraybuffer_info(env, argv[0], &data, &len);
-    status = napi_get_value_int32(env, argv[1], &sw);
-    status = napi_get_value_int32(env, argv[2], &sh);
-    status = napi_get_value_int32(env, argv[3], &dx);
-    status = napi_get_value_int32(env, argv[4], &dy);
+    status = napi_unwrap(env, argv[0], reinterpret_cast<void**>(&imgData));
+    status = napi_get_value_int32(env, argv[1], &dx);
+    status = napi_get_value_int32(env, argv[2], &dy);
 
-    SkImageInfo image_info = SkImageInfo::MakeN32Premul(sw, sh);
-    ctx->canvas_->writePixels(image_info, data, 32, dx, dy);
+    SkImageInfo image_info = SkImageInfo::Make(SkISize::Make(imgData->getWidth(), imgData->getHeight()), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+    ctx->canvas_->writePixels(image_info, imgData->getData(), image_info.minRowBytes(), dx, dy);
 
     return nullptr;
 }
