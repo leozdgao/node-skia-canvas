@@ -2,6 +2,70 @@
 
 namespace node_skia {
 
+SkPaint::Cap StyleParser::fromStrToStrokeCap(string& cap) {
+    if (cap == "butt") {
+        return SkPaint::Cap::kButt_Cap;
+    }
+
+    if (cap == "round") {
+        return SkPaint::Cap::kRound_Cap;
+    }
+
+    if (cap == "square") {
+        return SkPaint::Cap::kSquare_Cap;
+    }
+
+    return SkPaint::Cap::kDefault_Cap;
+}
+
+string StyleParser::fromStrokeCapToStr(SkPaint::Cap& cap) {
+    if (cap == SkPaint::Cap::kButt_Cap) {
+        return "butt";
+    }
+
+    if (cap == SkPaint::Cap::kRound_Cap) {
+        return "round";
+    }
+
+    if (cap == SkPaint::Cap::kSquare_Cap) {
+        return "square";
+    }
+
+    return "butt";
+}
+
+SkPaint::Join StyleParser::fromStrToStrokeJoin(string& join) {
+    if (join == "bevel") {
+        return SkPaint::Join::kBevel_Join;
+    }
+
+    if (join == "round") {
+        return SkPaint::Join::kRound_Join;
+    }
+
+    if (join == "miter") {
+        return SkPaint::Join::kMiter_Join;
+    }
+
+    return SkPaint::kDefault_Join;
+}
+
+string StyleParser::fromStrokeJoinToStr(SkPaint::Join& join) {
+    if (join == SkPaint::Join::kBevel_Join) {
+        return "bevel";
+    }
+
+    if (join == SkPaint::Join::kRound_Join) {
+        return "round";
+    }
+
+    if (join == SkPaint::Join::kMiter_Join) {
+        return "miter";
+    }
+
+    return "miter";
+}
+
 TextAlign StyleParser::fromStrToTextAlign(string& align_name) {
     if (align_name == "center") {
         return TextAlign::kCenter;

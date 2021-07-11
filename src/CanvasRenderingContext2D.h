@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include <vector>
 #include <napi.h>
 #include "include/core/SkCanvas.h"
 #include "include/core/SkSurface.h"
@@ -10,6 +11,7 @@
 #include "StyleParser.h"
 
 using std::stack;
+using std::vector;
 using skia::textlayout::ParagraphStyle;
 using skia::textlayout::TextStyle;
 using node_skia::TextBaseline;
@@ -20,6 +22,9 @@ struct CanvasState
     // state for path
     SkPath path_;
     SkPoint* last_move_point_ = nullptr;
+    
+    vector<SkScalar> intervals = {};
+    double line_dash_offset = 0.0;
 
     // state for fill & stroke
     SkPaint paint_for_fill_;
@@ -62,8 +67,16 @@ private:
     static napi_value SetFillStyle(napi_env env, napi_callback_info info);
     static napi_value GetGlobalAlpha(napi_env env, napi_callback_info info);
     static napi_value SetGlobalAlpha(napi_env env, napi_callback_info info);
+    static napi_value GetLineCap(napi_env env, napi_callback_info info);
+    static napi_value SetLineCap(napi_env env, napi_callback_info info);
+    static napi_value GetLineDashOffset(napi_env env, napi_callback_info info);
+    static napi_value SetLineDashOffset(napi_env env, napi_callback_info info);
+    static napi_value GetLineJoin(napi_env env, napi_callback_info info);
+    static napi_value SetLineJoin(napi_env env, napi_callback_info info);
     static napi_value GetLineWidth(napi_env env, napi_callback_info info);
     static napi_value SetLineWidth(napi_env env, napi_callback_info info);
+    static napi_value GetMiterLimit(napi_env env, napi_callback_info info);
+    static napi_value SetMiterLimit(napi_env env, napi_callback_info info);
     static napi_value GetStrokeStyle(napi_env env, napi_callback_info info);
     static napi_value SetStrokeStyle(napi_env env, napi_callback_info info);
     static napi_value GetTextAlign(napi_env env, napi_callback_info info);
@@ -94,6 +107,7 @@ private:
     static napi_value Rect(napi_env env, napi_callback_info info);
     static napi_value Restore(napi_env env, napi_callback_info info);
     static napi_value Save(napi_env env, napi_callback_info info);
+    static napi_value SetLineDash(napi_env env, napi_callback_info info);
     static napi_value Stroke(napi_env env, napi_callback_info info);
     static napi_value StrokeRect(napi_env env, napi_callback_info info);
     static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`

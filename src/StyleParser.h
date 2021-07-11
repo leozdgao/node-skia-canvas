@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "include/core/SkPaint.h"
 #include "include/core/SkFontMetrics.h"
 #include "modules/skparagraph/include/DartTypes.h"
 
@@ -25,6 +26,10 @@ public:
     StyleParser(/* args */);
     ~StyleParser();
 
+    static SkPaint::Cap fromStrToStrokeCap(string& cap);
+    static string fromStrokeCapToStr(SkPaint::Cap& cap);
+    static SkPaint::Join fromStrToStrokeJoin(string& join);
+    static string fromStrokeJoinToStr(SkPaint::Join& join);
     static TextAlign fromStrToTextAlign(string& align);
     static string fromTextAlignToStr(TextAlign& align);
     static TextBaseline fromStrToTextBaseline(string& baseline);

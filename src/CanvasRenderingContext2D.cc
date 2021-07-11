@@ -1,5 +1,6 @@
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
+#include <include/effects/SkDashPathEffect.h>
 
 #include "CanvasRenderingContext2D.h"
 #include "ImageData.h"
@@ -25,7 +26,8 @@ void CanvasRenderingContext2D::init_canvas_state() {
 
     init_state.paint_for_stroke_ = SkPaint();
     init_state.paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
-    init_state.paint_for_fill_.setAntiAlias(true);
+    init_state.paint_for_stroke_.setAntiAlias(true);
+    init_state.paint_for_stroke_.setStrokeMiter(10.0);
 
     init_state.pargf_style_ = ParagraphStyle();
     init_state.text_style_ = TextStyle();
@@ -44,7 +46,11 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
         DECLARE_NAPI_PROPERTY("globalAlpha", GetGlobalAlpha, SetGlobalAlpha),
+        DECLARE_NAPI_PROPERTY("lineCap", GetLineCap, SetLineCap),
+        DECLARE_NAPI_PROPERTY("lineDashOffset", GetLineDashOffset, SetLineDashOffset),
+        DECLARE_NAPI_PROPERTY("lineJoin", GetLineJoin, SetLineJoin),
         DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
+        DECLARE_NAPI_PROPERTY("miterLimit", GetMiterLimit, SetMiterLimit),
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
         DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
@@ -70,6 +76,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("rect", Rect),
         DECLARE_NAPI_METHOD("restore", Restore),
         DECLARE_NAPI_METHOD("save", Save),
+        DECLARE_NAPI_METHOD("setLineDash", SetLineDash),
         DECLARE_NAPI_METHOD("stroke", Stroke),
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
         DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
@@ -78,7 +85,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 32, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 37, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -227,6 +234,84 @@ napi_value CanvasRenderingContext2D::SetGlobalAlpha(napi_env env, napi_callback_
     return nullptr;
 }
 
+napi_value CanvasRenderingContext2D::GetLineCap(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    SkPaint::Cap cap = ctx->states_.top().paint_for_stroke_.getStrokeCap();
+    string capStr = StyleParser::fromStrokeCapToStr(cap);
+    
+    return Napi::String::New(env, capStr);
+}
+
+napi_value CanvasRenderingContext2D::SetLineCap(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    string cap = node_skia_helpers::get_utf8_string(env, argv[0]);
+    ctx->states_.top().paint_for_stroke_.setStrokeCap(StyleParser::fromStrToStrokeCap(cap));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetLineDashOffset(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    double val = ctx->states_.top().line_dash_offset;
+    
+    return Napi::Number::New(env, val);
+}
+
+napi_value CanvasRenderingContext2D::SetLineDashOffset(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double line_dash_offset;
+    status = napi_get_value_double(env, argv[0], &line_dash_offset);
+    ctx->states_.top().line_dash_offset = line_dash_offset;
+
+    sk_sp<SkPathEffect> effect = SkDashPathEffect::Make(ctx->states_.top().intervals.data(), 2, line_dash_offset);
+    ctx->states_.top().paint_for_stroke_.setPathEffect(effect);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetLineJoin(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    SkPaint::Join join = ctx->states_.top().paint_for_stroke_.getStrokeJoin();
+    string joinStr = StyleParser::fromStrokeJoinToStr(join);
+    
+    return Napi::String::New(env, joinStr);
+}
+
+napi_value CanvasRenderingContext2D::SetLineJoin(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    string join = node_skia_helpers::get_utf8_string(env, argv[0]);
+    ctx->states_.top().paint_for_stroke_.setStrokeJoin(StyleParser::fromStrToStrokeJoin(join));
+
+    return nullptr;
+}
+
 napi_value CanvasRenderingContext2D::GetLineWidth(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO_WITHOUT_ARG(env, info, status)
@@ -252,6 +337,35 @@ napi_value CanvasRenderingContext2D::SetLineWidth(napi_env env, napi_callback_in
     status = napi_get_value_double(env, argv[0], &line_width);
     
     ctx->states_.top().paint_for_stroke_.setStrokeWidth(line_width);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetMiterLimit(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    double v = ctx->states_.top().paint_for_stroke_.getStrokeMiter();
+    status = napi_create_double(env, v, &result);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetMiterLimit(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double miter;
+    status = napi_get_value_double(env, argv[0], &miter);
+    
+    ctx->states_.top().paint_for_stroke_.setStrokeMiter(miter);
 
     return nullptr;
 }
@@ -744,6 +858,33 @@ napi_value CanvasRenderingContext2D::Save(napi_env env, napi_callback_info info)
     CanvasState new_state = ctx->states_.top();
     ctx->states_.push(new_state);
     ctx->canvas_->save();
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::SetLineDash(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    Napi::Array array = Napi::Array(env, argv[0]);
+    int len = array.Length();
+    vector<SkScalar> intervals = {};
+    for (int i = 0; i < len; i++) {
+        float val = array.Get(i).As<Napi::Number>().FloatValue();
+        intervals.push_back(val);
+    }
+
+    ctx->states_.top().intervals = intervals;
+
+    sk_sp<SkPathEffect> effect = SkDashPathEffect::Make(
+        ctx->states_.top().intervals.data(),
+        intervals.size(),
+        ctx->states_.top().line_dash_offset
+    );
+    ctx->states_.top().paint_for_stroke_.setPathEffect(effect);
 
     return nullptr;
 }
