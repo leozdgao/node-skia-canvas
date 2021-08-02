@@ -51,6 +51,10 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("lineJoin", GetLineJoin, SetLineJoin),
         DECLARE_NAPI_PROPERTY("lineWidth", GetLineWidth, SetLineWidth),
         DECLARE_NAPI_PROPERTY("miterLimit", GetMiterLimit, SetMiterLimit),
+        DECLARE_NAPI_PROPERTY("shadowBlur", GetShadowBlur, SetShadowBlur),
+        DECLARE_NAPI_PROPERTY("shadowColor", GetShadowColor, SetShadowColor),
+        DECLARE_NAPI_PROPERTY("shadowOffsetX", GetShadowOffsetX, SetShadowOffsetX),
+        DECLARE_NAPI_PROPERTY("shadowOffsetY", GetShadowOffsetY, SetShadowOffsetY),
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
         DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
@@ -86,7 +90,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 38, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 42, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -369,6 +373,38 @@ napi_value CanvasRenderingContext2D::SetMiterLimit(napi_env env, napi_callback_i
     ctx->states_.top().paint_for_stroke_.setStrokeMiter(miter);
 
     return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetShadowBlur(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::SetShadowBlur(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::GetShadowColor(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::SetShadowColor(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::GetShadowOffsetX(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::SetShadowOffsetX(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::GetShadowOffsetY(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::SetShadowOffsetY(napi_env env, napi_callback_info info) {
+
 }
 
 napi_value CanvasRenderingContext2D::GetStrokeStyle(napi_env env, napi_callback_info info) {

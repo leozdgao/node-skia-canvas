@@ -31,6 +31,12 @@ struct CanvasState
     SkPaint paint_for_stroke_;
     double global_alpha_ = 1.0;
 
+    // state for shadow
+    double shadow_blur = 0.0;
+    SkColor4f shadow_color = SkColors::kTransparent;
+    double shadow_offset_x = 0.0;
+    double shadow_offset_y = 0.0;
+
     // state for text
     ParagraphStyle pargf_style_;
     TextStyle text_style_;
@@ -77,6 +83,14 @@ private:
     static napi_value SetLineWidth(napi_env env, napi_callback_info info);
     static napi_value GetMiterLimit(napi_env env, napi_callback_info info);
     static napi_value SetMiterLimit(napi_env env, napi_callback_info info);
+    static napi_value GetShadowBlur(napi_env env, napi_callback_info info);
+    static napi_value SetShadowBlur(napi_env env, napi_callback_info info);
+    static napi_value GetShadowColor(napi_env env, napi_callback_info info);
+    static napi_value SetShadowColor(napi_env env, napi_callback_info info);
+    static napi_value GetShadowOffsetX(napi_env env, napi_callback_info info);
+    static napi_value SetShadowOffsetX(napi_env env, napi_callback_info info);
+    static napi_value GetShadowOffsetY(napi_env env, napi_callback_info info);
+    static napi_value SetShadowOffsetY(napi_env env, napi_callback_info info);
     static napi_value GetStrokeStyle(napi_env env, napi_callback_info info);
     static napi_value SetStrokeStyle(napi_env env, napi_callback_info info);
     static napi_value GetTextAlign(napi_env env, napi_callback_info info);
