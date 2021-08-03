@@ -1,3 +1,4 @@
+#include "include/effects/SkImageFilters.h"
 #include "StyleParser.h"
 
 namespace node_skia {
@@ -202,6 +203,22 @@ float StyleParser::getBaselineOffsetFromFontMetrics(SkFontMetrics& font_metrics,
     if (baseline == TextBaseline::Bottom) {
         return -font_metrics.fDescent;
     }
+}
+
+std::shared_ptr<SkPaint> StyleParser::getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y) {
+    if (color.fA > 0 && !(blur == 0.0 && x == 0.0 && y == 0.0)) {
+        std::shared_ptr<SkPaint> layer_paint(new SkPaint());
+        // copy
+        *layer_paint = base_paint;
+
+        double sigma = blur / 2.0;
+        sk_sp<SkImageFilter> shadow_filter = SkImageFilters::DropShadowOnly(0, 0, sigma, sigma, color.toSkColor(), nullptr, nullptr);
+        layer_paint->setImageFilter(shadow_filter);
+
+        return layer_paint;
+    }
+
+    return nullptr;
 }
 
 }

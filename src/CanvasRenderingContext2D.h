@@ -66,6 +66,7 @@ private:
     stack<CanvasState> states_;
 
     void init_canvas_state();
+    void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
 
     // ================================== Properties ==================================
 

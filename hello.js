@@ -4,67 +4,65 @@ const { Canvas, Image } = require('./build/Debug/node-skia.node');
 const c = new Canvas(500, 500);
 
 
-const imgData = fs.readFileSync('./examples/leize.jpeg');
-const image = new Image();
-image.src = imgData;
-console.log(image.src)
-console.log('=== images', image.width, image.height);
-
-// fs.writeFileSync('lzlz.jpg', image.src);
 
 console.log(c.width, c.height);
 const ctx = c.getContext('2d');
 
-// ctx.fillStyle = '#FFF';
-// ctx.fillRect(0, 0, 500, 500);
+ctx.fillStyle = '#FFF';
+ctx.fillRect(0, 0, 500, 500);
 
-console.log('context', ctx);
-console.log(ctx.fillStyle);
-ctx.fillStyle = "yellowgreen";
-console.log(ctx.fillStyle);
+// console.log('context', ctx);
+// console.log(ctx.fillStyle);
+// ctx.fillStyle = "yellowgreen";
+// console.log(ctx.fillStyle);
 
-ctx.fillText('It`s OK');
+// ctx.fillText('It`s OK');
 
-ctx.fillStyle = "rgba(0x46,0x82,0xb4)";
-ctx.fillStyle = "#4682b4"
-ctx.fillStyle = "hsl(120, 1, 0.5)";
+// ctx.fillStyle = "rgba(0x46,0x82,0xb4)";
+// ctx.fillStyle = "#4682b4"
+// ctx.fillStyle = "hsl(120, 1, 0.5)";
 
-console.log(ctx.fillStyle.map(i => (Math.floor(i * 255)).toString(16)));
+// console.log(ctx.fillStyle.map(i => (Math.floor(i * 255)).toString(16)));
 
-ctx.fillText('aaaa');
+// ctx.fillText('aaaa');
+
+ctx.shadowColor = "blue";
+ctx.shadowBlur = 4;
+ctx.shadowOffsetX = 10;
+ctx.shadowOffsetY = 10;
 
 ctx.fillStyle = "red";
 ctx.fillRect(100, 100, 50, 50);
 
-console.log('strokeStyle', ctx.strokeStyle);
+// console.log('strokeStyle', ctx.strokeStyle);
 
-ctx.strokeStyle = "blue";
-ctx.strokeRect(100, 200, 50, 50);
-console.log('strokeStyle', ctx.strokeStyle);
+// ctx.strokeStyle = "blue";
+// ctx.strokeRect(100, 200, 50, 50);
+// console.log('strokeStyle', ctx.strokeStyle);
 
-console.log('lineWidth', ctx.lineWidth);
-ctx.lineWidth = 5;
+// console.log('lineWidth', ctx.lineWidth);
+// ctx.lineWidth = 5;
 
-ctx.strokeRect(200, 200, 50, 50);
+// ctx.strokeRect(200, 200, 50, 50);
 
-ctx.clearRect(120, 120, 20, 20);
-
-
-ctx.fillStyle = '#000'
-console.log(ctx.measureText('123xfg'));
-
-console.log(ctx.textAlign);
-ctx.textAlign = 'center';
-
-console.log(ctx.textAlign);
-console.log(ctx.textBaseline);
-ctx.textBaseline = 'top';
-console.log(ctx.measureText('123'));
+// ctx.clearRect(120, 120, 20, 20);
 
 
+// ctx.fillStyle = '#000'
+// console.log(ctx.measureText('123xfg'));
 
-const img = fs.readFileSync('./examples/leize.jpeg');
-ctx.drawImage(img, 0, 0, 1044, 1045, 200, 200, 300, 300);
+// console.log(ctx.textAlign);
+// ctx.textAlign = 'center';
+
+// console.log(ctx.textAlign);
+// console.log(ctx.textBaseline);
+// ctx.textBaseline = 'top';
+// console.log(ctx.measureText('123'));
+
+
+
+// const img = fs.readFileSync('./examples/leize.jpeg');
+// ctx.drawImage(img, 0, 0, 1044, 1045, 10, 10, 300, 300);
 
 
 
@@ -78,22 +76,22 @@ ctx.fill();
 /* ctx.fillStyle = 'blue' */
 
 /* ctx.fill() */
-// ctx.beginPath()
-// ctx.moveTo(10, 10)
-// ctx.lineTo(100, 10)
-// ctx.lineTo(100, 100)
-// ctx.rect(10, 10, 40, 40)
-// ctx.lineWidth = 2
-// ctx.closePath()
+ctx.beginPath()
+ctx.moveTo(10, 10)
+ctx.lineTo(100, 10)
+ctx.lineTo(100, 100)
+ctx.rect(10, 10, 40, 40)
+ctx.lineWidth = 2
+ctx.closePath()
 
-// ctx.beginPath()
-// ctx.lineTo(100, 50)
-// ctx.rect(10, 70, 80, 40)
-// ctx.fillStyle = 'red'
-// ctx.arc(200, 100, 5, 180, 360, false)
-// ctx.lineTo(100, 200)
+ctx.beginPath()
+ctx.lineTo(100, 50)
+ctx.rect(10, 70, 80, 40)
+ctx.fillStyle = 'red'
+ctx.arc(200, 100, 5, 180, 360, false)
+ctx.lineTo(100, 200)
 
-// ctx.fill()
+ctx.fill()
 
 // ctx.stroke()
 // ctx.strokeStyle = 'blue'
@@ -123,25 +121,25 @@ ctx.fill();
 //   ctx.fill();
 // }
 
-ctx.fillStyle = 'yellow';
-ctx.fillRect(0, 300, 60, 80);
+// ctx.fillStyle = 'yellow';
+// ctx.fillRect(0, 300, 60, 80);
 
-ctx.save();
+// ctx.save();
 
-ctx.fillStyle = 'red';
-ctx.fillRect(100, 300, 60, 80);
+// ctx.fillStyle = 'red';
+// ctx.fillRect(100, 300, 60, 80);
 
-ctx.restore();
+// ctx.restore();
 
-ctx.fillRect(200, 300, 60, 80);
+// ctx.fillRect(200, 300, 60, 80);
 
-const data = ctx.getImageData(200, 200, 300, 300);
-console.log(data.width, data.height, data.data);
+// const data = ctx.getImageData(200, 200, 300, 300);
+// console.log(data.width, data.height, data.data);
 
-ctx.putImageData(data, 0, 0);
+// ctx.putImageData(data, 0, 0);
 
-const dd = ctx.createImageData(2, 2);
-console.log(dd.width, dd.height, dd.data);
+// const dd = ctx.createImageData(2, 2);
+// console.log(dd.width, dd.height, dd.data);
 
 // console.log(ctx.shadowColor);
 // ctx.shadowColor = "#89F677";

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 #include <include/effects/SkDashPathEffect.h>
@@ -786,7 +788,9 @@ napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info 
 
     SkSamplingOptions sample_options = SkSamplingOptions();
 
-    ctx->canvas_->drawImageRect(img, src, dist, sample_options, &ctx->states_.top().paint_for_fill_, SkCanvas::kFast_SrcRectConstraint);
+    ctx->render_to_canvas(ctx->states_.top().paint_for_fill_, [&](SkPaint& paint) {
+        ctx->canvas_->drawImageRect(img, src, dist, sample_options, &paint, SkCanvas::kFast_SrcRectConstraint);
+    });
 
     return nullptr;
 }
@@ -798,7 +802,9 @@ napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info)
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->canvas_->drawPath(ctx->states_.top().path_, ctx->states_.top().paint_for_fill_);
+    ctx->render_to_canvas(ctx->states_.top().paint_for_fill_, [&](SkPaint& paint) {
+        ctx->canvas_->drawPath(ctx->states_.top().path_, paint);
+    });
 
     return nullptr;
 }
@@ -818,7 +824,10 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
 
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
-    ctx->canvas_->drawRect(rect, ctx->states_.top().paint_for_fill_);
+    CanvasState state = ctx->states_.top();
+    ctx->render_to_canvas(state.paint_for_fill_, [&](SkPaint& paint) {
+        ctx->canvas_->drawRect(rect, paint);
+    });
 
     return nullptr;
 }
@@ -1044,8 +1053,10 @@ napi_value CanvasRenderingContext2D::Stroke(napi_env env, napi_callback_info inf
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
-
-    ctx->canvas_->drawPath(ctx->states_.top().path_, ctx->states_.top().paint_for_stroke_);
+    
+    ctx->render_to_canvas(ctx->states_.top().paint_for_stroke_, [&](SkPaint& paint) {
+        ctx->canvas_->drawPath(ctx->states_.top().path_, paint);
+    });
 
     return nullptr;
 }
@@ -1065,7 +1076,9 @@ napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info
 
     SkRect rect = SkRect::MakeXYWH(x, y, w, h);
 
-    ctx->canvas_->drawRect(rect, ctx->states_.top().paint_for_stroke_);
+    ctx->render_to_canvas(ctx->states_.top().paint_for_stroke_, [&](SkPaint& paint) {
+        ctx->canvas_->drawRect(rect, paint);
+    });
 
     return nullptr;
 }
@@ -1127,4 +1140,29 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     ctx->canvas_->drawTextBlob(txt, 10, 10, ctx->states_.top().paint_for_fill_);
 
     return text_metrics;
+}
+
+
+void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f) {
+    CanvasState state = this->states_.top();
+
+    std::shared_ptr<SkPaint> shadow_paint = node_skia::StyleParser::getShadowLayerPaint(
+        paint,
+        state.shadow_color,
+        state.shadow_blur,
+        state.shadow_offset_x,
+        state.shadow_offset_y
+    );
+
+    if (shadow_paint != nullptr) {
+        this->canvas_->save();
+        this->canvas_->translate(state.shadow_offset_x, state.shadow_offset_y);
+        // 叠加当前的 matrix 状态
+        // ctx->canvas_->concat();
+        f(*shadow_paint);
+
+        this->canvas_->restore();
+    }
+
+    f(paint);
 }

@@ -34,6 +34,7 @@ public:
     static string fromTextAlignToStr(TextAlign& align);
     static TextBaseline fromStrToTextBaseline(string& baseline);
     static string fromTextBaselineToStr(TextBaseline& baseline);
+    static std::shared_ptr<SkPaint> getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y);
 
     static float getBaselineOffsetFromFontMetrics(SkFontMetrics& font_metrics, TextBaseline& baseline);
 };
