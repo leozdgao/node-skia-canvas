@@ -376,35 +376,130 @@ napi_value CanvasRenderingContext2D::SetMiterLimit(napi_env env, napi_callback_i
 }
 
 napi_value CanvasRenderingContext2D::GetShadowBlur(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    double v = ctx->states_.top().shadow_blur;
+    status = napi_create_double(env, v, &result);
+
+    return result;
 }
 
 napi_value CanvasRenderingContext2D::SetShadowBlur(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double val;
+    status = napi_get_value_double(env, argv[0], &val);
+    
+    ctx->states_.top().shadow_blur = val;
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetShadowColor(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    SkColor4f color = ctx->states_.top().shadow_color;
+
+    napi_value result, r, g, b, a;
+    status = napi_create_array(env, &result);
+    status = napi_create_double(env, color.fR, &r);
+    status = napi_create_double(env, color.fG, &g);
+    status = napi_create_double(env, color.fB, &b);
+    status = napi_create_double(env, color.fA, &a);
+
+    status = napi_set_element(env, result, 0, r);
+    status = napi_set_element(env, result, 1, g);
+    status = napi_set_element(env, result, 2, b);
+    status = napi_set_element(env, result, 3, a);
+
+    return result;
 }
 
 napi_value CanvasRenderingContext2D::SetShadowColor(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
 
+    string shadow_color_str = node_skia_helpers::get_utf8_string(env, argv[0]);
+    SkColor4f shadow_color = W3CSkColorParser::rgba_from_string(shadow_color_str);
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    W3CSkColorParser::color_mix_with_alpha(shadow_color, ctx->states_.top().global_alpha_);
+    ctx->states_.top().shadow_color = shadow_color;
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetShadowOffsetX(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    double v = ctx->states_.top().shadow_offset_x;
+    status = napi_create_double(env, v, &result);
+
+    return result;
 }
 
 napi_value CanvasRenderingContext2D::SetShadowOffsetX(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double val;
+    status = napi_get_value_double(env, argv[0], &val);
+    
+    ctx->states_.top().shadow_offset_x = val;
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetShadowOffsetY(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    napi_value result;
+
+    double v = ctx->states_.top().shadow_offset_y;
+    status = napi_create_double(env, v, &result);
+
+    return result;
 }
 
 napi_value CanvasRenderingContext2D::SetShadowOffsetY(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double val;
+    status = napi_get_value_double(env, argv[0], &val);
+    
+    ctx->states_.top().shadow_offset_y = val;
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::GetStrokeStyle(napi_env env, napi_callback_info info) {

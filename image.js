@@ -10,4 +10,4 @@ image.src = imgData;
 // console.log(image.src);
 console.log('=== images', image.width, image.height);
 
-fs.writeFileSync('tt.jpg', image.src);
+fs.writeFileSync('temp_tt.jpg', image.src);

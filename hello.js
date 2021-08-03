@@ -143,6 +143,14 @@ ctx.putImageData(data, 0, 0);
 const dd = ctx.createImageData(2, 2);
 console.log(dd.width, dd.height, dd.data);
 
+// console.log(ctx.shadowColor);
+// ctx.shadowColor = "#89F677";
+// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
+// ctx.shadowBlur = 12;
+// ctx.shadowOffsetX = 3;
+// ctx.shadowOffsetY = 2;
+// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
+
 // for (let i = 0, l = data.byteLength; i < l; i++) {
     // console.log(data)
     // console.log(data[i])
