@@ -41,6 +41,9 @@ struct CanvasState
     ParagraphStyle pargf_style_;
     TextStyle text_style_;
     TextBaseline text_baseline_;
+
+    // transform
+    SkMatrix matrix_ = SkMatrix();
 };
 
 
@@ -116,18 +119,24 @@ private:
     static napi_value FillText(napi_env env, napi_callback_info info);
     static napi_value GetImageData(napi_env env, napi_callback_info info);
     static napi_value GetLineDash(napi_env env, napi_callback_info info);
+    static napi_value GetTransform(napi_env env, napi_callback_info info);
     static napi_value LineTo(napi_env env, napi_callback_info info);
     static napi_value MoveTo(napi_env env, napi_callback_info info);
     static napi_value PutImageData(napi_env env, napi_callback_info info);
     static napi_value QuadraticCurveTo(napi_env env, napi_callback_info info);
     static napi_value Rect(napi_env env, napi_callback_info info);
     static napi_value Restore(napi_env env, napi_callback_info info);
+    static napi_value Rotate(napi_env env, napi_callback_info info);
     static napi_value Save(napi_env env, napi_callback_info info);
+    static napi_value Scale(napi_env env, napi_callback_info info);
     static napi_value SetLineDash(napi_env env, napi_callback_info info);
+    static napi_value SetTransform(napi_env env, napi_callback_info info);
     static napi_value Stroke(napi_env env, napi_callback_info info);
     static napi_value StrokeRect(napi_env env, napi_callback_info info);
     static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`
     static napi_value StrokeText(napi_env env, napi_callback_info info);
+    static napi_value Transform(napi_env env, napi_callback_info info);
+    static napi_value Translate(napi_env env, napi_callback_info info);
 
     static napi_value MeasureText(napi_env env, napi_callback_info info);
 };

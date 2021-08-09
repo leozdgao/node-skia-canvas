@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 #include <include/effects/SkDashPathEffect.h>
@@ -76,23 +74,29 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("fillText", FillText),
         DECLARE_NAPI_METHOD("getImageData", GetImageData),
         DECLARE_NAPI_METHOD("getLineDash", GetLineDash),
+        DECLARE_NAPI_METHOD("getTransform", GetTransform),
         DECLARE_NAPI_METHOD("lineTo", LineTo),
         DECLARE_NAPI_METHOD("moveTo", MoveTo),
         DECLARE_NAPI_METHOD("putImageData", PutImageData),
         DECLARE_NAPI_METHOD("quadraticCurveTo", QuadraticCurveTo),
         DECLARE_NAPI_METHOD("rect", Rect),
         DECLARE_NAPI_METHOD("restore", Restore),
+        DECLARE_NAPI_METHOD("rotate", Rotate),
         DECLARE_NAPI_METHOD("save", Save),
+        DECLARE_NAPI_METHOD("scale", Scale),
         DECLARE_NAPI_METHOD("setLineDash", SetLineDash),
+        DECLARE_NAPI_METHOD("setTransform", SetTransform),
         DECLARE_NAPI_METHOD("stroke", Stroke),
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
         DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
         DECLARE_NAPI_METHOD("strokeText", StrokeText),
         DECLARE_NAPI_METHOD("measureText", MeasureText),
+        DECLARE_NAPI_METHOD("transform", Transform),
+        DECLARE_NAPI_METHOD("translate", Translate),
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 42, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 48, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -889,6 +893,26 @@ napi_value CanvasRenderingContext2D::GetLineDash(napi_env env, napi_callback_inf
     return array;
 }
 
+napi_value CanvasRenderingContext2D::GetTransform(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    Napi::Array array = Napi::Array::New(env, 6);
+    SkMatrix matrix = ctx->canvas_->getTotalMatrix();
+
+    array[(uint32_t)0] = matrix.getScaleX();
+    array[2] = matrix.getSkewX();
+    array[4] = matrix.getTranslateX();
+    array[1] = matrix.getSkewY();
+    array[3] = matrix.getScaleY();
+    array[5] = matrix.getTranslateY();
+
+    return array;
+}
+
 napi_value CanvasRenderingContext2D::LineTo(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 2)
@@ -1005,6 +1029,24 @@ napi_value CanvasRenderingContext2D::Restore(napi_env env, napi_callback_info in
     return nullptr;
 }
 
+napi_value CanvasRenderingContext2D::Rotate(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double degree;
+    status = napi_get_value_double(env, argv[0], &degree);
+
+    SkMatrix matrix = ctx->states_.top().matrix_;
+    matrix = matrix.preRotate(degree);
+    ctx->canvas_->setMatrix(matrix);
+    ctx->states_.top().matrix_ = matrix;
+
+    return nullptr;
+}
+
 napi_value CanvasRenderingContext2D::Save(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO_WITHOUT_ARG(env, info, status)
@@ -1016,6 +1058,25 @@ napi_value CanvasRenderingContext2D::Save(napi_env env, napi_callback_info info)
     CanvasState new_state = ctx->states_.top();
     ctx->states_.push(new_state);
     ctx->canvas_->save();
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Scale(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+
+    SkMatrix matrix = ctx->states_.top().matrix_;
+    matrix = matrix.preScale(x, y);
+    ctx->canvas_->setMatrix(matrix);
+    ctx->states_.top().matrix_ = matrix;
 
     return nullptr;
 }
@@ -1043,6 +1104,29 @@ napi_value CanvasRenderingContext2D::SetLineDash(napi_env env, napi_callback_inf
         ctx->states_.top().line_dash_offset
     );
     ctx->states_.top().paint_for_stroke_.setPathEffect(effect);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::SetTransform(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 6)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double a, b, c, d, e, f;
+
+    status = napi_get_value_double(env, argv[0], &a);
+    status = napi_get_value_double(env, argv[1], &b);
+    status = napi_get_value_double(env, argv[2], &c);
+    status = napi_get_value_double(env, argv[3], &d);
+    status = napi_get_value_double(env, argv[4], &e);
+    status = napi_get_value_double(env, argv[5], &f);
+
+    CanvasState state = ctx->states_.top();
+    state.matrix_ = state.matrix_.setAll(a, c, e, b, d, f, 0, 0, 1);
+    ctx->canvas_->setMatrix(state.matrix_);
 
     return nullptr;
 }
@@ -1142,6 +1226,51 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     return text_metrics;
 }
 
+napi_value CanvasRenderingContext2D::Transform(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 6)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double a, b, c, d, e, f;
+
+    status = napi_get_value_double(env, argv[0], &a);
+    status = napi_get_value_double(env, argv[1], &b);
+    status = napi_get_value_double(env, argv[2], &c);
+    status = napi_get_value_double(env, argv[3], &d);
+    status = napi_get_value_double(env, argv[4], &e);
+    status = napi_get_value_double(env, argv[5], &f);
+
+    SkMatrix new_matrix = SkMatrix::MakeAll(a, c, e, b, d, f, 0, 0, 1);
+    SkMatrix matrix = ctx->states_.top().matrix_;
+    matrix = matrix.preConcat(new_matrix);
+    ctx->canvas_->setMatrix(matrix);
+    ctx->states_.top().matrix_ = matrix;
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 2)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x, y;
+    status = napi_get_value_double(env, argv[0], &x);
+    status = napi_get_value_double(env, argv[1], &y);
+
+    SkMatrix matrix = ctx->states_.top().matrix_;
+    matrix = matrix.preTranslate(x, y);
+    ctx->canvas_->setMatrix(matrix);
+    ctx->states_.top().matrix_ = matrix;
+
+    return nullptr;
+}
+
+// ======================= Private =======================
 
 void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f) {
     CanvasState state = this->states_.top();
