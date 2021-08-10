@@ -8,6 +8,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 file(GLOB SOURCE_FILES
     "init.cc"
     "Canvas.cc"
+    "CanvasGradient.cc"
     "CanvasRenderingContext2D.cc"
     "helpers.cc"
     "Image.cc"
