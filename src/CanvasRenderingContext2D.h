@@ -112,6 +112,7 @@ private:
     static napi_value CreateImageData(napi_env env, napi_callback_info info);
     static napi_value CreatePattern(napi_env env, napi_callback_info info);
     static napi_value ClearRect(napi_env env, napi_callback_info info);
+    static napi_value Clip(napi_env env, napi_callback_info info);
     static napi_value ClosePath(napi_env env, napi_callback_info info);
     static napi_value DrawImage(napi_env env, napi_callback_info info);
     static napi_value Ellipse(napi_env env, napi_callback_info info);

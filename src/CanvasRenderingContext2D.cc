@@ -70,6 +70,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("createImageData", CreateImageData),
         DECLARE_NAPI_METHOD("createPattern", CreatePattern),
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
+        DECLARE_NAPI_METHOD("clip", Clip),
         DECLARE_NAPI_METHOD("closePath", ClosePath),
         DECLARE_NAPI_METHOD("drawImage", DrawImage),
         DECLARE_NAPI_METHOD("ellipse", Ellipse),
@@ -101,7 +102,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 49, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 50, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -619,7 +620,7 @@ napi_value CanvasRenderingContext2D::Arc(napi_env env, napi_callback_info info) 
     status = napi_get_value_double(env, argv[3], &start_angle);
     status = napi_get_value_double(env, argv[4], &end_angle);
 
-    double ax = x + radius;
+    double ax = x - radius;
     double ay = y - radius;
 
     SkRect oval = SkRect::MakeXYWH(ax, ay, radius * 2, radius * 2);
@@ -741,6 +742,20 @@ napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info 
     ctx->canvas_->drawRect(rect, p);
 
     return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::Clip(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->canvas_->clipPath(
+        ctx->states_.top().path_,
+        SkClipOp::kIntersect,
+        true
+    );
 }
 
 napi_value CanvasRenderingContext2D::ClosePath(napi_env env, napi_callback_info info) {
