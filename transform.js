@@ -7,6 +7,13 @@ const ctx = c.getContext('2d');
 ctx.fillStyle = "#FFF";
 ctx.fillRect(0, 0, 300, 300)
 
+ctx.shadowColor = "#89F677";
+// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
+ctx.shadowBlur = 12;
+ctx.shadowOffsetX = 3;
+ctx.shadowOffsetY = 2;
+// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
+
 // Moved square
 // ctx.translate(110, 30);
 // ctx.fillStyle = 'red';

@@ -1334,8 +1334,7 @@ void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<vo
     if (shadow_paint != nullptr) {
         this->canvas_->save();
         this->canvas_->translate(state.shadow_offset_x, state.shadow_offset_y);
-        // 叠加当前的 matrix 状态
-        // ctx->canvas_->concat();
+
         f(*shadow_paint);
 
         this->canvas_->restore();
