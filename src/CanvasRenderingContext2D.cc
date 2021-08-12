@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 #include <include/effects/SkDashPathEffect.h>
@@ -70,6 +72,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("closePath", ClosePath),
         DECLARE_NAPI_METHOD("drawImage", DrawImage),
+        DECLARE_NAPI_METHOD("ellipse", Ellipse),
         DECLARE_NAPI_METHOD("fill", Fill),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
         DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
@@ -98,7 +101,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 48, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 49, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -791,6 +794,44 @@ napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info 
     return nullptr;
 }
 
+napi_value CanvasRenderingContext2D::Ellipse(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 8)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    double x = Napi::Value::From(env, argv[0]).As<Napi::Number>().DoubleValue();
+    double y = Napi::Value::From(env, argv[1]).As<Napi::Number>().DoubleValue();
+    double rx = Napi::Value::From(env, argv[2]).As<Napi::Number>().DoubleValue();
+    double ry = Napi::Value::From(env, argv[3]).As<Napi::Number>().DoubleValue();
+    double rotation = Napi::Value::From(env, argv[4]).As<Napi::Number>().DoubleValue();
+    double start_angle = Napi::Value::From(env, argv[5]).As<Napi::Number>().DoubleValue();
+    double end_angle = Napi::Value::From(env, argv[6]).As<Napi::Number>().DoubleValue();
+    bool ccw = Napi::Value::From(env, argv[7]).As<Napi::Boolean>().Value();
+
+    SkRect rect = SkRect::MakeXYWH(x - rx, y - ry, 2 * rx, 2 * ry);
+    SkMatrix matrix = SkMatrix().preTranslate(x, y).preRotate(rotation / M_PI * 180).preTranslate(-x, -y);
+    SkMatrix inverted_matrix;
+    matrix.invert(&inverted_matrix);
+
+    ctx->states_.top().path_.transform(inverted_matrix);
+
+    double sweep_deg = (end_angle - start_angle) / M_PI * 180;
+    double start_deg = start_angle / M_PI * 180;
+
+    if (abs(sweep_deg - 360.0) < 0.00001) {
+        double half_sweep = sweep_deg / 2.0;
+        ctx->states_.top().path_.arcTo(rect, start_deg, half_sweep, false);
+        ctx->states_.top().path_.arcTo(rect, start_deg + half_sweep, half_sweep, false);
+    } else {
+        ctx->states_.top().path_.arcTo(rect, start_deg, sweep_deg, false);
+    }
+
+
+    ctx->states_.top().path_.transform(matrix);
+}
+
 napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO_WITHOUT_ARG(env, info, status)
@@ -1032,7 +1073,7 @@ napi_value CanvasRenderingContext2D::Rotate(napi_env env, napi_callback_info inf
     status = napi_get_value_double(env, argv[0], &degree);
 
     SkMatrix matrix = ctx->states_.top().matrix_;
-    matrix = matrix.preRotate(degree);
+    matrix = matrix.preRotate(degree / M_PI * 180);
     ctx->canvas_->setMatrix(matrix);
     ctx->states_.top().matrix_ = matrix;
 

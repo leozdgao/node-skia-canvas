@@ -114,6 +114,7 @@ private:
     static napi_value ClearRect(napi_env env, napi_callback_info info);
     static napi_value ClosePath(napi_env env, napi_callback_info info);
     static napi_value DrawImage(napi_env env, napi_callback_info info);
+    static napi_value Ellipse(napi_env env, napi_callback_info info);
     static napi_value Fill(napi_env env, napi_callback_info info);
     static napi_value FillRect(napi_env env, napi_callback_info info);
     static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`

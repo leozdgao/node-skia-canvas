@@ -32,8 +32,8 @@ ctx.fillStyle = 'gray';
 ctx.fillRect(100, 0, 80, 20);
 
 // Rotated rectangle
-ctx.rotate(45);
-ctx.translate(-100, 50);
+ctx.rotate(Math.PI / 4);
+// ctx.translate(-100, 50);
 ctx.fillStyle = 'red';
 ctx.fillRect(100, 0, 80, 20);
 
