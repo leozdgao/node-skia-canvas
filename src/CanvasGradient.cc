@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string>
 #include "CanvasGradient.h"
 #include "W3CSkColorParser.h"
@@ -50,6 +51,24 @@ CanvasGradient::CanvasGradient(const Napi::CallbackInfo& info) : Napi::ObjectWra
 
 Napi::FunctionReference CanvasGradient::constructor;
 
+vector<SkScalar> CanvasGradient::getSortedGradientPos() {
+    vector<SkScalar> col = {};
+    for (auto i = this->colors.begin(); i != this->colors.end(); i++) {
+        col.push_back(i->pos);
+    }
+    return col;
+}
+
+vector<SkColor> CanvasGradient::getSortedGradientColors() {
+    vector<SkColor> col = {};
+    for (auto i = this->colors.begin(); i != this->colors.end(); i++) {
+        col.push_back(i->color.toSkColor());
+    }
+    return col;
+}
+
+// =================== Wrap Method ===================
+
 Napi::Object CanvasGradient::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(env, "CanvasGradient", {
     InstanceMethod<&CanvasGradient::AddColorStop>("addColorStop"),
@@ -76,5 +95,9 @@ void CanvasGradient::AddColorStop(const Napi::CallbackInfo& info) {
         color = W3CSkColorParser::rgba_from_string(color_str);
     }
 
-    colors.push_back({ pos: p, color });
+    colors.push_back({ .pos = p, .color = color });
+
+    std::sort(this->colors.begin(), this->colors.end(), [](GradientPosColor a, GradientPosColor b) -> bool {
+        return a.pos < b.pos;
+    });
 };

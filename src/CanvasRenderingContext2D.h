@@ -70,6 +70,7 @@ private:
 
     void init_canvas_state();
     void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
+    void fill_with_dye(SkPaint& paint, Napi::Value dye);
 
     // ================================== Properties ==================================
 

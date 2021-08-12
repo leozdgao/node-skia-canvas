@@ -1,7 +1,9 @@
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>
 #include <include/effects/SkDashPathEffect.h>
+#include <include/effects/SkGradientShader.h>
 
+#include "CanvasGradient.h"
 #include "CanvasRenderingContext2D.h"
 #include "ImageData.h"
 #include "StyleParser.h"
@@ -202,15 +204,10 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     napi_status status;
     GET_CB_INFO(env, info, status, 1)
 
-    string fill_style = node_skia_helpers::get_utf8_string(env, argv[0]);
-    SkColor4f fill_style_color = W3CSkColorParser::rgba_from_string(fill_style);
-
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    W3CSkColorParser::color_mix_with_alpha(fill_style_color, ctx->states_.top().global_alpha_);
-
-    ctx->states_.top().paint_for_fill_.setColor4f(fill_style_color);
+    ctx->fill_with_dye(ctx->states_.top().paint_for_fill_, Napi::Value::From(env, argv[0]));
 
     return nullptr;
 }
@@ -536,15 +533,10 @@ napi_value CanvasRenderingContext2D::SetStrokeStyle(napi_env env, napi_callback_
     napi_status status;
     GET_CB_INFO(env, info, status, 1)
 
-    string stroke_style = node_skia_helpers::get_utf8_string(env, argv[0]);
-    SkColor4f stroke_style_color = W3CSkColorParser::rgba_from_string(stroke_style);
-
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    stroke_style_color.fA = ctx->states_.top().global_alpha_ * stroke_style_color.fA;
-
-    ctx->states_.top().paint_for_stroke_.setColor4f(stroke_style_color);
+    ctx->fill_with_dye(ctx->states_.top().paint_for_stroke_, Napi::Value::From(env, argv[0]));
 
     return nullptr;
 }
@@ -1294,4 +1286,55 @@ void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<vo
     }
 
     f(paint);
+}
+
+void CanvasRenderingContext2D::fill_with_dye(SkPaint& paint, Napi::Value value) {
+    if (value.IsObject()) {
+        Napi::Object dye = value.As<Napi::Object>();
+
+        try {
+            // maybe gradient
+            CanvasGradient* gradient = Napi::ObjectWrap<CanvasGradient>::Unwrap(dye);
+            int pos_count = gradient->colors.size();
+
+            if (pos_count >= 2) {
+                sk_sp<SkShader> shader = nullptr;
+
+                if (gradient->gradient_type == GradientType::Linear) {
+                    shader = SkGradientShader::MakeLinear(
+                        gradient->pts,
+                        gradient->getSortedGradientColors().data(),
+                        gradient->getSortedGradientPos().data(),
+                        gradient->colors.size(),
+                        SkTileMode::kClamp
+                    );
+                } else if (gradient->gradient_type == GradientType::Radial) {
+                    shader = SkGradientShader::MakeTwoPointConical(
+                        gradient->pts[0],
+                        gradient->radius[0],
+                        gradient->pts[1],
+                        gradient->radius[1],
+                        gradient->getSortedGradientColors().data(),
+                        gradient->getSortedGradientPos().data(),
+                        gradient->colors.size(),
+                        SkTileMode::kClamp
+                    );
+                }
+                
+                paint.setShader(shader);
+            } else if (pos_count == 1) {
+                paint.setShader(nullptr);
+                paint.setColor4f(gradient->colors[0].color);
+            }
+        } catch (...) {
+            // try pattern
+        }
+    } else if (value.IsString()) {
+        // color
+        string fill_style = value.ToString().Utf8Value();
+        SkColor4f fill_style_color = W3CSkColorParser::rgba_from_string(fill_style);
+        W3CSkColorParser::color_mix_with_alpha(fill_style_color, this->states_.top().global_alpha_);
+        paint.setShader(nullptr);
+        paint.setColor4f(fill_style_color);
+    }
 }

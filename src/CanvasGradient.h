@@ -21,13 +21,16 @@ public:
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
   CanvasGradient(const Napi::CallbackInfo& info);
 
-private:
-  static Napi::FunctionReference constructor;
-
-  void AddColorStop(const Napi::CallbackInfo& info);
+  vector<SkScalar> getSortedGradientPos();
+  vector<SkColor> getSortedGradientColors();
 
   GradientType gradient_type = GradientType::Linear;
   SkPoint pts[2];
   SkScalar radius[2];
   vector<GradientPosColor> colors = {};
+
+private:
+  static Napi::FunctionReference constructor;
+
+  void AddColorStop(const Napi::CallbackInfo& info);
 };

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Canvas, Image } = require('./build/Debug/node-skia.node');
+const { Canvas, Image, CanvasGradient } = require('./build/Debug/node-skia.node');
 
 const c = new Canvas(500, 500);
 
@@ -8,8 +8,26 @@ const c = new Canvas(500, 500);
 console.log(c.width, c.height);
 const ctx = c.getContext('2d');
 
-ctx.fillStyle = '#FFF';
-ctx.fillRect(0, 0, 500, 500);
+const gradient = new CanvasGradient('linear', 20, 0, 220, 0);
+gradient.addColorStop(0, 'green');
+gradient.addColorStop(.5, 'cyan');
+gradient.addColorStop(1, 'green');
+
+
+const rgradient = new CanvasGradient('radial', 110, 90, 100, 100, 30, 70);
+// Add three color stops
+rgradient.addColorStop(0, 'pink');
+rgradient.addColorStop(.9, 'white');
+rgradient.addColorStop(1, 'green');
+
+// ctx.fillStyle = '#FFF';
+// ctx.fillRect(0, 0, 500, 500);
+
+ctx.fillStyle = gradient;
+ctx.fillRect(20, 20, 200, 100);
+
+ctx.fillStyle = rgradient;
+ctx.fillRect(20, 20, 160, 160);
 
 // console.log('context', ctx);
 // console.log(ctx.fillStyle);
@@ -93,10 +111,10 @@ ctx.lineTo(100, 200)
 
 ctx.fill()
 
-// ctx.stroke()
-// ctx.strokeStyle = 'blue'
-// ctx.lineWidth = 1
-// ctx.strokeRect(0, 100, 400, 1)
+ctx.stroke()
+ctx.strokeStyle = 'blue'
+ctx.lineWidth = 1
+ctx.strokeRect(0, 100, 400, 1)
 
 // ctx.globalAlpha = 0.2;
 
