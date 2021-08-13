@@ -5,25 +5,27 @@
 #include "CanvasRenderingContext2D.h"
 #include "include/core/SkSurface.h"
 
-class Canvas {
+class Canvas : public Napi::ObjectWrap<Canvas> {
 public:
-    static napi_value Init(napi_env env, napi_value exports);
-    static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
+    static Napi::FunctionReference constructor;
+
+    Canvas(const Napi::CallbackInfo& info);
+    // static napi_value Init(napi_env env, napi_value exports);
+    // static inline napi_value Constructor(napi_env env);
+    // static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
+
+    sk_sp<SkSurface> getSurface();
+    int getWidth();
+    int getHeight();
 
 private:
-    explicit Canvas(int width, int height);
-    ~Canvas();
-
-    static inline napi_value Constructor(napi_env env);
-    static napi_value New(napi_env env, napi_callback_info info);
-
-    static napi_value GetWidth(napi_env env, napi_callback_info info);
-    static napi_value SetWidth(napi_env env, napi_callback_info info);
-    static napi_value GetHeight(napi_env env, napi_callback_info info);
-    static napi_value SetHeight(napi_env env, napi_callback_info info);
-    static napi_value GetContext(napi_env env, napi_callback_info info);
-    static napi_value ToBuffer(napi_env env, napi_callback_info info);
-    
+    Napi::Value GetWidth(const Napi::CallbackInfo& info);
+    void SetWidth(const Napi::CallbackInfo& info, const Napi::Value& value);
+    Napi::Value GetHeight(const Napi::CallbackInfo& info);
+    void SetHeight(const Napi::CallbackInfo& info, const Napi::Value& value);
+    Napi::Value GetContext(const Napi::CallbackInfo& info);
+    Napi::Value ToBuffer(const Napi::CallbackInfo& info);
 
     napi_env env_;
     napi_ref wrapper_;

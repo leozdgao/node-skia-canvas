@@ -19,6 +19,8 @@ struct GradientPosColor {
 class CanvasGradient : public Napi::ObjectWrap<CanvasGradient> {
 public:
   static Napi::Object Init(Napi::Env env, Napi::Object exports);
+  static Napi::FunctionReference constructor;
+
   CanvasGradient(const Napi::CallbackInfo& info);
 
   vector<SkScalar> getSortedGradientPos();
@@ -30,7 +32,5 @@ public:
   vector<GradientPosColor> colors = {};
 
 private:
-  static Napi::FunctionReference constructor;
-
   void AddColorStop(const Napi::CallbackInfo& info);
 };

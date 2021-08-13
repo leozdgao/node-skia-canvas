@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Canvas, Image, CanvasGradient } = require('./build/Debug/node-skia.node');
+const { Canvas, Image, CanvasGradient } = require('../build/Debug/node-skia.node');
 
 const c = new Canvas(500, 500);
 
@@ -54,33 +54,33 @@ ctx.fillRect(100, 100, 50, 50);
 
 // console.log('strokeStyle', ctx.strokeStyle);
 
-// ctx.strokeStyle = "blue";
-// ctx.strokeRect(100, 200, 50, 50);
-// console.log('strokeStyle', ctx.strokeStyle);
+ctx.strokeStyle = "blue";
+ctx.strokeRect(100, 200, 50, 50);
+console.log('strokeStyle', ctx.strokeStyle);
 
-// console.log('lineWidth', ctx.lineWidth);
-// ctx.lineWidth = 5;
+console.log('lineWidth', ctx.lineWidth);
+ctx.lineWidth = 5;
 
-// ctx.strokeRect(200, 200, 50, 50);
+ctx.strokeRect(200, 200, 50, 50);
 
-// ctx.clearRect(120, 120, 20, 20);
-
-
-// ctx.fillStyle = '#000'
-// console.log(ctx.measureText('123xfg'));
-
-// console.log(ctx.textAlign);
-// ctx.textAlign = 'center';
-
-// console.log(ctx.textAlign);
-// console.log(ctx.textBaseline);
-// ctx.textBaseline = 'top';
-// console.log(ctx.measureText('123'));
+ctx.clearRect(120, 120, 20, 20);
 
 
+ctx.fillStyle = '#000'
+console.log(ctx.measureText('123xfg'));
 
-// const img = fs.readFileSync('./examples/leize.jpeg');
-// ctx.drawImage(img, 0, 0, 1044, 1045, 10, 10, 300, 300);
+console.log(ctx.textAlign);
+ctx.textAlign = 'center';
+
+console.log(ctx.textAlign);
+console.log(ctx.textBaseline);
+ctx.textBaseline = 'top';
+console.log(ctx.measureText('123'));
+
+
+
+const img = fs.readFileSync('./examples/leize.jpeg');
+ctx.drawImage(img, 0, 0, 1044, 1045, 10, 10, 300, 300);
 
 
 

@@ -37,6 +37,8 @@ struct CanvasState
     double shadow_offset_x = 0.0;
     double shadow_offset_y = 0.0;
 
+    bool image_smoothing_enable = false;
+
     // state for text
     ParagraphStyle pargf_style_;
     TextStyle text_style_;
@@ -78,6 +80,8 @@ private:
     static napi_value SetFillStyle(napi_env env, napi_callback_info info);
     static napi_value GetGlobalAlpha(napi_env env, napi_callback_info info);
     static napi_value SetGlobalAlpha(napi_env env, napi_callback_info info);
+    static napi_value GetImageSmoothingEnabled(napi_env env, napi_callback_info info);
+    static napi_value SetImageSmoothingEnabled(napi_env env, napi_callback_info info);
     static napi_value GetLineCap(napi_env env, napi_callback_info info);
     static napi_value SetLineCap(napi_env env, napi_callback_info info);
     static napi_value GetLineDashOffset(napi_env env, napi_callback_info info);

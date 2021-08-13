@@ -7,179 +7,96 @@
 #include "CanvasRenderingContext2D.h"
 #include "helpers.h"
 
-Canvas::Canvas(int width, int height): width_(width), height_(height) {
+Canvas::Canvas(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Canvas>(info) {
+    Napi::Number width = info[0].As<Napi::Number>();
+    Napi::Number height = info[0].As<Napi::Number>();
+    width_ = width.Int32Value();
+    height_ = height.Int32Value();
+
     rasterSurface_ = SkSurface::MakeRasterN32Premul(width_, height_);
 }
 
-Canvas::~Canvas() {
-    napi_delete_reference(env_, wrapper_);
+Napi::FunctionReference Canvas::constructor;
+
+sk_sp<SkSurface> Canvas::getSurface() {
+    return rasterSurface_;
+}
+
+int Canvas::getWidth() {
+    return width_;
+}
+
+int Canvas::getHeight() {
+    return height_;
 }
 
 // Binding 初始化层，定义如何向上暴露 API
-napi_value Canvas::Init(napi_env env, napi_value exports) {
-    napi_status status;
-    napi_value cls;
-    napi_property_descriptor properties[] = {
-        DECLARE_NAPI_PROPERTY("width", GetWidth, SetWidth),
-        DECLARE_NAPI_PROPERTY("height", GetHeight, SetHeight),
-        DECLARE_NAPI_METHOD("getContext", GetContext),
-        DECLARE_NAPI_METHOD("toBuffer", ToBuffer),
-    };
+Napi::Object Canvas::Init(Napi::Env env, Napi::Object exports) {
+    Napi::Function func = DefineClass(env, "Canvas", {
+        InstanceAccessor<&Canvas::GetWidth, &Canvas::SetWidth>("width"),
+        InstanceAccessor<&Canvas::GetHeight, &Canvas::SetHeight>("height"),
+        InstanceMethod<&Canvas::GetContext>("getContext"),
+        InstanceMethod<&Canvas::ToBuffer>("toBuffer")
+    });
 
-    status = napi_define_class(env, "Canvas", NAPI_AUTO_LENGTH, New, nullptr, 4, properties, &cls);
-    assert(status == napi_ok);
+    constructor = Napi::Persistent(func);
+    constructor.SuppressDestruct();
 
-    napi_ref* constructor = new napi_ref;
-    status = napi_create_reference(env, cls, 1, constructor);
-    assert(status == napi_ok);
-
-    // status = napi_set_instance_data(
-    //     env,
-    //     constructor,
-    //     [](napi_env env, void* data, void* hint) {
-    //         napi_ref* constructor = static_cast<napi_ref*>(data);
-    //         napi_status status = napi_delete_reference(env, *constructor);
-    //         assert(status == napi_ok);
-    //         delete constructor;
-    //     },
-    //     nullptr
-    // );
-    // assert(status == napi_ok);
-
-    status = napi_set_named_property(env, exports, "Canvas", cls);
-    assert(status == napi_ok);
+    exports.Set("Canvas", func);
 
     return exports;
 }
 
-napi_value Canvas::New(napi_env env, napi_callback_info info) {
-    napi_status status;
-    bool is_constructor = node_skia_helpers::is_called_by_new(env, info);
-
-    if (is_constructor) {
-        // 通过 new 的方式调用
-        size_t argc = 2;
-        napi_value args[2];
-        napi_value ctx;
-        status = napi_get_cb_info(env, info, &argc, args, &ctx, nullptr);
-        assert(status == napi_ok);
-
-        int width;
-        int height;
-
-        napi_get_value_int32(env, args[0], &width);
-        napi_get_value_int32(env, args[1], &height);
-
-        Canvas* canvas = new Canvas(width, height);
-        canvas->env_ = env;
-        status = napi_wrap(env, ctx, reinterpret_cast<void*>(canvas), Canvas::Destructor, nullptr, &canvas->wrapper_);
-        assert(status == napi_ok);
-
-        return ctx;
-    } else {
-        // 也去支持工厂方式构造
-    }
+Napi::Value Canvas::GetWidth(const Napi::CallbackInfo& info) {
+    return Napi::Number::New(info.Env(), this->width_);
 }
 
-void Canvas::Destructor(napi_env env, void* nativeObject, void* finalize_hint) {
-    
+void Canvas::SetWidth(const Napi::CallbackInfo& info, const Napi::Value& value) {
+    Napi::Number width = value.As<Napi::Number>();
+
+    this->width_ = width.Int32Value();
+    this->rasterSurface_ = SkSurface::MakeRasterN32Premul(this->width_, this->height_);
+    this->inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
 }
 
-napi_value Canvas::GetWidth(napi_env env, napi_callback_info info) {
-    napi_status status;
-    GET_CB_INFO_WITHOUT_ARG(env, info, status)
-
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
-
-    napi_value result;
-    status = napi_create_int32(env, canvas->width_, &result);
-
-    return result;
+Napi::Value Canvas::GetHeight(const Napi::CallbackInfo& info) {
+    return Napi::Number::New(info.Env(), this->height_);
 }
 
-napi_value Canvas::SetWidth(napi_env env, napi_callback_info info) {
-    napi_status status;
-    GET_CB_INFO(env, info, status, 1)
+void Canvas::SetHeight(const Napi::CallbackInfo& info, const Napi::Value& value) {
+    Napi::Number height = value.As<Napi::Number>();
 
-    int32_t width;
-    status = napi_get_value_int32(env, argv[0], &width);
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
-
-    canvas->width_ = width;
-    canvas->rasterSurface_ = SkSurface::MakeRasterN32Premul(canvas->width_, canvas->height_);
-    canvas->inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
-
-    return nullptr;
+    this->height_ = height.Int32Value();
+    this->rasterSurface_ = SkSurface::MakeRasterN32Premul(this->width_, this->height_);
+    this->inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
 }
 
-napi_value Canvas::GetHeight(napi_env env, napi_callback_info info) {
+Napi::Value Canvas::GetContext(const Napi::CallbackInfo& info) {
     napi_status status;
-    GET_CB_INFO_WITHOUT_ARG(env, info, status)
-
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
-
-    napi_value result;
-    status = napi_create_int32(env, canvas->height_, &result);
-
-    return result;
-}
-
-napi_value Canvas::SetHeight(napi_env env, napi_callback_info info) {
-    napi_status status;
-    GET_CB_INFO(env, info, status, 1)
-
-    int32_t height;
-    status = napi_get_value_int32(env, argv[0], &height);
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
-
-    canvas->height_ = height;
-    canvas->rasterSurface_ = SkSurface::MakeRasterN32Premul(canvas->width_, canvas->height_);
-    canvas->inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
-
-    return nullptr;
-}
-
-napi_value Canvas::GetContext(napi_env env, napi_callback_info info) {
-    napi_status status;
-    size_t argc = 1;
-    napi_value argv[1];
-    napi_value jsthis;
-    status = napi_get_cb_info(env, info, &argc, argv, &jsthis, nullptr);
-
-    std::string cc = node_skia_helpers::get_utf8_string(env, argv[0]);
-
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
+    std::string cc = info[0].As<Napi::String>().Utf8Value();
 
     napi_valuetype ctx_type;
-    status = napi_typeof(env, canvas->ctx_, &ctx_type);
+    status = napi_typeof(info.Env(), this->ctx_, &ctx_type);
 
     // NOTE: 这里判断 == nullptr 会有问题，后续挖一下为什么
     if (ctx_type != napi_object) {
-        status = CanvasRenderingContext2D::NewInstance(env, &canvas->ctx_);
+        status = CanvasRenderingContext2D::NewInstance(info.Env(), &this->ctx_);
 
         CanvasRenderingContext2D* inner_ctx;
-        status = napi_unwrap(env, canvas->ctx_, reinterpret_cast<void**>(&inner_ctx));
-        canvas->inner_ctx = inner_ctx;
-        inner_ctx->SetCanvas(canvas->rasterSurface_->getCanvas());
+        status = napi_unwrap(info.Env(), this->ctx_, reinterpret_cast<void**>(&inner_ctx));
+        this->inner_ctx = inner_ctx;
+        inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
     }
     
-    return canvas->ctx_;
+    return Napi::Value::From(info.Env(), this->ctx_);
 }
 
-napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {
-    napi_status status;
-    GET_CB_INFO(env, info, status, 2)
-
+Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {
     // TODO: ouptut config argv[1]
     SkEncodedImageFormat sk_format = SkEncodedImageFormat::kPNG;
 
-    if (argc >= 1) {
-        string mime_type_str = node_skia_helpers::get_utf8_string(env, argv[0]);
+    if (info.Length() >= 1) {
+        string mime_type_str = info[0].As<Napi::String>().Utf8Value();
 
         if (mime_type_str == "image/jpeg") {
             sk_format = SkEncodedImageFormat::kJPEG;
@@ -188,17 +105,9 @@ napi_value Canvas::ToBuffer(napi_env env, napi_callback_info info) {
         }
     }
 
-    Canvas* canvas;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&canvas));
-
-    SkCanvas* c = canvas->rasterSurface_->getCanvas();
-    sk_sp<SkImage> img(canvas->rasterSurface_->makeImageSnapshot());
+    SkCanvas* c = this->rasterSurface_->getCanvas();
+    sk_sp<SkImage> img(this->rasterSurface_->makeImageSnapshot());
     sk_sp<SkData> png(img->encodeToData(sk_format, 100));
 
-    napi_value buf;
-    status = napi_create_buffer_copy(env, png->size(), png->data(), nullptr, &buf); // 为什么必须是 buffer copy？
-
-    assert(status == napi_ok);
-
-    return buf;
+    return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)png->data(), png->size());
 }

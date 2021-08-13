@@ -9,6 +9,7 @@ file(GLOB SOURCE_FILES
     "init.cc"
     "Canvas.cc"
     "CanvasGradient.cc"
+    "CanvasPattern.cc"
     "CanvasRenderingContext2D.cc"
     "helpers.cc"
     "Image.cc"

@@ -221,4 +221,20 @@ std::shared_ptr<SkPaint> StyleParser::getShadowLayerPaint(SkPaint& base_paint, S
     return nullptr;
 }
 
+void StyleParser::fillTileModeWithRepetition(string& repetition, SkTileMode* result) {
+    if (repetition == "repeat-x") {
+        result[0] = SkTileMode::kRepeat;
+        result[1] = SkTileMode::kDecal;
+    } else if (repetition == "repeat-y") {
+        result[0] = SkTileMode::kDecal;
+        result[1] = SkTileMode::kRepeat;
+    } else if (repetition == "no-repeat") {
+        result[0] = SkTileMode::kDecal;
+        result[1] = SkTileMode::kDecal;
+    } else {
+        result[0] = SkTileMode::kRepeat;
+        result[1] = SkTileMode::kRepeat;
+    }
+}
+
 }

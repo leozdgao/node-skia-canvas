@@ -6,6 +6,7 @@
 #include <include/effects/SkGradientShader.h>
 
 #include "CanvasGradient.h"
+#include "CanvasPattern.h"
 #include "CanvasRenderingContext2D.h"
 #include "ImageData.h"
 #include "StyleParser.h"
@@ -50,6 +51,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
         DECLARE_NAPI_PROPERTY("globalAlpha", GetGlobalAlpha, SetGlobalAlpha),
+        DECLARE_NAPI_PROPERTY("imageSmoothingEnabled", GetImageSmoothingEnabled, SetImageSmoothingEnabled),
         DECLARE_NAPI_PROPERTY("lineCap", GetLineCap, SetLineCap),
         DECLARE_NAPI_PROPERTY("lineDashOffset", GetLineDashOffset, SetLineDashOffset),
         DECLARE_NAPI_PROPERTY("lineJoin", GetLineJoin, SetLineJoin),
@@ -102,7 +104,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 50, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 51, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -242,6 +244,33 @@ napi_value CanvasRenderingContext2D::SetGlobalAlpha(napi_env env, napi_callback_
     ctx->states_.top().global_alpha_ = alpha;
     ctx->states_.top().paint_for_fill_.setAlphaf(alpha);
     ctx->states_.top().paint_for_stroke_.setAlphaf(alpha);
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetImageSmoothingEnabled(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    bool smoothing = ctx->states_.top().image_smoothing_enable;
+
+    return Napi::Boolean::New(env, smoothing);
+}
+
+napi_value CanvasRenderingContext2D::SetImageSmoothingEnabled(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    bool smoothing = false;
+    status = napi_get_value_bool(env, argv[0], &smoothing);
+    
+    ctx->states_.top().image_smoothing_enable = smoothing;
 
     return nullptr;
 }
@@ -800,7 +829,8 @@ napi_value CanvasRenderingContext2D::DrawImage(napi_env env, napi_callback_info 
     SkRect dist = SkRect();
     dist.setXYWH(dx, dy, dW, dH);
 
-    SkSamplingOptions sample_options = SkSamplingOptions();
+    bool smoothing = ctx->states_.top().image_smoothing_enable;
+    SkSamplingOptions sample_options = smoothing ? SkSamplingOptions(SkFilterQuality::kHigh_SkFilterQuality) : SkSamplingOptions();
 
     ctx->render_to_canvas(ctx->states_.top().paint_for_fill_, [&](SkPaint& paint) {
         ctx->canvas_->drawImageRect(img, src, dist, sample_options, &paint, SkCanvas::kFast_SrcRectConstraint);
@@ -1346,8 +1376,8 @@ void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<vo
 void CanvasRenderingContext2D::fill_with_dye(SkPaint& paint, Napi::Value value) {
     if (value.IsObject()) {
         Napi::Object dye = value.As<Napi::Object>();
-
-        try {
+        
+        if (dye.InstanceOf(CanvasGradient::constructor.Value())) {
             // maybe gradient
             CanvasGradient* gradient = Napi::ObjectWrap<CanvasGradient>::Unwrap(dye);
             int pos_count = gradient->colors.size();
@@ -1381,8 +1411,9 @@ void CanvasRenderingContext2D::fill_with_dye(SkPaint& paint, Napi::Value value) 
                 paint.setShader(nullptr);
                 paint.setColor4f(gradient->colors[0].color);
             }
-        } catch (...) {
-            // try pattern
+        } else if (dye.InstanceOf(CanvasPattern::constructor.Value())) {
+            CanvasPattern* pattern = Napi::ObjectWrap<CanvasPattern>::Unwrap(dye);
+            paint.setShader(pattern->toShader(this->states_.top().image_smoothing_enable));
         }
     } else if (value.IsString()) {
         // color
