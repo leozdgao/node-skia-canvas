@@ -23,12 +23,15 @@ struct CanvasState
     SkPath path_;
     SkPoint* last_move_point_ = nullptr;
     
+    // state for dash
     vector<SkScalar> intervals = {};
     double line_dash_offset = 0.0;
 
     // state for fill & stroke
     SkPaint paint_for_fill_;
     SkPaint paint_for_stroke_;
+
+    // state for alpha
     double global_alpha_ = 1.0;
 
     // state for shadow
@@ -43,6 +46,7 @@ struct CanvasState
     ParagraphStyle pargf_style_;
     TextStyle text_style_;
     TextBaseline text_baseline_;
+    sk_sp<SkTypeface> typeface_;
 
     // transform
     SkMatrix matrix_ = SkMatrix();
@@ -78,6 +82,8 @@ private:
 
     static napi_value GetFillStyle(napi_env env, napi_callback_info info);
     static napi_value SetFillStyle(napi_env env, napi_callback_info info);
+    static napi_value GetFont(napi_env env, napi_callback_info info);
+    static napi_value SetFont(napi_env env, napi_callback_info info);
     static napi_value GetGlobalAlpha(napi_env env, napi_callback_info info);
     static napi_value SetGlobalAlpha(napi_env env, napi_callback_info info);
     static napi_value GetImageSmoothingEnabled(napi_env env, napi_callback_info info);
@@ -122,7 +128,6 @@ private:
     static napi_value Ellipse(napi_env env, napi_callback_info info);
     static napi_value Fill(napi_env env, napi_callback_info info);
     static napi_value FillRect(napi_env env, napi_callback_info info);
-    static napi_value FillWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.fill()`
     static napi_value FillText(napi_env env, napi_callback_info info);
     static napi_value GetImageData(napi_env env, napi_callback_info info);
     static napi_value GetLineDash(napi_env env, napi_callback_info info);

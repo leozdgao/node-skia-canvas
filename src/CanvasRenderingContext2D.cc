@@ -4,6 +4,7 @@
 #include <include/core/SkTextBlob.h>
 #include <include/effects/SkDashPathEffect.h>
 #include <include/effects/SkGradientShader.h>
+#include <modules/skparagraph/include/FontCollection.h>
 
 #include "CanvasGradient.h"
 #include "CanvasPattern.h"
@@ -13,6 +14,7 @@
 #include "W3CSkColorParser.h"
 #include "helpers.h"
 
+using skia::textlayout::FontCollection;
 using node_skia::StyleParser;
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
@@ -37,6 +39,9 @@ void CanvasRenderingContext2D::init_canvas_state() {
     init_state.pargf_style_ = ParagraphStyle();
     init_state.text_style_ = TextStyle();
     init_state.text_style_.setFontSize(10);
+    init_state.text_style_.setHeight(1.16);
+    init_state.text_style_.setHeightOverride(true);
+    init_state.text_style_.setHalfLeading(true);
 
     sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
     init_state.text_style_.setTypeface(face);
@@ -50,6 +55,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     napi_property_descriptor properties[] = {
         // properties
         DECLARE_NAPI_PROPERTY("fillStyle", GetFillStyle, SetFillStyle),
+        DECLARE_NAPI_PROPERTY("font", GetFont, SetFont),
         DECLARE_NAPI_PROPERTY("globalAlpha", GetGlobalAlpha, SetGlobalAlpha),
         DECLARE_NAPI_PROPERTY("imageSmoothingEnabled", GetImageSmoothingEnabled, SetImageSmoothingEnabled),
         DECLARE_NAPI_PROPERTY("lineCap", GetLineCap, SetLineCap),
@@ -78,7 +84,6 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("ellipse", Ellipse),
         DECLARE_NAPI_METHOD("fill", Fill),
         DECLARE_NAPI_METHOD("fillRect", FillRect),
-        DECLARE_NAPI_METHOD("fillWithPath2D", FillWithPath2D),
         DECLARE_NAPI_METHOD("fillText", FillText),
         DECLARE_NAPI_METHOD("getImageData", GetImageData),
         DECLARE_NAPI_METHOD("getLineDash", GetLineDash),
@@ -214,6 +219,37 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     ctx->fill_with_dye(ctx->states_.top().paint_for_fill_, Napi::Value::From(env, argv[0]));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetFont(napi_env env, napi_callback_info info) {
+
+}
+
+napi_value CanvasRenderingContext2D::SetFont(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    string font = Napi::Value::From(env, argv[0]).As<Napi::String>().Utf8Value();
+    
+    FontCollection collection = FontCollection();
+    collection.setDefaultFontManager(SkFontMgr::RefDefault());
+    vector<sk_sp<SkTypeface>> matches = collection.findTypefaces({ SkString(font) }, SkFontStyle::BoldItalic());
+
+    if (matches.size() > 0) {
+        sk_sp<SkTypeface> matchedFont = matches[0];
+        SkFontParameters::Variation::Axis params = SkFontParameters::Variation::Axis();
+        matchedFont->getVariationDesignParameters(&params, 1);
+
+        SkString name;
+        matchedFont->getFamilyName(&name);
+
+        string stub = Napi::Value::From(env, argv[0]).As<Napi::String>().Utf8Value();
+    }
 
     return nullptr;
 }
@@ -911,10 +947,6 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
         ctx->canvas_->drawRect(rect, paint);
     });
 
-    return nullptr;
-}
-
-napi_value CanvasRenderingContext2D::FillWithPath2D(napi_env env, napi_callback_info info) {
     return nullptr;
 }
 
