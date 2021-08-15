@@ -5,6 +5,8 @@
 #include <include/effects/SkDashPathEffect.h>
 #include <include/effects/SkGradientShader.h>
 #include <modules/skparagraph/include/FontCollection.h>
+#include <modules/skparagraph/include/Paragraph.h>
+#include <modules/skparagraph/include/ParagraphBuilder.h>
 
 #include "CanvasGradient.h"
 #include "CanvasPattern.h"
@@ -15,6 +17,8 @@
 #include "helpers.h"
 
 using skia::textlayout::FontCollection;
+using skia::textlayout::ParagraphBuilder;
+using skia::textlayout::Paragraph;
 using node_skia::StyleParser;
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
@@ -243,12 +247,11 @@ napi_value CanvasRenderingContext2D::SetFont(napi_env env, napi_callback_info in
     if (matches.size() > 0) {
         sk_sp<SkTypeface> matchedFont = matches[0];
         SkFontParameters::Variation::Axis params = SkFontParameters::Variation::Axis();
-        matchedFont->getVariationDesignParameters(&params, 1);
+        int num = matchedFont->getVariationDesignParameters(nullptr, 0);
 
-        SkString name;
-        matchedFont->getFamilyName(&name);
-
-        string stub = Napi::Value::From(env, argv[0]).As<Napi::String>().Utf8Value();
+        if (num != -1) {
+            matchedFont->getVariationDesignParameters(&params, num);
+        }
     }
 
     return nullptr;
@@ -958,9 +961,16 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     string input = node_skia_helpers::get_utf8_string(env, argv[0]);
-    auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
 
-    ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->states_.top().paint_for_fill_);
+    FontCollection collection = FontCollection();
+    collection.setDefaultFontManager(SkFontMgr::RefDefault());
+
+    // ParagraphBuilder::make(ctx->states_.top().pargf_style_, collection);
+
+    // ParagraphBuil
+    // auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
+
+    // ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->states_.top().paint_for_fill_);
 
     return nullptr;
 }
