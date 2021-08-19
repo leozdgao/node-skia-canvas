@@ -3,6 +3,7 @@
 #include <string>
 #include "include/core/SkPaint.h"
 #include "include/core/SkFontMetrics.h"
+#include "include/core/SkFontStyle.h"
 #include "modules/skparagraph/include/DartTypes.h"
 
 using std::string;
@@ -36,6 +37,8 @@ public:
     static string fromTextBaselineToStr(TextBaseline& baseline);
     static std::shared_ptr<SkPaint> getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y);
     static void fillTileModeWithRepetition(string& repetition, SkTileMode* result);
+    static SkFontStyle::Slant fromStrToFontSlant(string& slant);
+    static SkFontStyle::Width fromStrToFontStrecth(string& stretch);
 
     static float getBaselineOffsetFromFontMetrics(SkFontMetrics& font_metrics, TextBaseline& baseline);
 };

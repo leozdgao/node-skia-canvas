@@ -237,4 +237,31 @@ void StyleParser::fillTileModeWithRepetition(string& repetition, SkTileMode* res
     }
 }
 
+SkFontStyle::Slant StyleParser::fromStrToFontSlant(string& slant) {
+    if (slant == "normal") {
+        return SkFontStyle::Slant::kUpright_Slant;
+    }
+
+    if (slant == "italic") {
+        return SkFontStyle::Slant::kItalic_Slant;
+    }
+
+    if (slant == "oblique") {
+        return SkFontStyle::Slant::kOblique_Slant;
+    }
+}
+
+SkFontStyle::Width StyleParser::fromStrToFontStrecth(string& stretch) {
+    if (stretch == "ultra-condensed") return SkFontStyle::Width::kUltraCondensed_Width;
+    if (stretch == "extra-condensed") return SkFontStyle::Width::kExtraCondensed_Width;
+    if (stretch == "condensed") return SkFontStyle::Width::kCondensed_Width;
+    if (stretch == "semi-condensed") return SkFontStyle::Width::kSemiCondensed_Width;
+    if (stretch == "semi-expanded") return SkFontStyle::Width::kSemiExpanded_Width;
+    if (stretch == "expanded") return SkFontStyle::Width::kExpanded_Width;
+    if (stretch == "extra-expanded") return SkFontStyle::Width::kExtraExpanded_Width;
+    if (stretch == "ultra-expanded") return SkFontStyle::Width::kUltraExpanded_Width;
+
+    return SkFontStyle::Width::kNormal_Width;
+}
+
 }

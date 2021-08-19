@@ -43,7 +43,7 @@ void CanvasRenderingContext2D::init_canvas_state() {
     init_state.pargf_style_ = ParagraphStyle();
     init_state.text_style_ = TextStyle();
     init_state.text_style_.setFontSize(10);
-    init_state.text_style_.setHeight(1.16);
+    init_state.text_style_.setHeight(1.2);
     init_state.text_style_.setHeightOverride(true);
     init_state.text_style_.setHalfLeading(true);
 
@@ -228,7 +228,13 @@ napi_value CanvasRenderingContext2D::SetFillStyle(napi_env env, napi_callback_in
 }
 
 napi_value CanvasRenderingContext2D::GetFont(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
 
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    return Napi::String::New(env, ctx->states_.top().font_str);
 }
 
 napi_value CanvasRenderingContext2D::SetFont(napi_env env, napi_callback_info info) {
@@ -238,19 +244,55 @@ napi_value CanvasRenderingContext2D::SetFont(napi_env env, napi_callback_info in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    string font = Napi::Value::From(env, argv[0]).As<Napi::String>().Utf8Value();
+    Napi::Value arg0 = Napi::Value::From(env, argv[0]);
     
-    FontCollection collection = FontCollection();
-    collection.setDefaultFontManager(SkFontMgr::RefDefault());
-    vector<sk_sp<SkTypeface>> matches = collection.findTypefaces({ SkString(font) }, SkFontStyle::BoldItalic());
+    if (arg0.IsObject()) {
+        // Does not actually match fonts, just udpate style
+        Napi::Object font_spec = arg0.As<Napi::Object>();
+        Napi::String canonical = font_spec.Get("canonical").As<Napi::String>();
+        ctx->states_.top().font_str = canonical.Utf8Value();
 
-    if (matches.size() > 0) {
-        sk_sp<SkTypeface> matchedFont = matches[0];
-        SkFontParameters::Variation::Axis params = SkFontParameters::Variation::Axis();
-        int num = matchedFont->getVariationDesignParameters(nullptr, 0);
+        Napi::String style = font_spec.Get("style").As<Napi::String>();
+        Napi::String stretch = font_spec.Get("stretch").As<Napi::String>();
+        Napi::Number weight = font_spec.Get("weight").As<Napi::Number>();
+        Napi::Number size = font_spec.Get("size").As<Napi::Number>();
+        Napi::Number leading = font_spec.Get("leading").As<Napi::Number>();
+        Napi::Array families = font_spec.Get("family").As<Napi::Array>();
+        vector<SkString> sk_families = {};
 
-        if (num != -1) {
-            matchedFont->getVariationDesignParameters(&params, num);
+        for (int i = 0, len = families.Length(); i < len; i++) {
+            Napi::Value item = families.Get(i);
+            if (item.IsString()) {
+                sk_families.push_back(SkString(item.As<Napi::String>().Utf8Value()));
+            }
+        }
+
+        string s_slant = style.Utf8Value();
+        string s_stretch = stretch.Utf8Value();
+        ctx->states_.top().text_style_.setFontFamilies(sk_families);
+        ctx->states_.top().text_style_.setFontStyle(
+            SkFontStyle(weight.Int32Value(), StyleParser::fromStrToFontStrecth(s_stretch), StyleParser::fromStrToFontSlant(s_slant))
+        );
+        ctx->states_.top().text_style_.setFontSize(size.DoubleValue());
+        ctx->states_.top().text_style_.setHeight(leading.DoubleValue() / size.DoubleValue());
+
+        ctx->states_.top().text_style_.resetFontFeatures();
+        Napi::Object features = font_spec.Get("features").As<Napi::Object>();
+        Napi::Value on = features.Get("on");
+
+        if (on.IsArray()) {
+            Napi::Array a_features = on.As<Napi::Array>();
+
+            for (int i = 0, l = a_features.Length(); i < l; i++) {
+                Napi::Value item = a_features.Get(i);
+
+                if (item.IsString()) {
+                    ctx->states_.top().text_style_.addFontFeature(
+                        SkString(item.As<Napi::String>().Utf8Value()),
+                        1
+                    );
+                }
+            }
         }
     }
 
@@ -1391,6 +1433,12 @@ napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info 
 }
 
 // ======================= Private =======================
+
+void CanvasRenderingContext2D::render_text(SkPaint& paint, string text) {
+    TextStyle text_style = this->states_.top().text_style_;
+    text_style.setForegroundColor(paint);
+
+}
 
 void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f) {
     CanvasState state = this->states_.top();

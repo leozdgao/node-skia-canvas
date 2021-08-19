@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include <string>
 #include <vector>
 #include <napi.h>
 #include "include/core/SkCanvas.h"
@@ -11,7 +12,9 @@
 #include "StyleParser.h"
 
 using std::stack;
+using std::string;
 using std::vector;
+
 using skia::textlayout::ParagraphStyle;
 using skia::textlayout::TextStyle;
 using node_skia::TextBaseline;
@@ -43,6 +46,7 @@ struct CanvasState
     bool image_smoothing_enable = false;
 
     // state for text
+    string font_str = "10px sans-serif";
     ParagraphStyle pargf_style_;
     TextStyle text_style_;
     TextBaseline text_baseline_;
@@ -77,6 +81,7 @@ private:
     void init_canvas_state();
     void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
     void fill_with_dye(SkPaint& paint, Napi::Value dye);
+    void render_text(SkPaint& paint, string text);
 
     // ================================== Properties ==================================
 
