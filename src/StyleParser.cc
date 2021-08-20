@@ -1,6 +1,8 @@
 #include "include/effects/SkImageFilters.h"
 #include "StyleParser.h"
 
+using skia::textlayout::TextDirection;
+
 namespace node_skia {
 
 SkPaint::Cap StyleParser::fromStrToStrokeCap(string& cap) {
@@ -179,32 +181,6 @@ string StyleParser::fromTextBaselineToStr(TextBaseline& baseline) {
     return "alphabetic";
 }
 
-float StyleParser::getBaselineOffsetFromFontMetrics(SkFontMetrics& font_metrics, TextBaseline& baseline) {
-    if (baseline == TextBaseline::Alphabetic) {
-        return 0;
-    }
-
-    if (baseline == TextBaseline::Top) {
-        return -font_metrics.fAscent;
-    }
-
-    if (baseline == TextBaseline::Hanging) {
-        return font_metrics.fCapHeight;
-    }
-
-    if (baseline == TextBaseline::Middle) {
-        return font_metrics.fCapHeight / 2;
-    }
-
-    if (baseline == TextBaseline::Ideographic) {
-        return -font_metrics.fDescent;
-    }
-
-    if (baseline == TextBaseline::Bottom) {
-        return -font_metrics.fDescent;
-    }
-}
-
 std::shared_ptr<SkPaint> StyleParser::getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y) {
     if (color.fA > 0 && !(blur == 0.0 && x == 0.0 && y == 0.0)) {
         std::shared_ptr<SkPaint> layer_paint(new SkPaint());
@@ -262,6 +238,36 @@ SkFontStyle::Width StyleParser::fromStrToFontStrecth(string& stretch) {
     if (stretch == "ultra-expanded") return SkFontStyle::Width::kUltraExpanded_Width;
 
     return SkFontStyle::Width::kNormal_Width;
+}
+
+SkScalar StyleParser::getTextBaselineOffset(SkFontMetrics& metrics, TextBaseline baseline) {
+    if (baseline == TextBaseline::Top) return 0;
+    if (baseline == TextBaseline::Hanging) return -(-metrics.fAscent - metrics.fCapHeight);
+    if (baseline == TextBaseline::Middle) return -(-metrics.fAscent - metrics.fCapHeight / 2);
+    if (baseline == TextBaseline::Alphabetic) return metrics.fAscent;
+    if (baseline == TextBaseline::Ideographic) return -(-metrics.fAscent + metrics.fDescent);
+    if (baseline == TextBaseline::Bottom) return -(-metrics.fAscent + metrics.fDescent);
+    
+    return 0;
+}
+
+SkScalar StyleParser::getTextAlignFactor(ParagraphStyle& style) {
+    TextDirection dir = style.getTextDirection();
+    TextAlign align = style.getTextAlign();
+
+    if (dir == TextDirection::kLtr) {
+        if (align == TextAlign::kLeft || align == TextAlign::kStart) return 0;
+        if (align == TextAlign::kRight || align == TextAlign::kEnd) return -1;
+        if (align == TextAlign::kCenter) return -0.5;
+    }
+
+    if (dir == TextDirection::kRtl) {
+        if (align == TextAlign::kLeft || align == TextAlign::kEnd) return 0;
+        if (align == TextAlign::kRight || align == TextAlign::kStart) return -1;
+        if (align == TextAlign::kCenter) return -0.5;
+    }
+
+    return 0;
 }
 
 }

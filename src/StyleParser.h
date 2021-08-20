@@ -5,9 +5,11 @@
 #include "include/core/SkFontMetrics.h"
 #include "include/core/SkFontStyle.h"
 #include "modules/skparagraph/include/DartTypes.h"
+#include "modules/skparagraph/include/ParagraphStyle.h"
 
 using std::string;
 using skia::textlayout::TextAlign;
+using skia::textlayout::ParagraphStyle;
 
 namespace node_skia {
 
@@ -35,12 +37,13 @@ public:
     static string fromTextAlignToStr(TextAlign& align);
     static TextBaseline fromStrToTextBaseline(string& baseline);
     static string fromTextBaselineToStr(TextBaseline& baseline);
-    static std::shared_ptr<SkPaint> getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y);
     static void fillTileModeWithRepetition(string& repetition, SkTileMode* result);
     static SkFontStyle::Slant fromStrToFontSlant(string& slant);
     static SkFontStyle::Width fromStrToFontStrecth(string& stretch);
 
-    static float getBaselineOffsetFromFontMetrics(SkFontMetrics& font_metrics, TextBaseline& baseline);
+    static SkScalar getTextBaselineOffset(SkFontMetrics& metrics, TextBaseline baseline);
+    static SkScalar getTextAlignFactor(ParagraphStyle& style);
+    static std::shared_ptr<SkPaint> getShadowLayerPaint(SkPaint& base_paint, SkColor4f color, double blur, double x, double y);
 };
 
 }
