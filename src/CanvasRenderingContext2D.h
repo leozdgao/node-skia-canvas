@@ -81,7 +81,7 @@ private:
     void init_canvas_state();
 
     void fill_with_dye(SkPaint& paint, Napi::Value dye);
-    void render_text(SkPaint& paint, string text, SkScalar x, SkScalar y);
+    void render_text(SkPaint& paint, string text, SkScalar x, SkScalar y, SkScalar maxWidth);
     void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
 
     // ================================== Properties ==================================

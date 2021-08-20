@@ -1006,10 +1006,11 @@ napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info i
     Napi::Number x = Napi::Value::From(env, argv[1]).As<Napi::Number>();
     Napi::Number y = Napi::Value::From(env, argv[2]).As<Napi::Number>();
     Napi::Number maxWidth = Napi::Value::From(env, argv[3]).As<Napi::Number>();
+    SkScalar s_maxWidth = maxWidth.IsNumber() ? maxWidth.DoubleValue() : 10 * 10000;
 
     CanvasState state = ctx->states_.top();
     ctx->render_to_canvas(state.paint_for_fill_, [&](SkPaint& paint) {
-        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue());
+        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue(), s_maxWidth);
     });
 
     return nullptr;
@@ -1338,10 +1339,11 @@ napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info
     Napi::Number x = Napi::Value::From(env, argv[1]).As<Napi::Number>();
     Napi::Number y = Napi::Value::From(env, argv[2]).As<Napi::Number>();
     Napi::Number maxWidth = Napi::Value::From(env, argv[3]).As<Napi::Number>();
+    SkScalar s_maxWidth = maxWidth.IsNumber() ? maxWidth.DoubleValue() : 10 * 10000;
 
     CanvasState state = ctx->states_.top();
     ctx->render_to_canvas(state.paint_for_stroke_, [&](SkPaint& paint) {
-        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue());
+        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue(), s_maxWidth);
     });
 
     return nullptr;
@@ -1444,7 +1446,7 @@ napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info 
 
 // ======================= Private =======================
 
-void CanvasRenderingContext2D::render_text(SkPaint& paint, string text, SkScalar x, SkScalar y) {
+void CanvasRenderingContext2D::render_text(SkPaint& paint, string text, SkScalar x, SkScalar y, SkScalar maxWidth) {
     TextStyle text_style = this->states_.top().text_style_;
     text_style.setForegroundColor(paint);
 
@@ -1454,7 +1456,7 @@ void CanvasRenderingContext2D::render_text(SkPaint& paint, string text, SkScalar
     builder->addText(text.data());
 
     std::unique_ptr<Paragraph> paragraph = builder->Build();
-    paragraph->layout(10 * 10000);
+    paragraph->layout(maxWidth);
 
     paragraph->paint(this->canvas_, x, y);
 

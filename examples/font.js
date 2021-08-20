@@ -9,8 +9,7 @@ ctx.fillRect(0, 0, 300, 300);
 
 
 ctx.fillStyle = 'blue';
-ctx.font = "normal 700 32px \"PingFang SC\"";
-ctx.fillText("你好世界 哈哈 13114", 0, 0);
-
+ctx.font = "normal 700 32px/1.2 \"PingFang SC\"";
+ctx.fillText("你好世界 哈哈 13114", 0, 0, 280);
 
 fs.writeFileSync("temp_font.png", canvas.toBuffer());
