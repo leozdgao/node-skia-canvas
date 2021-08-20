@@ -79,9 +79,10 @@ private:
     stack<CanvasState> states_;
 
     void init_canvas_state();
-    void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
+
     void fill_with_dye(SkPaint& paint, Napi::Value dye);
-    void render_text(SkPaint& paint, string text);
+    void render_text(SkPaint& paint, string text, SkScalar x, SkScalar y);
+    void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
 
     // ================================== Properties ==================================
 
@@ -150,7 +151,6 @@ private:
     static napi_value SetTransform(napi_env env, napi_callback_info info);
     static napi_value Stroke(napi_env env, napi_callback_info info);
     static napi_value StrokeRect(napi_env env, napi_callback_info info);
-    static napi_value StrokeWithPath2D(napi_env env, napi_callback_info info); // work for `ctx.stroke()`
     static napi_value StrokeText(napi_env env, napi_callback_info info);
     static napi_value Transform(napi_env env, napi_callback_info info);
     static napi_value Translate(napi_env env, napi_callback_info info);

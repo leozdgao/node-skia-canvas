@@ -11,6 +11,7 @@
 #include "CanvasGradient.h"
 #include "CanvasPattern.h"
 #include "CanvasRenderingContext2D.h"
+#include "FontManager.h"
 #include "ImageData.h"
 #include "StyleParser.h"
 #include "W3CSkColorParser.h"
@@ -105,7 +106,6 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("setTransform", SetTransform),
         DECLARE_NAPI_METHOD("stroke", Stroke),
         DECLARE_NAPI_METHOD("strokeRect", StrokeRect),
-        DECLARE_NAPI_METHOD("strokeWithPath2D", StrokeWithPath2D),
         DECLARE_NAPI_METHOD("strokeText", StrokeText),
         DECLARE_NAPI_METHOD("measureText", MeasureText),
         DECLARE_NAPI_METHOD("transform", Transform),
@@ -113,7 +113,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 51, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 50, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -997,22 +997,20 @@ napi_value CanvasRenderingContext2D::FillRect(napi_env env, napi_callback_info i
 
 napi_value CanvasRenderingContext2D::FillText(napi_env env, napi_callback_info info) {
     napi_status status;
-    GET_CB_INFO(env, info, status, 1)
+    GET_CB_INFO(env, info, status, 4)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    string input = node_skia_helpers::get_utf8_string(env, argv[0]);
+    Napi::String text = Napi::Value::From(env, argv[0]).As<Napi::String>();
+    Napi::Number x = Napi::Value::From(env, argv[1]).As<Napi::Number>();
+    Napi::Number y = Napi::Value::From(env, argv[2]).As<Napi::Number>();
+    Napi::Number maxWidth = Napi::Value::From(env, argv[3]).As<Napi::Number>();
 
-    FontCollection collection = FontCollection();
-    collection.setDefaultFontManager(SkFontMgr::RefDefault());
-
-    // ParagraphBuilder::make(ctx->states_.top().pargf_style_, collection);
-
-    // ParagraphBuil
-    // auto text = SkTextBlob::MakeFromString(input.data(), SkFont(nullptr, 18));
-
-    // ctx->canvas_->drawTextBlob(text.get(), 50, 25, ctx->states_.top().paint_for_fill_);
+    CanvasState state = ctx->states_.top();
+    ctx->render_to_canvas(state.paint_for_fill_, [&](SkPaint& paint) {
+        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue());
+    });
 
     return nullptr;
 }
@@ -1329,11 +1327,23 @@ napi_value CanvasRenderingContext2D::StrokeRect(napi_env env, napi_callback_info
     return nullptr;
 }
 
-napi_value CanvasRenderingContext2D::StrokeWithPath2D(napi_env env, napi_callback_info info) {
-    return nullptr;
-}
-
 napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 4)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    Napi::String text = Napi::Value::From(env, argv[0]).As<Napi::String>();
+    Napi::Number x = Napi::Value::From(env, argv[1]).As<Napi::Number>();
+    Napi::Number y = Napi::Value::From(env, argv[2]).As<Napi::Number>();
+    Napi::Number maxWidth = Napi::Value::From(env, argv[3]).As<Napi::Number>();
+
+    CanvasState state = ctx->states_.top();
+    ctx->render_to_canvas(state.paint_for_stroke_, [&](SkPaint& paint) {
+        ctx->render_text(paint, text.Utf8Value(), x.DoubleValue(), y.DoubleValue());
+    });
+
     return nullptr;
 }
 
@@ -1434,10 +1444,21 @@ napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info 
 
 // ======================= Private =======================
 
-void CanvasRenderingContext2D::render_text(SkPaint& paint, string text) {
+void CanvasRenderingContext2D::render_text(SkPaint& paint, string text, SkScalar x, SkScalar y) {
     TextStyle text_style = this->states_.top().text_style_;
     text_style.setForegroundColor(paint);
 
+    ParagraphStyle pragh_style = this->states_.top().pargf_style_;
+    std::unique_ptr<ParagraphBuilder> builder = ParagraphBuilder::make(pragh_style, FontManager::collection.getCollection());
+    builder->pushStyle(text_style);
+    builder->addText(text.data());
+
+    std::unique_ptr<Paragraph> paragraph = builder->Build();
+    paragraph->layout(10 * 10000);
+
+    paragraph->paint(this->canvas_, x, y);
+
+    // vector<sk_sp<SkTypeface>> typefaces = FontManager::collection->findTypefaces(text_style.getFontFamilies(), text_style.getFontStyle());
 }
 
 void CanvasRenderingContext2D::render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f) {

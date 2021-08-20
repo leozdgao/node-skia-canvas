@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Canvas } = require('./build/Debug/node-skia.node');
+const { Canvas } = require('../build/Debug/node-skia.node');
 
 const c = new Canvas(300, 300);
 const ctx = c.getContext('2d');
