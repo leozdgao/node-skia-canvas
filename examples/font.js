@@ -12,7 +12,9 @@ ctx.fillRect(0, 0, 500, 500);
 // ctx.font = "normal 700 32px/1.2 \"PingFang SC\"";
 // ctx.fillText("你好世界 哈哈 13114", 0, 0);
 
-const baselines = ['alphabetic'];
+// const baselines = ['alphabetic'];
+const baselines = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];
+
 ctx.font = '36px serif';
 ctx.fillStyle = '#000';
 ctx.strokeStyle = 'red';
