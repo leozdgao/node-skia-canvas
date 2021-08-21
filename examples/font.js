@@ -1,18 +1,13 @@
 const fs = require('fs');
 const { createCanvas } = require('../lib');
 
-const canvas = createCanvas(500, 500);
+const canvas = createCanvas(500, 800);
 const ctx = canvas.getContext('2d');
 
 ctx.fillStyle = '#FFF';
-ctx.fillRect(0, 0, 500, 500);
+ctx.fillRect(0, 0, 500, 1000);
 
-// ctx.textBaseline = 'top';
-// ctx.fillStyle = 'blue';
-// ctx.font = "normal 700 32px/1.2 \"PingFang SC\"";
-// ctx.fillText("你好世界 哈哈 13114", 0, 0);
-
-// const baselines = ['alphabetic'];
+// TextBaseline
 const baselines = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];
 
 ctx.font = '36px serif';
@@ -29,5 +24,27 @@ baselines.forEach(function (baseline, index) {
 
   ctx.fillText('Abcdefghijklmnop (' + baseline + ')', 0, y);
 });
+
+
+// TextAlign
+const x = canvas.width / 2;
+
+ctx.fillStyle = '#000';
+
+ctx.beginPath();
+ctx.moveTo(x, 500);
+ctx.lineTo(x, canvas.height);
+ctx.stroke();
+
+ctx.font = '30px serif';
+
+ctx.textAlign = 'left';
+ctx.fillText('left-aligned', x, 540);
+
+ctx.textAlign = 'center';
+ctx.fillText('center-aligned', x, 585);
+
+ctx.textAlign = 'right';
+ctx.fillText('right-aligned', x, 630);
 
 fs.writeFileSync("temp_font.png", canvas.toBuffer());

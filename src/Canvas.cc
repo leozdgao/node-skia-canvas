@@ -9,7 +9,7 @@
 
 Canvas::Canvas(const Napi::CallbackInfo& info) : Napi::ObjectWrap<Canvas>(info) {
     Napi::Number width = info[0].As<Napi::Number>();
-    Napi::Number height = info[0].As<Napi::Number>();
+    Napi::Number height = info[1].As<Napi::Number>();
     width_ = width.Int32Value();
     height_ = height.Int32Value();
 
