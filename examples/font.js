@@ -1,5 +1,12 @@
 const fs = require('fs');
-const { createCanvas } = require('../lib');
+const path = require('path');
+const { createCanvas, registerFont } = require('../lib');
+
+console.log(path.join(__dirname, './OswaldRegular.ttf'))
+
+registerFont(path.join(__dirname, './OswaldRegular.ttf'), {
+  family: 'Oswald'
+});
 
 const canvas = createCanvas(500, 800);
 const ctx = canvas.getContext('2d');
@@ -7,11 +14,15 @@ const ctx = canvas.getContext('2d');
 ctx.fillStyle = '#FFF';
 ctx.fillRect(0, 0, 500, 1000);
 
+ctx.fillStyle = '#000';
+
+ctx.font = '24px Oswald';
+ctx.fillText('Abcdefghijklmnop', 40, 40);
+
 // TextBaseline
 const baselines = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];
 
 ctx.font = '36px serif';
-ctx.fillStyle = '#000';
 ctx.strokeStyle = 'red';
 
 baselines.forEach(function (baseline, index) {

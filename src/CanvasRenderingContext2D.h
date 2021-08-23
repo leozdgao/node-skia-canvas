@@ -20,8 +20,7 @@ using skia::textlayout::TextStyle;
 using node_skia::TextBaseline;
 
 
-struct CanvasState
-{
+struct CanvasState {
     // state for path
     SkPath path_;
     SkPoint* last_move_point_ = nullptr;
