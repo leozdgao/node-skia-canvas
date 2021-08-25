@@ -2,9 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const { createCanvas, registerFont } = require('../lib');
 
-console.log(path.join(__dirname, './OswaldRegular.ttf'))
-
 registerFont(path.join(__dirname, './OswaldRegular.ttf'), {
+  family: 'Oswald'
+});
+registerFont(path.join(__dirname, './OswaldLight.ttf'), {
+  family: 'Oswald'
+});
+registerFont(path.join(__dirname, './OswaldBold.ttf'), {
   family: 'Oswald'
 });
 
@@ -16,8 +20,14 @@ ctx.fillRect(0, 0, 500, 1000);
 
 ctx.fillStyle = '#000';
 
-ctx.font = '24px Oswald';
-ctx.fillText('Abcdefghijklmnop', 40, 40);
+ctx.font = 'normal 400 24px Oswald';
+ctx.fillText('Abcdefghijklmnop 0123456789', 10, 20);
+
+ctx.font = 'normal 700 24px Oswald';
+ctx.fillText('Abcdefghijklmnop 0123456789', 10, 50);
+
+ctx.font = 'normal 100 24px Oswald';
+ctx.fillText('Abcdefghijklmnop 0123456789', 10, 80);
 
 // TextBaseline
 const baselines = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];
@@ -27,7 +37,7 @@ ctx.strokeStyle = 'red';
 
 baselines.forEach(function (baseline, index) {
   ctx.textBaseline = baseline;
-  const y = 75 + index * 75;
+  const y = 100 + index * 75;
   ctx.beginPath();
   ctx.moveTo(0, y + 0.5);
   ctx.lineTo(550, y + 0.5);
