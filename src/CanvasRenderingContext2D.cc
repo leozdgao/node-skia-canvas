@@ -14,12 +14,14 @@
 #include "FontManager.h"
 #include "ImageData.h"
 #include "StyleParser.h"
+#include "TextMetrics.h"
 #include "W3CSkColorParser.h"
 #include "helpers.h"
 
 using skia::textlayout::FontCollection;
 using skia::textlayout::ParagraphBuilder;
 using skia::textlayout::Paragraph;
+using skia::textlayout::LineMetrics;
 using node_skia::StyleParser;
 
 CanvasRenderingContext2D::CanvasRenderingContext2D() {
@@ -1349,56 +1351,20 @@ napi_value CanvasRenderingContext2D::StrokeText(napi_env env, napi_callback_info
     return nullptr;
 }
 
-// FIXME: It's really complex, do it later
 napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_info info) {
     napi_status status;
-    GET_CB_INFO(env, info, status, 1)
+    GET_CB_INFO(env, info, status, 2)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    // string text = node_skia_helpers::get_utf8_string(env, argv[0]);
-    // SkFontMetrics font_metrics;
-    // ctx->states_.top().text_style_.getFontMetrics(&font_metrics);
-    // // 新基线到原基线的距离
-    // float offset = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, ctx->states_.top().text_baseline_);
-    // auto base_hang = TextBaseline::Hanging;
-    // float hang = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, base_hang) - offset;
-    // auto base_ideo = TextBaseline::Ideographic;
-    // float ideo = StyleParser::getBaselineOffsetFromFontMetrics(font_metrics, base_ideo) - offset;
-    // // 原基线需要偏移的距离
-    // float norm = 0 - offset;
-    // float ascent = norm - font_metrics.fAscent;
-    // float descent = font_metrics.fDescent - norm;
+    Napi::String text = Napi::Value::From(env, argv[0]).As<Napi::String>();
+    Napi::Number maxWidth = Napi::Value::From(env, argv[1]).As<Napi::Number>();
+    SkScalar s_maxWidth = maxWidth.IsNumber() ? maxWidth.DoubleValue() : 10 * 10000;
 
-    // // FIXME: font
-    // // sk_sp<SkTextBlob> tb = SkTextBlob::MakeFromString(text.data(), SkFont(nullptr, 10));
-    // // SkRect bounds = tb->bounds();
+    vector<double> values = ctx->measure_text(ctx->states_.top().paint_for_fill_, text.Utf8Value(), s_maxWidth);
 
-    // napi_value text_metrics, v_norm, v_ascent, v_descent, v_hang, v_ideo;
-    // status = napi_create_double(env, norm, &v_norm);
-    // status = napi_create_double(env, ascent, &v_ascent);
-    // status = napi_create_double(env, descent, &v_descent);
-    // status = napi_create_double(env, hang, &v_hang);
-    // status = napi_create_double(env, ideo, &v_ideo);
-
-    // status = napi_create_object(env, &text_metrics);
-    // // status = napi_set_named_property(env, text_metrics, "actualBoundingBoxAscent", v_ascent);
-    // // status = napi_set_named_property(env, text_metrics, "actualBoundingBoxDescent", v_descent);
-    // status = napi_set_named_property(env, text_metrics, "emHeightAscent", v_ascent);
-    // status = napi_set_named_property(env, text_metrics, "emHeightDescent", v_descent);
-    // status = napi_set_named_property(env, text_metrics, "hangingBaseline", v_hang);
-    // status = napi_set_named_property(env, text_metrics, "alphabeticBaseline", v_norm);
-    // status = napi_set_named_property(env, text_metrics, "ideographicBaseline", v_ideo);
-
-    // sk_sp<SkTypeface> face = SkTypeface::MakeFromName("sans-serif", SkFontStyle::Normal());
-    // auto font = SkFont(face, 10);
-
-    // auto txt = SkTextBlob::MakeFromString(text.c_str(), font);
-    // ctx->canvas_->drawTextBlob(txt, 10, 10, ctx->states_.top().paint_for_fill_);
-
-    // return text_metrics;
-    return nullptr;
+    return TextMetrics::CreateInstance(env, values);
 }
 
 napi_value CanvasRenderingContext2D::Transform(napi_env env, napi_callback_info info) {
@@ -1446,6 +1412,51 @@ napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info 
 }
 
 // ======================= Private =======================
+
+vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string text, SkScalar maxWidth) {
+    TextStyle text_style = this->states_.top().text_style_;
+    text_style.setForegroundColor(paint);
+
+    ParagraphStyle pragh_style = this->states_.top().pargf_style_;
+    std::unique_ptr<ParagraphBuilder> builder = ParagraphBuilder::make(pragh_style, FontManager::collection.getCollection());
+    builder->pushStyle(text_style);
+    builder->addText(text.data());
+
+    std::unique_ptr<Paragraph> paragraph = builder->Build();
+    paragraph->layout(maxWidth);
+
+    // SkFontMetrics metrics;
+    // text_style.getFontMetrics(&metrics);
+    // SkScalar offset = StyleParser::getTextBaselineOffset(metrics, this->states_.top().text_baseline_);
+    // SkScalar hang = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Hanging) - offset;
+    // SkScalar norm = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Alphabetic) - offset;
+    // SkScalar ideo = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Ideographic) - offset;
+    // SkScalar ascent = norm - metrics.fAscent;
+    // SkScalar descent = metrics.fDescent - norm;
+
+    vector<double> result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    
+    if (paragraph->lineNumber() == 0) {
+        return result;
+    }
+
+    vector<LineMetrics> line_metrics;
+    paragraph->getLineMetrics(line_metrics);
+
+    LineMetrics first_line = line_metrics[0];
+    // width
+    result[0] = first_line.fWidth;
+    // fontBoundingBoxAscent
+    result[5] = SkScalarRoundToScalar(first_line.fAscent);
+    // fontBoundingBoxDescent
+    result[6] = SkScalarRoundToScalar(first_line.fDescent);
+    // emHeightAscent
+    result[7] = SkScalarRoundToScalar(first_line.fAscent);
+    // emHeightDescent
+    result[8] = SkScalarRoundToScalar(first_line.fDescent);
+
+    return result;
+}
 
 void CanvasRenderingContext2D::render_text(SkPaint& paint, string text, SkScalar x, SkScalar y, SkScalar maxWidth) {
     TextStyle text_style = this->states_.top().text_style_;

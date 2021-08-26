@@ -20,14 +20,22 @@ ctx.fillRect(0, 0, 500, 1000);
 
 ctx.fillStyle = '#000';
 
-ctx.font = 'normal 400 24px Oswald';
-ctx.fillText('Abcdefghijklmnop 0123456789', 10, 20);
+// ctx.font = "normal 400 10px/12px \"PingFang SC\"";
+ctx.font = "10px STFangsong";
+console.log(ctx.font)
+// console.log(ctx.measureText('你好世界哈哈哈'));
+const info = ctx.measureText('asjdkflasdfkjlasdf');
+console.log(info.width)
+ctx.fillText('asjdkflasdfkjlasdf', 10, 10)
 
-ctx.font = 'normal 700 24px Oswald';
-ctx.fillText('Abcdefghijklmnop 0123456789', 10, 50);
+// ctx.font = 'normal 400 24px Oswald';
+// ctx.fillText('Abcdefghijklmnop 0123456789', 10, 20);
 
-ctx.font = 'normal 100 24px Oswald';
-ctx.fillText('Abcdefghijklmnop 0123456789', 10, 80);
+// ctx.font = 'normal 700 24px Oswald';
+// ctx.fillText('Abcdefghijklmnop 0123456789', 10, 50);
+
+// ctx.font = 'normal 100 24px Oswald';
+// ctx.fillText('Abcdefghijklmnop 0123456789', 10, 80);
 
 // TextBaseline
 const baselines = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];

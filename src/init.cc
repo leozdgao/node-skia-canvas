@@ -6,6 +6,7 @@
 #include "FontManager.h"
 #include "Image.h"
 #include "ImageData.h"
+#include "TextMetrics.h"
 
 static Napi::Object Init(Napi::Env env, Napi::Object exports) {
   Canvas::Init(env, exports);
@@ -15,6 +16,7 @@ static Napi::Object Init(Napi::Env env, Napi::Object exports) {
   FontManager::Init(env, exports);
   Image::Init(env, exports);
   ImageData::Init(env, exports);
+  TextMetrics::Init(env, exports);
 
   return exports;
 }

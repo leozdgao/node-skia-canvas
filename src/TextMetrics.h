@@ -1,35 +1,42 @@
+#pragma once
+
+#include <vector>
 #include <napi.h>
 
-class TextMetrics {
+using std::vector;
+
+class TextMetrics : public Napi::ObjectWrap<TextMetrics> {
 public:
-    TextMetrics(/* args */);
-    ~TextMetrics();
+    static Napi::Object Init(Napi::Env env, Napi::Object exports);
+    static Napi::Value CreateInstance(Napi::Env env, vector<double> values);
+    static Napi::FunctionReference constructor;
 
-    static napi_status Init(napi_env env, napi_value exports);
-    static napi_value New(napi_env env, napi_callback_info info);
-    static napi_status NewInstance(napi_env env, napi_value* result);
-    static napi_value Constructor(napi_env env);
-    static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
-
-    static napi_value GetWidth(napi_env env, napi_callback_info info);
-    static napi_value GetActualBoundingBoxLeft(napi_env env, napi_callback_info info);
-    static napi_value GetWidth(napi_env env, napi_callback_info info);
-    static napi_value GetWidth(napi_env env, napi_callback_info info);
-    static napi_value GetWidth(napi_env env, napi_callback_info info);
-
-    float width;
-    float actualBoundingBoxLeft;
-    float actualBoundingBoxRight;
-    float fontBoundingBoxAscent;
-    float fontBoundingBoxDescent;
-    float actualBoundingBoxAscent;
-    float actualBoundingBoxDescent;
-    float emHeightAscent;
-    float emHeightDescent;
-    float hangingBaseline;
-    float alphabeticBaseline;
-    float ideographicBaseline;
+    TextMetrics(const Napi::CallbackInfo& info);
 
 private:
-    /* data */
+    Napi::Value GetWidth(const Napi::CallbackInfo& info);
+    Napi::Value GetActualBoundingBoxLeft(const Napi::CallbackInfo& info);
+    Napi::Value GetActualBoundingBoxRight(const Napi::CallbackInfo& info);
+    Napi::Value GetFontBoundingBoxAscent(const Napi::CallbackInfo& info);
+    Napi::Value GetFontBoundingBoxDescent(const Napi::CallbackInfo& info);
+    Napi::Value GetActualBoundingBoxAscent(const Napi::CallbackInfo& info);
+    Napi::Value GetActualBoundingBoxDescent(const Napi::CallbackInfo& info);
+    Napi::Value GetEmHeightAscent(const Napi::CallbackInfo& info);
+    Napi::Value GetEmHeightDescent(const Napi::CallbackInfo& info);
+    Napi::Value GetHangingBaseline(const Napi::CallbackInfo& info);
+    Napi::Value GetAlphabeticBaseline(const Napi::CallbackInfo& info);
+    Napi::Value GetIdeographicBaseline(const Napi::CallbackInfo& info);
+
+    double width_;
+    double actualBoundingBoxLeft_;
+    double actualBoundingBoxRight_;
+    double fontBoundingBoxAscent_;
+    double fontBoundingBoxDescent_;
+    double actualBoundingBoxAscent_;
+    double actualBoundingBoxDescent_;
+    double emHeightAscent_;
+    double emHeightDescent_;
+    double hangingBaseline_;
+    double alphabeticBaseline_;
+    double ideographicBaseline_;
 };
