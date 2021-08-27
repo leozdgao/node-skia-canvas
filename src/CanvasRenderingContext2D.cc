@@ -1364,7 +1364,7 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
 
     vector<double> values = ctx->measure_text(ctx->states_.top().paint_for_fill_, text.Utf8Value(), s_maxWidth);
 
-    return TextMetrics::CreateInstance(env, values);
+    return TextMetrics::CreateObject(env, values);
 }
 
 napi_value CanvasRenderingContext2D::Transform(napi_env env, napi_callback_info info) {
@@ -1425,14 +1425,14 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     std::unique_ptr<Paragraph> paragraph = builder->Build();
     paragraph->layout(maxWidth);
 
-    // SkFontMetrics metrics;
-    // text_style.getFontMetrics(&metrics);
-    // SkScalar offset = StyleParser::getTextBaselineOffset(metrics, this->states_.top().text_baseline_);
-    // SkScalar hang = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Hanging) - offset;
-    // SkScalar norm = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Alphabetic) - offset;
-    // SkScalar ideo = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Ideographic) - offset;
-    // SkScalar ascent = norm - metrics.fAscent;
-    // SkScalar descent = metrics.fDescent - norm;
+    SkFontMetrics metrics;
+    text_style.getFontMetrics(&metrics);
+    SkScalar offset = StyleParser::getTextBaselineOffset(metrics, this->states_.top().text_baseline_);
+    SkScalar hang = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Hanging) - offset;
+    SkScalar norm = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Alphabetic) - offset;
+    SkScalar ideo = StyleParser::getTextBaselineOffset(metrics, TextBaseline::Ideographic) - offset;
+    SkScalar ascent = norm - metrics.fAscent;
+    SkScalar descent = metrics.fDescent - norm;
 
     vector<double> result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     
@@ -1446,6 +1446,14 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     LineMetrics first_line = line_metrics[0];
     // width
     result[0] = first_line.fWidth;
+    // actualBoundingBoxLeft
+    result[1] = StyleParser::getTextAlignFactor(pragh_style) * first_line.fWidth;
+    // actualBoundingBoxRight
+    result[2] = first_line.fWidth + StyleParser::getTextAlignFactor(pragh_style) * first_line.fWidth;
+    // actualBoundingBoxAscent
+    result[3] = ascent;
+    // actualBoundingBoxDescent
+    result[4] = descent;
     // fontBoundingBoxAscent
     result[5] = SkScalarRoundToScalar(first_line.fAscent);
     // fontBoundingBoxDescent
@@ -1454,6 +1462,12 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     result[7] = SkScalarRoundToScalar(first_line.fAscent);
     // emHeightDescent
     result[8] = SkScalarRoundToScalar(first_line.fDescent);
+    // alphabeticBaseline
+    result[9] = norm;
+    // hangingBaseline
+    result[10] = hang;
+    // ideographicBaseline
+    result[11] = ideo;
 
     return result;
 }

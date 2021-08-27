@@ -24,8 +24,9 @@ ctx.fillStyle = '#000';
 ctx.font = "10px STFangsong";
 console.log(ctx.font)
 // console.log(ctx.measureText('你好世界哈哈哈'));
-const info = ctx.measureText('asjdkflasdfkjlasdf');
-console.log(info.width)
+// const info = ctx.measureText('asjdkflasdfkjlasdf');
+const info = ctx.measureText('a');
+console.log(info)
 ctx.fillText('asjdkflasdfkjlasdf', 10, 10)
 
 // ctx.font = 'normal 400 24px Oswald';

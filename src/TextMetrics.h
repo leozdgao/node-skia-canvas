@@ -9,6 +9,7 @@ class TextMetrics : public Napi::ObjectWrap<TextMetrics> {
 public:
     static Napi::Object Init(Napi::Env env, Napi::Object exports);
     static Napi::Value CreateInstance(Napi::Env env, vector<double> values);
+    static Napi::Object CreateObject(Napi::Env env, vector<double> values);
     static Napi::FunctionReference constructor;
 
     TextMetrics(const Napi::CallbackInfo& info);

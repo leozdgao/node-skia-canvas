@@ -9,6 +9,25 @@ Napi::Value TextMetrics::CreateInstance(Napi::Env env, vector<double> values) {
   return constructor.New({ array });
 }
 
+Napi::Object TextMetrics::CreateObject(Napi::Env env, vector<double> values) {
+  Napi::Object result = Napi::Object::New(env);
+
+  result.Set("width", values[0]);
+  result.Set("actualBoundingBoxLeft", values[1]);
+  result.Set("actualBoundingBoxRight", values[2]);
+  result.Set("actualBoundingBoxAscent", values[3]);
+  result.Set("actualBoundingBoxDescent", values[4]);
+  result.Set("fontBoundingBoxAscent", values[5]);
+  result.Set("fontBoundingBoxDescent", values[6]);
+  result.Set("emHeightAscent", values[7]);
+  result.Set("emHeightDescent", values[8]);
+  result.Set("alphabeticBaseline", values[9]);
+  result.Set("hangingBaseline", values[10]);
+  result.Set("ideographicBaseline", values[11]);
+
+  return result;
+}
+
 TextMetrics::TextMetrics(const Napi::CallbackInfo& info) : Napi::ObjectWrap<TextMetrics>(info) {
   Napi::Array arg0 = info[0].As<Napi::Array>();
 
@@ -79,18 +98,18 @@ Napi::FunctionReference TextMetrics::constructor;
 
 Napi::Object TextMetrics::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(env, "TextMetrics", {
-      InstanceAccessor<&TextMetrics::GetWidth>("width"),
-      InstanceAccessor<&TextMetrics::GetActualBoundingBoxAscent>("actualBoundingBoxAscent"),
-      InstanceAccessor<&TextMetrics::GetActualBoundingBoxDescent>("actualBoundingBoxDescent"),
-      InstanceAccessor<&TextMetrics::GetActualBoundingBoxLeft>("actualBoundingBoxLeft"),
-      InstanceAccessor<&TextMetrics::GetActualBoundingBoxRight>("actualBoundingBoxRight"),
-      InstanceAccessor<&TextMetrics::GetFontBoundingBoxAscent>("fontBoundingBoxAscent"),
-      InstanceAccessor<&TextMetrics::GetFontBoundingBoxDescent>("fontBoundingBoxDescent"),
-      InstanceAccessor<&TextMetrics::GetEmHeightAscent>("emHeightAscent"),
-      InstanceAccessor<&TextMetrics::GetEmHeightDescent>("emHeightDescent"),
-      InstanceAccessor<&TextMetrics::GetAlphabeticBaseline>("alphabeticBaseline"),
-      InstanceAccessor<&TextMetrics::GetHangingBaseline>("hangingBaseline"),
-      InstanceAccessor<&TextMetrics::GetIdeographicBaseline>("ideographicBaseline"),
+    InstanceAccessor<&TextMetrics::GetWidth>("width"),
+    InstanceAccessor<&TextMetrics::GetActualBoundingBoxAscent>("actualBoundingBoxAscent"),
+    InstanceAccessor<&TextMetrics::GetActualBoundingBoxDescent>("actualBoundingBoxDescent"),
+    InstanceAccessor<&TextMetrics::GetActualBoundingBoxLeft>("actualBoundingBoxLeft"),
+    InstanceAccessor<&TextMetrics::GetActualBoundingBoxRight>("actualBoundingBoxRight"),
+    InstanceAccessor<&TextMetrics::GetFontBoundingBoxAscent>("fontBoundingBoxAscent"),
+    InstanceAccessor<&TextMetrics::GetFontBoundingBoxDescent>("fontBoundingBoxDescent"),
+    InstanceAccessor<&TextMetrics::GetEmHeightAscent>("emHeightAscent"),
+    InstanceAccessor<&TextMetrics::GetEmHeightDescent>("emHeightDescent"),
+    InstanceAccessor<&TextMetrics::GetAlphabeticBaseline>("alphabeticBaseline"),
+    InstanceAccessor<&TextMetrics::GetHangingBaseline>("hangingBaseline"),
+    InstanceAccessor<&TextMetrics::GetIdeographicBaseline>("ideographicBaseline"),
   });
 
   constructor = Napi::Persistent(func);
