@@ -7,6 +7,8 @@
 #include <modules/skparagraph/include/FontCollection.h>
 #include <modules/skparagraph/include/Paragraph.h>
 #include <modules/skparagraph/include/ParagraphBuilder.h>
+#include <modules/skparagraph/src/ParagraphImpl.h>
+#include <modules/skparagraph/src/Run.h>
 
 #include "CanvasGradient.h"
 #include "CanvasPattern.h"
@@ -21,6 +23,8 @@
 using skia::textlayout::FontCollection;
 using skia::textlayout::ParagraphBuilder;
 using skia::textlayout::Paragraph;
+using skia::textlayout::ParagraphImpl;
+using skia::textlayout::Run;
 using skia::textlayout::LineMetrics;
 using node_skia::StyleParser;
 
@@ -44,6 +48,8 @@ void CanvasRenderingContext2D::init_canvas_state() {
     init_state.paint_for_stroke_.setStrokeMiter(10.0);
 
     init_state.pargf_style_ = ParagraphStyle();
+    init_state.pargf_style_.turnHintingOff();
+
     init_state.text_style_ = TextStyle();
     init_state.text_style_.setFontSize(10);
     init_state.text_style_.setHeight(1.2);
@@ -1422,8 +1428,28 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     builder->pushStyle(text_style);
     builder->addText(text.data());
 
-    std::unique_ptr<Paragraph> paragraph = builder->Build();
+    ParagraphImpl* paragraph = static_cast<ParagraphImpl*>(builder->Build().release());
     paragraph->layout(maxWidth);
+
+    Run run = paragraph->run(0);
+    int run_size = run.size();
+    SkRect first_char_bounds = run.getBounds(0);
+    SkScalar actual_ascent = first_char_bounds.fTop;
+    SkScalar actual_descent = first_char_bounds.fBottom;
+
+    for (int i = 1; i < run_size; i++) {
+        SkRect char_bounds = run.getBounds(i);
+        SkScalar top = char_bounds.fTop;
+        SkScalar bottom = char_bounds.fBottom;
+
+        if (top < actual_ascent) {
+            actual_ascent = top;
+        }
+
+        if (bottom > actual_descent) {
+            actual_descent = bottom;
+        }
+    }
 
     SkFontMetrics metrics;
     text_style.getFontMetrics(&metrics);
@@ -1455,13 +1481,13 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     // actualBoundingBoxDescent
     result[4] = descent;
     // fontBoundingBoxAscent
-    result[5] = SkScalarRoundToScalar(first_line.fAscent);
+    result[5] = SkScalarRoundToScalar(norm + first_line.fAscent);
     // fontBoundingBoxDescent
-    result[6] = SkScalarRoundToScalar(first_line.fDescent);
+    result[6] = SkScalarRoundToScalar(first_line.fDescent - norm);
     // emHeightAscent
-    result[7] = SkScalarRoundToScalar(first_line.fAscent);
+    result[7] = SkScalarRoundToScalar(norm + first_line.fAscent);
     // emHeightDescent
-    result[8] = SkScalarRoundToScalar(first_line.fDescent);
+    result[8] = SkScalarRoundToScalar(first_line.fDescent - norm);
     // alphabeticBaseline
     result[9] = norm;
     // hangingBaseline

@@ -16,16 +16,17 @@ const canvas = createCanvas(500, 800);
 const ctx = canvas.getContext('2d');
 
 ctx.fillStyle = '#FFF';
-ctx.fillRect(0, 0, 500, 1000);
+ctx.fillRect(0, 0, 500, 800);
 
 ctx.fillStyle = '#000';
 
 // ctx.font = "normal 400 10px/12px \"PingFang SC\"";
 ctx.font = "10px STFangsong";
+ctx.textBaseline = 'top';
 console.log(ctx.font)
 // console.log(ctx.measureText('你好世界哈哈哈'));
 // const info = ctx.measureText('asjdkflasdfkjlasdf');
-const info = ctx.measureText('a');
+const info = ctx.measureText('asjdkflasdfkjlasdf');
 console.log(info)
 ctx.fillText('asjdkflasdfkjlasdf', 10, 10)
 

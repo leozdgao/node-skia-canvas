@@ -1,5 +1,5 @@
 const fs = require('fs');
-const { Image } = require('./build/Debug/node-skia.node');
+const { Image } = require('../build/Debug/node-skia.node');
 
 const imgData = fs.readFileSync('./examples/leize.jpeg');
 console.log(imgData)
