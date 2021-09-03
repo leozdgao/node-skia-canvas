@@ -1,10 +1,11 @@
 {
-  "name": "node-skia",
-  "version": "1.0.0",
-  "description": "Canvas work on node.js base skia.",
-  "main": "hello.js",
+  "name": "node-skia-canvas",
+  "version": "0.1.0",
+  "description": "Skia based graphics canvas run on node.js, written in Node-API",
+  "main": "lib/index.js",
   "scripts": {
-    "build:dev": "cmake-js configure -D && cmake-js compile -D"
+    "build:dev": "cmake-js configure -D && cmake-js compile -D",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -18,6 +19,16 @@
   },
   "homepage": "https://github.com/leozdgao/node-skia#readme",
   "dependencies": {
+    "bindings": "^1.5.0",
     "node-addon-api": "^4.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jest": "^24.4.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "jest": "^27.1.0"
   }
 }
