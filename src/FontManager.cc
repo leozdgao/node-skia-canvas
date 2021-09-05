@@ -17,24 +17,32 @@ void FontManager::RegisterFont(const Napi::CallbackInfo& info) {
   Napi::String path = info[0].As<Napi::String>();
   Napi::Object options = info[1].As<Napi::Object>();
 
-  if (options.IsObject()) {
-    Napi::String family = options.Get("family").As<Napi::String>();
-    sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(path.Utf8Value().data());
+  sk_sp<SkTypeface> typeface = SkTypeface::MakeFromFile(path.Utf8Value().data());
     
-    if (typeface == nullptr) {
-      Napi::Error err = Napi::Error::New(info.Env(), "Invalid font file");
-      err.ThrowAsJavaScriptException();
+  if (typeface == nullptr) {
+    Napi::Error err = Napi::Error::New(info.Env(), "Invalid font file");
+    err.ThrowAsJavaScriptException();
 
-      return;
-    }
+    return;
+  }
 
-    fonts.push_back({ .typeface = typeface, .alias = family.Utf8Value() });
+  string alias;
 
-    TypefaceFontProvider* provider = new TypefaceFontProvider();
-    for (auto i = fonts.begin(), l = fonts.end(); i < l; i++) {
+  if (options.IsObject() && options.Get("family").IsString()) {
+    Napi::String family = options.Get("family").As<Napi::String>();
+    alias = family.Utf8Value();
+  }
+
+  fonts.push_back({ .typeface = typeface, .alias = alias });
+
+  TypefaceFontProvider* provider = new TypefaceFontProvider();
+  for (auto i = fonts.begin(), l = fonts.end(); i < l; i++) {
+    if (i->alias.empty()) {
+      provider->registerTypeface(i->typeface);
+    } else {
       provider->registerTypeface(i->typeface, SkString(i->alias));
     }
-
-    collection->setAssetFontManager(sk_sp(provider));
   }
+
+  collection->setAssetFontManager(sk_sp(provider));
 }

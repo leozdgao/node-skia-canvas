@@ -1,4 +1,4 @@
-const { Canvas } = require('../')
+const { Canvas, registerFont } = require('../')
 const parseFont = require('../lib/parseFont')
 
 describe('Canvas', () => {
@@ -64,5 +64,12 @@ describe('Canvas', () => {
 
     // not match
     expect(parseFont('Helvetica, sans')).toBeNull()
+  })
+
+  it('registerFont', function () {
+    // Minimal test to make sure nothing is thrown
+    registerFont('./examples/OswaldBold.ttf')
+    registerFont('./examples/OswaldRegular.ttf', { family: 'Oswald' })
+    registerFont('./examples/OswaldLight.ttf', { family: 'Oswald' })
   })
 })
