@@ -321,10 +321,10 @@ SkColor4f W3CSkColorParser::rgba_from_rgba_expr(string &str) {
 
         return SkColor4f::FromColor(
             SkColorSetARGB(
-                params_len >= 4 ? stoi(expr.params[3], nullptr, 0) : 0xFF,
-                params_len >= 1 ? stoi(expr.params[0], nullptr, 0) : 0,
-                params_len >= 2 ? stoi(expr.params[1], nullptr, 0) : 0,
-                params_len >= 3 ? stoi(expr.params[2], nullptr, 0) : 0
+                params_len >= 4 ? stof(expr.params[3]) * 0xFF : 0xFF,
+                params_len >= 1 ? stoi(expr.params[0]) : 0,
+                params_len >= 2 ? stoi(expr.params[1]) : 0,
+                params_len >= 3 ? stoi(expr.params[2]) : 0
             )
         );
     }
@@ -341,9 +341,9 @@ SkColor4f W3CSkColorParser::rgba_from_rgb_expr(string &str) {
         return SkColor4f::FromColor(
             SkColorSetARGB(
                 0XFF,
-                params_len >= 1 ? stoi(expr.params[0], nullptr, 0) : 0,
-                params_len >= 2 ? stoi(expr.params[1], nullptr, 0) : 0,
-                params_len >= 3 ? stoi(expr.params[2], nullptr, 0) : 0
+                params_len >= 1 ? stoi(expr.params[0]) : 0,
+                params_len >= 2 ? stoi(expr.params[1]) : 0,
+                params_len >= 3 ? stoi(expr.params[2]) : 0
             )
         );
     }
@@ -356,10 +356,10 @@ SkColor4f W3CSkColorParser::rgba_from_hsla_expr(string &str) {
 
     if (expr.name == "hsla") {
         size_t params_len = expr.params.size();
-        float h_deg = params_len >= 1 ? stof(expr.params[0], nullptr) : 0;
-        float s = params_len >= 2 ? stof(expr.params[1], nullptr) : 1;
-        float l = params_len >= 3 ? stof(expr.params[2], nullptr) : 0.5;
-        float a = params_len >= 4 ? stof(expr.params[3], nullptr) : 1;
+        float h_deg = params_len >= 1 ? stof(expr.params[0]) : 0;
+        float s = params_len >= 2 ? stof(expr.params[1]) : 1;
+        float l = params_len >= 3 ? stof(expr.params[2]) : 0.5;
+        float a = params_len >= 4 ? stof(expr.params[3]) : 1;
         float h = (6 * h_deg) / 360.0f, m1, m2;
 
         if (l<=0.5)
