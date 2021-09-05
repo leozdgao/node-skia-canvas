@@ -199,6 +199,14 @@ void W3CSkColorParser::color_mix_with_alpha(SkColor4f &color, double alpha) {
     color.fA = color.fA * alpha;
 };
 
+int W3CSkColorParser::to_color_component(int color) {
+    if (color < 0) {
+        return 0;
+    }
+
+    return color > 255 ? 255 : color;
+}
+
 int W3CSkColorParser::h(char c) {
   switch (c) {
     case '0':
@@ -321,10 +329,18 @@ SkColor4f W3CSkColorParser::rgba_from_rgba_expr(string &str) {
 
         return SkColor4f::FromColor(
             SkColorSetARGB(
-                params_len >= 4 ? stof(expr.params[3]) * 0xFF : 0xFF,
-                params_len >= 1 ? stoi(expr.params[0]) : 0,
-                params_len >= 2 ? stoi(expr.params[1]) : 0,
-                params_len >= 3 ? stoi(expr.params[2]) : 0
+                to_color_component(
+                    params_len >= 4 ? stof(expr.params[3]) * 0xFF : 0xFF
+                ),
+                to_color_component(
+                    params_len >= 1 ? stoi(expr.params[0]) : 0
+                ),
+                to_color_component(
+                    params_len >= 2 ? stoi(expr.params[1]) : 0
+                ),
+                to_color_component(
+                    params_len >= 3 ? stoi(expr.params[2]) : 0
+                )
             )
         );
     }
@@ -341,9 +357,15 @@ SkColor4f W3CSkColorParser::rgba_from_rgb_expr(string &str) {
         return SkColor4f::FromColor(
             SkColorSetARGB(
                 0XFF,
-                params_len >= 1 ? stoi(expr.params[0]) : 0,
-                params_len >= 2 ? stoi(expr.params[1]) : 0,
-                params_len >= 3 ? stoi(expr.params[2]) : 0
+                to_color_component(
+                    params_len >= 1 ? stoi(expr.params[0]) : 0
+                ),
+                to_color_component(
+                    params_len >= 2 ? stoi(expr.params[1]) : 0
+                ),
+                to_color_component(
+                    params_len >= 3 ? stoi(expr.params[2]) : 0
+                )
             )
         );
     }

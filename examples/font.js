@@ -11,7 +11,7 @@ registerFont(path.join(__dirname, './OswaldBold.ttf'))
 const canvas = createCanvas(500, 800)
 const ctx = canvas.getContext('2d')
 
-ctx.fillStyle = 'rgba(128,80,0,0.5)'
+ctx.fillStyle = '#FGG'
 console.log(ctx.fillStyle)
 
 ctx.fillStyle = '#FFF'

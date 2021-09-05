@@ -14,6 +14,7 @@ private:
     static const SkColorMap semantic_color_map;
     
     static int h(char c);
+    static int to_color_component(int val);
     static float hue_to_rgb(float t1, float t2, float hue);
     static SkColor4f rgba_from_hex_string(string &str);
     static SkColor4f rgba_from_rgb_expr(string &str);
