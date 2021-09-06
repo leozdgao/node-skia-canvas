@@ -558,13 +558,15 @@ napi_value CanvasRenderingContext2D::SetShadowColor(napi_env env, napi_callback_
     GET_CB_INFO(env, info, status, 1)
 
     string shadow_color_str = node_skia_helpers::get_utf8_string(env, argv[0]);
-    SkColor4f shadow_color = W3CSkColorParser::rgba_from_string(shadow_color_str);
+    shared_ptr<SkColor4f> shadow_color = W3CSkColorParser::rgba_from_string(shadow_color_str);
 
-    CanvasRenderingContext2D* ctx;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    if (shadow_color != nullptr) {
+        CanvasRenderingContext2D* ctx;
+        status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    W3CSkColorParser::color_mix_with_alpha(shadow_color, ctx->states_.top().global_alpha_);
-    ctx->states_.top().shadow_color = shadow_color;
+        W3CSkColorParser::color_mix_with_alpha(*shadow_color, ctx->states_.top().global_alpha_);
+        ctx->states_.top().shadow_color = *shadow_color;
+    }
 
     return nullptr;
 }
@@ -1588,9 +1590,13 @@ void CanvasRenderingContext2D::fill_with_dye(SkPaint& paint, Napi::Value value) 
     } else if (value.IsString()) {
         // color
         string fill_style = value.ToString().Utf8Value();
-        SkColor4f fill_style_color = W3CSkColorParser::rgba_from_string(fill_style);
-        W3CSkColorParser::color_mix_with_alpha(fill_style_color, this->states_.top().global_alpha_);
-        paint.setShader(nullptr);
-        paint.setColor4f(fill_style_color);
+        shared_ptr<SkColor4f> fill_style_color = W3CSkColorParser::rgba_from_string(fill_style);
+
+        if (fill_style_color != nullptr) {
+            W3CSkColorParser::color_mix_with_alpha(*fill_style_color, this->states_.top().global_alpha_);
+
+            paint.setShader(nullptr);
+            paint.setColor4f(*fill_style_color);
+        }
     }
 }

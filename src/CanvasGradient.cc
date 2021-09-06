@@ -84,7 +84,7 @@ Napi::Object CanvasGradient::Init(Napi::Env env, Napi::Object exports) {
 
 void CanvasGradient::AddColorStop(const Napi::CallbackInfo& info) {
     SkScalar p = 0;
-    SkColor4f color;
+    shared_ptr<SkColor4f> color;
 
     if (info[0].IsNumber()) {
         p = info[0].ToNumber().FloatValue();
@@ -95,9 +95,11 @@ void CanvasGradient::AddColorStop(const Napi::CallbackInfo& info) {
         color = W3CSkColorParser::rgba_from_string(color_str);
     }
 
-    colors.push_back({ .pos = p, .color = color });
+    if (color != nullptr) {
+        colors.push_back({ .pos = p, .color = *color });
 
-    std::sort(this->colors.begin(), this->colors.end(), [](GradientPosColor a, GradientPosColor b) -> bool {
-        return a.pos < b.pos;
-    });
+        std::sort(this->colors.begin(), this->colors.end(), [](GradientPosColor a, GradientPosColor b) -> bool {
+            return a.pos < b.pos;
+        });
+    }
 };

@@ -1,10 +1,18 @@
+#include <algorithm>
 #include <iostream>
 
 #include "W3CSkColorParser.h"
 #include "helpers.h"
 
+using std::round;
 using std::stoi;
 using std::stof;
+
+bool is_number(const std::string& s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && (std::isdigit(*it) || *it == '.' || *it == '-')) ++it;
+    return !s.empty() && it == s.end();
+}
 
 const SkColorMap W3CSkColorParser::semantic_color_map = {
     // 'transparent' keyword
@@ -173,7 +181,8 @@ const SkColorMap W3CSkColorParser::semantic_color_map = {
  * - hsla(h, s, l, a)
  * - sementics name
  */
-SkColor4f W3CSkColorParser::rgba_from_string(string &str) {
+
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_string(string &str) {
     if (str[0] == '#') {
         return rgba_from_hex_string(str);
     } else if (str.rfind("rgba", 0) == 0) {
@@ -188,11 +197,11 @@ SkColor4f W3CSkColorParser::rgba_from_string(string &str) {
         auto iter = semantic_color_map.find(str);
 
         if (iter != semantic_color_map.end()) {
-            return SkColor4f::FromColor(iter->second);
+            return std::make_shared<SkColor4f>(SkColor4f::FromColor(iter->second));
         }
     }
 
-    return SkColor4f::FromColor(SK_ColorBLACK);
+    return nullptr;
 };
 
 void W3CSkColorParser::color_mix_with_alpha(SkColor4f &color, double alpha) {
@@ -205,6 +214,41 @@ int W3CSkColorParser::to_color_component(int color) {
     }
 
     return color > 255 ? 255 : color;
+}
+
+float W3CSkColorParser::normalize_deg(string& deg_str) {
+    // end with deg
+    if (deg_str.find_first_of("deg") == deg_str.size() - 4 || is_number(deg_str)) {
+        float deg = fmod(stof(deg_str), 360.0);
+        if (deg < 0) deg += 360;
+
+        return deg / 360.0;
+    } else if (deg_str.find_first_of("rad") == deg_str.size() - 4) {
+        float v = stof(deg_str) / (2 * M_PI);
+        v = v - (int) v;
+
+        if (v < 0) v += 1;
+
+        return v;
+    }
+
+    return -1;
+}
+
+float W3CSkColorParser::normalize_percent(string &per) {
+    if (
+        (per.find_first_of('%') == per.size() - 1) &&
+        is_number(per.substr(0, per.size() - 1))
+    ) {
+        float pert = stof(per);
+
+        if (pert <= 0) return 0;
+        if (pert >= 100) return 1;
+
+        return pert / 100.0;
+    }
+
+    return -1;
 }
 
 int W3CSkColorParser::h(char c) {
@@ -238,26 +282,29 @@ int W3CSkColorParser::h(char c) {
   return 0;
 }
 
-float W3CSkColorParser::hue_to_rgb(float t1, float t2, float hue) {
-  if (hue < 0)
-    hue += 6;
-  if (hue >= 6)
-    hue -= 6;
+float W3CSkColorParser::hue_to_rgb(float p, float q, float t) {
+    if (t < 0) t += 1;
+    if (t > 1) t-= 1;
+    if(t < 1/6.0) return p + (q - p) * 6 * t;
+    if(t < 1/2.0) return q;
+    if(t < 2/3.0) return p + (q - p) * (2/3.0 - t) * 6;
 
-  if (hue < 1)
-    return (t2 - t1) * hue + t1;
-  else if (hue < 3)
-    return t2;
-  else if (hue < 4)
-    return (t2 - t1) * (4 - hue) + t1;
-  else
-    return t1;
+    return p;
 }
 
-SkColor4f W3CSkColorParser::rgba_from_hex_string(string &str) {
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_hex_string(string &str) {
     string hex_color_str = str[0] == '#' ? str.substr(1) : str;
     size_t len = hex_color_str.size();
     SkColor color = SK_ColorBLACK;
+
+    // if char is not in [0-9a-fA-F], just return nullptr
+    for (char c : hex_color_str) {
+        if (
+            !(c >= '0' && c <= '9') &&
+            !(c >= 'a' && c <= 'f') &&
+            !(c >= 'A' && c <= 'F')
+        ) return nullptr;
+    }
     
     switch (len) {
         // RRGGBBAA
@@ -318,118 +365,138 @@ SkColor4f W3CSkColorParser::rgba_from_hex_string(string &str) {
         };
     }
 
-    return SkColor4f::FromColor(color);
+    return std::make_shared<SkColor4f>(SkColor4f::FromColor(color));
 };
 
-SkColor4f W3CSkColorParser::rgba_from_rgba_expr(string &str) {
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_rgba_expr(string &str) {
     node_skia_helpers::FunctionExpression expr = node_skia_helpers::parse_func_str(str);
 
     if (expr.name == "rgba") {
         size_t params_len = expr.params.size();
 
-        return SkColor4f::FromColor(
+        if (params_len < 3) {
+            return nullptr;
+        }
+
+        return std::make_shared<SkColor4f>(SkColor4f::FromColor(
             SkColorSetARGB(
                 to_color_component(
                     params_len >= 4 ? stof(expr.params[3]) * 0xFF : 0xFF
                 ),
-                to_color_component(
-                    params_len >= 1 ? stoi(expr.params[0]) : 0
-                ),
-                to_color_component(
-                    params_len >= 2 ? stoi(expr.params[1]) : 0
-                ),
-                to_color_component(
-                    params_len >= 3 ? stoi(expr.params[2]) : 0
-                )
+                to_color_component(stoi(expr.params[0])),
+                to_color_component(stoi(expr.params[1])),
+                to_color_component(stoi(expr.params[2]))
             )
-        );
+        ));
     }
 
-    return SkColor4f::FromColor(SK_ColorBLACK);
+    return nullptr;
 };
 
-SkColor4f W3CSkColorParser::rgba_from_rgb_expr(string &str) {
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_rgb_expr(string &str) {
     node_skia_helpers::FunctionExpression expr = node_skia_helpers::parse_func_str(str);
 
     if (expr.name == "rgb") {
         size_t params_len = expr.params.size();
 
-        return SkColor4f::FromColor(
+        if (params_len < 3) {
+            return nullptr;
+        }
+
+        return std::make_shared<SkColor4f>(SkColor4f::FromColor(
             SkColorSetARGB(
                 0XFF,
-                to_color_component(
-                    params_len >= 1 ? stoi(expr.params[0]) : 0
-                ),
-                to_color_component(
-                    params_len >= 2 ? stoi(expr.params[1]) : 0
-                ),
-                to_color_component(
-                    params_len >= 3 ? stoi(expr.params[2]) : 0
-                )
+                to_color_component(stoi(expr.params[0])),
+                to_color_component(stoi(expr.params[1])),
+                to_color_component(stoi(expr.params[2]))
             )
-        );
+        ));
     }
 
-    return SkColor4f::FromColor(SK_ColorBLACK);
+    return nullptr;
 }
 
-SkColor4f W3CSkColorParser::rgba_from_hsla_expr(string &str) {
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_hsla_expr(string &str) {
     node_skia_helpers::FunctionExpression expr = node_skia_helpers::parse_func_str(str);
 
     if (expr.name == "hsla") {
         size_t params_len = expr.params.size();
-        float h_deg = params_len >= 1 ? stof(expr.params[0]) : 0;
-        float s = params_len >= 2 ? stof(expr.params[1]) : 1;
-        float l = params_len >= 3 ? stof(expr.params[2]) : 0.5;
+
+        if (params_len < 3) {
+            return nullptr;
+        }
+
+        float r, g, b;
+        float h = normalize_deg(expr.params[0]);
+        float s = normalize_percent(expr.params[1]);
+        float l = normalize_percent(expr.params[2]);
         float a = params_len >= 4 ? stof(expr.params[3]) : 1;
-        float h = (6 * h_deg) / 360.0f, m1, m2;
 
-        if (l<=0.5)
-            m2=l*(s+1);
-        else
-            m2=l+s-l*s;
+        if (h < 0 || s < 0 || l < 0) {
+            return nullptr;
+        }
 
-        m1 = l*2 - m2;
+        if (s == 0) {
+            r = g = b = l;
+        } else {
+            float q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            float p = 2.0 * l - q;
+            r = hue_to_rgb(p, q, h + 1/3.0);
+            g = hue_to_rgb(p, q, h);
+            b = hue_to_rgb(p, q, h - 1/3.0);
+        }
         
-        return SkColor4f::FromColor(
+        return std::make_shared<SkColor4f>(SkColor4f::FromColor(
             SkColorSetARGB(
                 a * 255,
-                hue_to_rgb(m1, m2, h + 2) * 255 + 0.5,
-                hue_to_rgb(m1, m2, h) * 255 + 0.5,
-                hue_to_rgb(m1, m2, h - 2) * 255 + 0.5
+                round(r * 255),
+                round(g * 255),
+                round(b * 255)
             )
-        );
+        ));
     }
 
-    return SkColor4f::FromColor(SK_ColorBLACK);
+    return nullptr;
 }
 
-SkColor4f W3CSkColorParser::rgba_from_hsl_expr(string &str) {
+shared_ptr<SkColor4f> W3CSkColorParser::rgba_from_hsl_expr(string &str) {
     node_skia_helpers::FunctionExpression expr = node_skia_helpers::parse_func_str(str);
 
     if (expr.name == "hsl") {
         size_t params_len = expr.params.size();
-        float h_deg = params_len >= 1 ? stof(expr.params[0], nullptr) : 0;
-        float s = params_len >= 2 ? stof(expr.params[1], nullptr) : 1;
-        float l = params_len >= 3 ? stof(expr.params[2], nullptr) : 0.5;
-        float h = (6 * h_deg) / 360.0f, m1, m2;
 
-        if (l<=0.5)
-            m2=l*(s+1);
-        else
-            m2=l+s-l*s;
+        if (params_len < 3) {
+            return nullptr;
+        }
 
-        m1 = l*2 - m2;
-        
-        return SkColor4f::FromColor(
+        float r, g, b;
+        float h = normalize_deg(expr.params[0]);
+        float s = normalize_percent(expr.params[1]);
+        float l = normalize_percent(expr.params[2]);
+
+        if (h < 0 || s < 0 || l < 0) {
+            return nullptr;
+        }
+
+        if (s == 0) {
+            r = g = b = l;
+        } else {
+            float q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            float p = 2.0 * l - q;
+            r = hue_to_rgb(p, q, h + 1/3.0);
+            g = hue_to_rgb(p, q, h);
+            b = hue_to_rgb(p, q, h - 1/3.0);
+        }
+
+        return std::make_shared<SkColor4f>(SkColor4f::FromColor(
             SkColorSetARGB(
                 0xFF,
-                hue_to_rgb(m1, m2, h + 2) * 255 + 0.5,
-                hue_to_rgb(m1, m2, h) * 255 + 0.5,
-                hue_to_rgb(m1, m2, h - 2) * 255 + 0.5
+                round(r * 255),
+                round(g * 255),
+                round(b * 255)
             )
-        );
+        ));
     }
 
-    return SkColor4f::FromColor(SK_ColorBLACK);
+    return nullptr;
 }

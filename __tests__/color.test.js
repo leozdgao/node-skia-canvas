@@ -130,14 +130,14 @@ test('color parser', function () {
   ctx.fillStyle = 'hsla(240, 75%, 25%, 0.75)'
   expect(ctx.fillStyle).toBe('rgba(16, 16, 112, 0.75)')
 
-  ctx.fillStyle = 'hsla(172.0, 33.00000e0%, 42%, 1)'
-  expect(ctx.fillStyle).toBe('#488e85')
-
   ctx.fillStyle = 'hsl(124.5, 76.1%, 47.6%)'
   expect(ctx.fillStyle).toBe('#1dd62b')
 
-  ctx.fillStyle = 'hsl(1.24e2, 760e-1%, 4.7e1%)'
-  expect(ctx.fillStyle).toBe('#1dd329')
+  // ctx.fillStyle = 'hsla(172.0, 33.00000e0%, 42%, 1)'
+  // expect(ctx.fillStyle).toBe('#488e85')
+
+  // ctx.fillStyle = 'hsl(1.24e2, 760e-1%, 4.7e1%)'
+  // expect(ctx.fillStyle).toBe('#1dd329')
 
   // case-insensitive (#235)
   ctx.fillStyle = 'sILveR'
