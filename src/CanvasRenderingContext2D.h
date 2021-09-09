@@ -64,7 +64,8 @@ public:
     static napi_value Constructor(napi_env env);
     static void Destructor(napi_env env, void* nativeObject, void* finalize_hint);
 
-    void SetCanvas(SkCanvas* canvas);
+    void setCanvas(SkCanvas* canvas);
+    void resetStates();
 
 private:
     explicit CanvasRenderingContext2D();

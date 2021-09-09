@@ -56,7 +56,8 @@ void Canvas::SetWidth(const Napi::CallbackInfo& info, const Napi::Value& value) 
 
     this->width_ = width.Int32Value();
     this->rasterSurface_ = SkSurface::MakeRasterN32Premul(this->width_, this->height_);
-    this->inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
+    this->inner_ctx->setCanvas(this->rasterSurface_->getCanvas());
+    this->inner_ctx->resetStates();
 }
 
 Napi::Value Canvas::GetHeight(const Napi::CallbackInfo& info) {
@@ -68,7 +69,8 @@ void Canvas::SetHeight(const Napi::CallbackInfo& info, const Napi::Value& value)
 
     this->height_ = height.Int32Value();
     this->rasterSurface_ = SkSurface::MakeRasterN32Premul(this->width_, this->height_);
-    this->inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
+    this->inner_ctx->setCanvas(this->rasterSurface_->getCanvas());
+    this->inner_ctx->resetStates();
 }
 
 Napi::Value Canvas::GetContext(const Napi::CallbackInfo& info) {
@@ -85,7 +87,7 @@ Napi::Value Canvas::GetContext(const Napi::CallbackInfo& info) {
         CanvasRenderingContext2D* inner_ctx;
         status = napi_unwrap(info.Env(), this->ctx_, reinterpret_cast<void**>(&inner_ctx));
         this->inner_ctx = inner_ctx;
-        inner_ctx->SetCanvas(this->rasterSurface_->getCanvas());
+        inner_ctx->setCanvas(this->rasterSurface_->getCanvas());
     }
     
     return Napi::Value::From(info.Env(), this->ctx_);

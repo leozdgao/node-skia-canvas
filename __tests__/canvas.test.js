@@ -10,31 +10,31 @@ describe('Canvas', () => {
     expect(Canvas.prototype.hasOwnProperty('width'))
   })
 
-  it('color serialization', function () {
-    const canvas = new Canvas(200, 200)
-    const ctx = canvas.getContext('2d')
+  it('Canvas#{width,height}=', function () {
+    const canvas = new Canvas(100, 200)
+    const context = canvas.getContext('2d')
 
-    ;['fillStyle', 'strokeStyle', 'shadowColor'].forEach(function (prop) {
-      ctx[prop] = '#FFFFFF'
-      expect(ctx[prop]).toBe('#ffffff')
+    expect(canvas.width).toBe(100)
+    expect(canvas.height).toBe(200)
 
-      ctx[prop] = '#FFF'
-      expect(ctx[prop]).toBe('#ffffff')
+    context.globalAlpha = 0.5
+    context.fillStyle = '#0f0'
+    context.strokeStyle = '#0f0'
+    context.font = '20px arial'
+    context.fillRect(0, 0, 1, 1)
 
-      ctx[prop] = 'rgba(128, 200, 128, 1)'
-      expect(ctx[prop]).toBe('#80c880')
+    canvas.width = 50
+    canvas.height = 70
+    expect(canvas.width).toBe(50)
+    expect(canvas.height).toBe(70)
 
-      ctx[prop] = 'rgba(128,80,0,0.5)'
-      expect(ctx[prop]).toBe('rgba(128, 80, 0, 0.5)')
+    canvas.width |= 0
 
-      ctx[prop] = 'rgba(128,80,0,0.75)'
-      expect(ctx[prop]).toBe('rgba(128, 80, 0, 0.75)')
-
-      if (prop === 'shadowColor') return
-
-      const grad = ctx.createLinearGradient(0, 0, 0, 150)
-      ctx[prop] = grad
-      expect(Object.is(ctx[prop], grad)).toBe(true)
-    })
+    expect(context.lineWidth).toBe(1)
+    expect(context.globalAlpha).toBe(1)
+    expect(context.fillStyle).toBe('#000000')
+    expect(context.strokeStyle).toBe('#000000')
+    expect(context.font).toBe('10px sans-serif')
+    expect(context.getImageData(0, 0, 1, 1).data.join(',')).toBe('0,0,0,0')
   })
 })

@@ -37,6 +37,11 @@ CanvasRenderingContext2D::~CanvasRenderingContext2D() {
 }
 
 void CanvasRenderingContext2D::init_canvas_state() {
+    if (!states_.empty()) {
+        // clear first
+        stack<CanvasState>().swap(states_);
+    }
+
     CanvasState init_state = CanvasState();
     init_state.paint_for_fill_ = SkPaint();
     init_state.paint_for_fill_.setStyle(SkPaint::kFill_Style);
@@ -46,6 +51,7 @@ void CanvasRenderingContext2D::init_canvas_state() {
     init_state.paint_for_stroke_.setStyle(SkPaint::kStroke_Style);
     init_state.paint_for_stroke_.setAntiAlias(true);
     init_state.paint_for_stroke_.setStrokeMiter(10.0);
+    init_state.paint_for_stroke_.setStrokeWidth(1.0);
 
     init_state.pargf_style_ = ParagraphStyle();
     init_state.pargf_style_.turnHintingOff();
@@ -193,9 +199,12 @@ void CanvasRenderingContext2D::Destructor(napi_env env, void* nativeObject, void
     reinterpret_cast<CanvasRenderingContext2D*>(nativeObject)->~CanvasRenderingContext2D();
 }
 
-void CanvasRenderingContext2D::SetCanvas(SkCanvas* canvas) {
+void CanvasRenderingContext2D::setCanvas(SkCanvas* canvas) {
     canvas_ = canvas;
 };
+void CanvasRenderingContext2D::resetStates() {
+    init_canvas_state();
+}
 
 // ================================== Properties ==================================
 
