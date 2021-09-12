@@ -698,7 +698,9 @@ napi_value CanvasRenderingContext2D::SetTextAlign(napi_env env, napi_callback_in
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
     
-    ctx->states_.top().pargf_style_.setTextAlign(StyleParser::fromStrToTextAlign(text_align));
+    ctx->states_.top().pargf_style_.setTextAlign(
+        StyleParser::fromStrToTextAlign(text_align, ctx->states_.top().pargf_style_.getTextAlign())
+    );
 
     return nullptr;
 }

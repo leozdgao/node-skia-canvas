@@ -69,7 +69,7 @@ string StyleParser::fromStrokeJoinToStr(SkPaint::Join& join) {
     return "miter";
 }
 
-TextAlign StyleParser::fromStrToTextAlign(string& align_name) {
+TextAlign StyleParser::fromStrToTextAlign(string& align_name, TextAlign default_value) {
     if (align_name == "center") {
         return TextAlign::kCenter;
     }
@@ -94,7 +94,7 @@ TextAlign StyleParser::fromStrToTextAlign(string& align_name) {
         return TextAlign::kStart;
     }
 
-    return TextAlign::kStart;
+    return default_value;
 }
 
 string StyleParser::fromTextAlignToStr(TextAlign& align) {

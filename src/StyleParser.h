@@ -33,7 +33,7 @@ public:
     static string fromStrokeCapToStr(SkPaint::Cap& cap);
     static SkPaint::Join fromStrToStrokeJoin(string& join);
     static string fromStrokeJoinToStr(SkPaint::Join& join);
-    static TextAlign fromStrToTextAlign(string& align);
+    static TextAlign fromStrToTextAlign(string& align, TextAlign default_value = TextAlign::kStart);
     static string fromTextAlignToStr(TextAlign& align);
     static TextBaseline fromStrToTextBaseline(string& baseline);
     static string fromTextBaselineToStr(TextBaseline& baseline);
