@@ -60,7 +60,17 @@ Napi::Value ImageData::GetHeight(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value ImageData::GetData(const Napi::CallbackInfo& info) {
+  size_t len = this->width_ * this->height_ * 4;
+  Napi::ArrayBuffer ab = Napi::ArrayBuffer::New(info.Env(), len);
+  auto buffer = Napi::Uint8Array::New(info.Env(), len, ab, 0, napi_uint8_clamped_array);
+  
+  // for (size_t i = 0; i < len; i++) {
+  //   buffer[i] = ((unsigned char *)this->data_)[i];
+  // }
+
+  return buffer;
+
   // Napi::ArrayBuffer ab = Napi::ArrayBuffer::New(info.Env(), this->data_, this->width_ * this->height_ * 4);
   // return Napi::Uint8Array::New(info.Env(), this->width_ * this->height_, ab, 0, napi_uint8_clamped_array);
-  return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)this->data_, this->width_ * this->height_ * 4);
+  // return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)this->data_, this->width_ * this->height_ * 4);
 }

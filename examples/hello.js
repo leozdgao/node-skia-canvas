@@ -5,6 +5,12 @@ const c = new Canvas(500, 500)
 console.log(c.width, c.height)
 const ctx = c.getContext('2d')
 
+const imageData = ctx.createImageData(10, 10)
+console.log(imageData.data, imageData.data instanceof Uint8ClampedArray)
+imageData[0] = 80
+imageData[1] = 800
+console.log(imageData.data[0], imageData[1])
+
 const gradient = new CanvasGradient('linear', 20, 0, 220, 0)
 gradient.addColorStop(0, 'green')
 gradient.addColorStop(0.5, 'cyan')
