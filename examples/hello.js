@@ -5,31 +5,31 @@ const c = new Canvas(500, 500)
 console.log(c.width, c.height)
 const ctx = c.getContext('2d')
 
-const imageData = ctx.createImageData(10, 10)
-console.log(imageData.data, imageData.data instanceof Uint8ClampedArray)
-imageData[0] = 80
-imageData[1] = 800
-console.log(imageData.data[0], imageData[1])
+// const imageData = ctx.createImageData(10, 10)
+// console.log(imageData.data, imageData.data instanceof Uint8ClampedArray)
+// imageData[0] = 80
+// imageData[1] = 800
+// console.log(imageData.data[0], imageData[1])
 
-const gradient = new CanvasGradient('linear', 20, 0, 220, 0)
-gradient.addColorStop(0, 'green')
-gradient.addColorStop(0.5, 'cyan')
-gradient.addColorStop(1, 'green')
+// const gradient = new CanvasGradient('linear', 20, 0, 220, 0)
+// gradient.addColorStop(0, 'green')
+// gradient.addColorStop(0.5, 'cyan')
+// gradient.addColorStop(1, 'green')
 
-const rgradient = new CanvasGradient('radial', 110, 90, 100, 100, 30, 70)
-// Add three color stops
-rgradient.addColorStop(0, 'pink')
-rgradient.addColorStop(0.9, 'white')
-rgradient.addColorStop(1, 'green')
+// const rgradient = new CanvasGradient('radial', 110, 90, 100, 100, 30, 70)
+// // Add three color stops
+// rgradient.addColorStop(0, 'pink')
+// rgradient.addColorStop(0.9, 'white')
+// rgradient.addColorStop(1, 'green')
 
 // ctx.fillStyle = '#FFF';
 // ctx.fillRect(0, 0, 500, 500);
 
-ctx.fillStyle = gradient
-ctx.fillRect(20, 20, 200, 100)
+// ctx.fillStyle = gradient
+// ctx.fillRect(20, 20, 200, 100)
 
-ctx.fillStyle = rgradient
-ctx.fillRect(20, 20, 160, 160)
+// ctx.fillStyle = rgradient
+// ctx.fillRect(20, 20, 160, 160)
 
 // console.log('context', ctx);
 // console.log(ctx.fillStyle);
@@ -46,10 +46,10 @@ ctx.fillRect(20, 20, 160, 160)
 
 // ctx.fillText('aaaa');
 
-ctx.shadowColor = 'blue'
-ctx.shadowBlur = 4
-ctx.shadowOffsetX = 10
-ctx.shadowOffsetY = 10
+// ctx.shadowColor = 'blue'
+// ctx.shadowBlur = 4
+// ctx.shadowOffsetX = 10
+// ctx.shadowOffsetY = 10
 
 ctx.fillStyle = 'red'
 ctx.fillRect(100, 100, 50, 50)
@@ -64,19 +64,6 @@ console.log('lineWidth', ctx.lineWidth)
 ctx.lineWidth = 5
 
 ctx.strokeRect(200, 200, 50, 50)
-
-ctx.clearRect(120, 120, 20, 20)
-
-ctx.fillStyle = '#000'
-console.log(ctx.measureText('123xfg'))
-
-console.log(ctx.textAlign)
-ctx.textAlign = 'center'
-
-console.log(ctx.textAlign)
-console.log(ctx.textBaseline)
-ctx.textBaseline = 'top'
-console.log(ctx.measureText('123'))
 
 const img = fs.readFileSync('./examples/leize.jpeg')
 ctx.drawImage(img, 0, 0, 1044, 1045, 10, 10, 300, 300)
@@ -147,10 +134,10 @@ ctx.strokeRect(0, 100, 400, 1)
 
 // ctx.fillRect(200, 300, 60, 80);
 
-// const data = ctx.getImageData(200, 200, 300, 300);
-// console.log(data.width, data.height, data.data);
+const data = ctx.getImageData(200, 200, 300, 300)
+console.log(data.width, data.height, data.data)
 
-// ctx.putImageData(data, 0, 0);
+ctx.putImageData(data, 0, 0)
 
 // const dd = ctx.createImageData(2, 2);
 // console.log(dd.width, dd.height, dd.data);

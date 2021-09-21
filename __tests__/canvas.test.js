@@ -1,4 +1,4 @@
-const { Canvas } = require('../')
+const { Canvas, createCanvas } = require('../')
 
 describe('Canvas', () => {
   it('Prototype and ctor are well-shaped, don\'t hit asserts on accessors (GH-803)', function () {

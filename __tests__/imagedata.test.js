@@ -6,9 +6,9 @@ describe('ImageData', function () {
   const ctx = canvas.getContext('2d')
 
   it('should throw with invalid numeric arguments', function () {
-    expect(() => { ctx.createImageData(0, 0) }).toThrow(/width is zero/)
-    expect(() => { ctx.createImageData(1, 0) }).toThrow(/height is zero/)
-    expect(() => { ctx.createImageData(0) }).toThrow(TypeError)
+    expect(() => { ctx.createImageData(0, 0) }).toThrow(/width for/)
+    expect(() => { ctx.createImageData(1, 0) }).toThrow(/height for/)
+    expect(() => { ctx.createImageData(0) }).toThrow(Error)
   })
 
   it('should construct with width and height', function () {

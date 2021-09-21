@@ -35,16 +35,24 @@ Napi::Value Image::GetSource(const Napi::CallbackInfo& info) {
 }
 
 void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) {
-  Napi::Buffer buffer = value.As<Napi::Buffer<unsigned char>>();
-  data_ = buffer.Data();
-  len_ = buffer.Length();
+  if (value.IsNull()) {
+    data_ = nullptr;
+    image_ = nullptr;
+    len_ = 0;
+    width_ = 0;
+    height_ = 0;
+  } else {
+    Napi::Buffer buffer = value.As<Napi::Buffer<unsigned char>>();
+    data_ = buffer.Data();
+    len_ = buffer.Length();
 
-  image_ = SkImage::MakeFromEncoded(
-      SkData::MakeWithoutCopy(data_, len_)
-  );
+    image_ = SkImage::MakeFromEncoded(
+        SkData::MakeWithoutCopy(data_, len_)
+    );
 
-  width_ = image_->width();
-  height_ = image_->height();
+    width_ = image_->width();
+    height_ = image_->height();
+  }
 }
 
 sk_sp<SkImage> Image::getImage() {
