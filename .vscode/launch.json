@@ -26,7 +26,7 @@
         "type": "lldb",
         "request": "launch",
         "name": "lldb:node",
-        "program": "/Users/leozdgao/.nvm/versions/node/v14.16.1/bin/node",
+        "program": "node",
         "args": ["${workspaceFolder}/examples/font.js"],
         "cwd": "${workspaceFolder}",
         "preLaunchTask": "cmake-js build"

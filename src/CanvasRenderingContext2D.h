@@ -127,7 +127,6 @@ private:
     static napi_value BeginPath(napi_env env, napi_callback_info info);
     static napi_value BezierCurveTo(napi_env env, napi_callback_info info);
     static napi_value CreateImageData(napi_env env, napi_callback_info info);
-    static napi_value CreatePattern(napi_env env, napi_callback_info info);
     static napi_value ClearRect(napi_env env, napi_callback_info info);
     static napi_value Clip(napi_env env, napi_callback_info info);
     static napi_value ClosePath(napi_env env, napi_callback_info info);
@@ -144,6 +143,7 @@ private:
     static napi_value PutImageData(napi_env env, napi_callback_info info);
     static napi_value QuadraticCurveTo(napi_env env, napi_callback_info info);
     static napi_value Rect(napi_env env, napi_callback_info info);
+    static napi_value ResetTransform(napi_env env, napi_callback_info info);
     static napi_value Restore(napi_env env, napi_callback_info info);
     static napi_value Rotate(napi_env env, napi_callback_info info);
     static napi_value Save(napi_env env, napi_callback_info info);

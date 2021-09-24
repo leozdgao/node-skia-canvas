@@ -22,5 +22,5 @@ private:
   
   size_t width_;
   size_t height_;
-  void* data_;
+  void* data_ = nullptr;
 };

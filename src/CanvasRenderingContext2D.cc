@@ -95,7 +95,6 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("beginPath", BeginPath),
         DECLARE_NAPI_METHOD("bezierCurveTo", BezierCurveTo),
         DECLARE_NAPI_METHOD("createImageData", CreateImageData),
-        DECLARE_NAPI_METHOD("createPattern", CreatePattern),
         DECLARE_NAPI_METHOD("clearRect", ClearRect),
         DECLARE_NAPI_METHOD("clip", Clip),
         DECLARE_NAPI_METHOD("closePath", ClosePath),
@@ -112,6 +111,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_METHOD("putImageData", PutImageData),
         DECLARE_NAPI_METHOD("quadraticCurveTo", QuadraticCurveTo),
         DECLARE_NAPI_METHOD("rect", Rect),
+        DECLARE_NAPI_METHOD("resetTransform", ResetTransform),
         DECLARE_NAPI_METHOD("restore", Restore),
         DECLARE_NAPI_METHOD("rotate", Rotate),
         DECLARE_NAPI_METHOD("save", Save),
@@ -839,20 +839,6 @@ napi_value CanvasRenderingContext2D::CreateImageData(napi_env env, napi_callback
     return ImageData::CreateInstance(env, width, height, data->writable_data());
 }
 
-napi_value CanvasRenderingContext2D::CreatePattern(napi_env env, napi_callback_info info) {
-    napi_status status;
-    GET_CB_INFO(env, info, status, 2)
-
-    CanvasRenderingContext2D* ctx;
-    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
-
-    napi_value result;
-    // 判断输入是一个 Image
-    
-
-    return result;
-}
-
 napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info info) {
     napi_status status;
     GET_CB_INFO(env, info, status, 4)
@@ -877,16 +863,23 @@ napi_value CanvasRenderingContext2D::ClearRect(napi_env env, napi_callback_info 
 
 napi_value CanvasRenderingContext2D::Clip(napi_env env, napi_callback_info info) {
     napi_status status;
-    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+    GET_CB_INFO(env, info, status, 1)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    ctx->canvas_->clipPath(
-        ctx->states_.top().path_,
-        SkClipOp::kIntersect,
-        true
-    );
+    SkPath clip_path = ctx->states_.top().path_;
+
+    Napi::String str = Napi::Value::From(env, argv[0]).As<Napi::String>();
+    if (str.IsString() && str.Utf8Value() == "evenodd") {
+        clip_path.setFillType(SkPathFillType::kEvenOdd);
+    } else {
+        clip_path.setFillType(SkPathFillType::kWinding);
+    }
+    
+    ctx->canvas_->clipPath(clip_path, SkClipOp::kIntersect, true);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::ClosePath(napi_env env, napi_callback_info info) {
@@ -981,13 +974,21 @@ napi_value CanvasRenderingContext2D::Ellipse(napi_env env, napi_callback_info in
 
 napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info) {
     napi_status status;
-    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+    GET_CB_INFO(env, info, status, 1)
 
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
     ctx->render_to_canvas(ctx->states_.top().paint_for_fill_, [&](SkPaint& paint) {
-        ctx->canvas_->drawPath(ctx->states_.top().path_, paint);
+        SkPath fill_path = ctx->states_.top().path_;
+
+        Napi::String str = Napi::Value::From(env, argv[0]).As<Napi::String>();
+        if (str.IsString() && str.Utf8Value() == "evenodd") {
+            fill_path.setFillType(SkPathFillType::kEvenOdd);
+        } else {
+            fill_path.setFillType(SkPathFillType::kWinding);
+        }
+        ctx->canvas_->drawPath(fill_path, paint);
     });
 
     return nullptr;
@@ -1192,6 +1193,19 @@ napi_value CanvasRenderingContext2D::Rect(napi_env env, napi_callback_info info)
     ctx->states_.top().last_move_point_ = &move_point;
 
     ctx->states_.top().path_.addRect(SkRect::MakeXYWH(x, y, w, h));
+
+    return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::ResetTransform(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO_WITHOUT_ARG(env, info, status)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    ctx->states_.top().matrix_ = SkMatrix();
+    ctx->canvas_->resetMatrix();
 
     return nullptr;
 }
