@@ -1,18 +1,11 @@
-const fs = require('fs');
-const { Canvas } = require('./build/Debug/node-skia.node');
+const fs = require('fs')
+const { Canvas } = require('../')
 
-const c = new Canvas(300, 300);
-const ctx = c.getContext('2d');
+const c = new Canvas(300, 300)
+const ctx = c.getContext('2d')
 
-ctx.fillStyle = "#FFF";
+ctx.fillStyle = '#FFF'
 ctx.fillRect(0, 0, 300, 300)
-
-ctx.shadowColor = "#89F677";
-// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
-ctx.shadowBlur = 12;
-ctx.shadowOffsetX = 3;
-ctx.shadowOffsetY = 2;
-// console.log(ctx.shadowColor, ctx.shadowBlur, ctx.shadowOffsetX, ctx.shadowOffsetY);
 
 // Moved square
 // ctx.translate(110, 30);
@@ -26,27 +19,26 @@ ctx.shadowOffsetY = 2;
 // ctx.fillStyle = 'gray';
 // ctx.fillRect(0, 0, 80, 80);
 
-
 // ctx.restore();
 
 // Point of transform origin
-ctx.arc(0, 0, 5, 0, 2 * Math.PI);
-ctx.fillStyle = 'blue';
-ctx.fill();
+// ctx.arc(0, 0, 5, 0, 2 * Math.PI)
+// ctx.fillStyle = 'blue'
+// ctx.fill()
 
 // Non-rotated rectangle
-ctx.fillStyle = 'gray';
-ctx.fillRect(100, 0, 80, 20);
+ctx.fillStyle = 'gray'
+ctx.fillRect(100, 0, 80, 20)
 
 // Rotated rectangle
-ctx.rotate(Math.PI / 4);
+ctx.rotate(NaN)
 // ctx.translate(-100, 50);
-ctx.fillStyle = 'red';
-ctx.fillRect(100, 0, 80, 20);
+ctx.fillStyle = 'red'
+ctx.fillRect(100, 0, 80, 20)
 
-console.log(ctx.getTransform());
+console.log(ctx.getTransform())
 
 // Reset transformation matrix to the identity matrix
 // ctx.setTransform(1, 0, 0, 1, 0, 0);
 
-fs.writeFileSync("temp_transform.png", c.toBuffer());
+fs.writeFileSync('temp_transform.png', c.toBuffer())

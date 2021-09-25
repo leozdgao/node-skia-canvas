@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
       {
+        "type": "lldb",
+        "request": "launch",
+        "name": "lldb:node",
+        "program": "node",
+        "args": ["${workspaceFolder}/examples/transform.js"],
+        "cwd": "${workspaceFolder}",
+        "preLaunchTask": "cmake-js build"
+      },
+      {
         "type": "node",
         "request": "launch",
         "name": "Run selected Jest test",
@@ -21,15 +30,6 @@
           "${selectedText}"
         ],
         "console": "integratedTerminal",
-      },
-      {
-        "type": "lldb",
-        "request": "launch",
-        "name": "lldb:node",
-        "program": "node",
-        "args": ["${workspaceFolder}/examples/font.js"],
-        "cwd": "${workspaceFolder}",
-        "preLaunchTask": "cmake-js build"
       }
     ]
   }

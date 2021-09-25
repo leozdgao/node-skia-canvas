@@ -1232,13 +1232,18 @@ napi_value CanvasRenderingContext2D::Rotate(napi_env env, napi_callback_info inf
     CanvasRenderingContext2D* ctx;
     status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
 
-    double degree;
-    status = napi_get_value_double(env, argv[0], &degree);
+    Napi::Value arg0 = Napi::Value::From(env, argv[0]);
 
-    SkMatrix matrix = ctx->states_.top().matrix_;
-    matrix = matrix.preRotate(degree / M_PI * 180);
-    ctx->canvas_->setMatrix(matrix);
-    ctx->states_.top().matrix_ = matrix;
+    if (arg0.IsNumber()) {
+        double degree = arg0.As<Napi::Number>().DoubleValue();
+
+        if (!std::isnan(degree) && !std::isinf(degree)) {
+            SkMatrix matrix = ctx->states_.top().matrix_;
+            matrix = matrix.preRotate(degree / M_PI * 180);
+            ctx->canvas_->setMatrix(matrix);
+            ctx->states_.top().matrix_ = matrix;
+        }
+    }
 
     return nullptr;
 }

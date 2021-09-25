@@ -1,3 +1,4 @@
+// #include <iostream>
 #include "ImageData.h"
 
 ImageData::ImageData(const Napi::CallbackInfo& info) : Napi::ObjectWrap<ImageData>(info) {
@@ -66,6 +67,8 @@ Napi::Value ImageData::GetData(const Napi::CallbackInfo& info) {
   for (size_t i = 0; i < len; i++) {
     buffer[i] = ((unsigned char *)this->data_)[i];
   }
+  
+  // std::cout << this->data_ << std::endl;
 
   return buffer;
 
