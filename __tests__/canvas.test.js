@@ -236,34 +236,34 @@ describe('Canvas', () => {
     })
   })
 
-  // it('Context2d#currentTransform', function () {
-  //   const canvas = new Canvas(20, 20)
-  //   const ctx = canvas.getContext('2d')
+  it('Context2d#currentTransform', function () {
+    const canvas = new Canvas(20, 20)
+    const ctx = canvas.getContext('2d')
 
-  //   ctx.scale(0.1, 0.3)
-  //   const mat1 = ctx.getTransform()
-  //   expect(mat1.a).toBe(0.1)
-  //   expect(mat1.b).toBe(0)
-  //   expect(mat1.c).toBe(0)
-  //   expect(mat1.d).toBe(0.3)
-  //   expect(mat1.e).toBe(0)
-  //   expect(mat1.f).toBe(0)
+    ctx.scale(0.1, 0.3)
+    const mat1 = ctx.getTransform()
+    expect(Math.abs(mat1.a - 0.1) < 1e-6).toBe(true)
+    expect(Math.abs(mat1.b - 0) < 1e-6).toBe(true)
+    expect(Math.abs(mat1.c - 0) < 1e-6).toBe(true)
+    expect(Math.abs(mat1.d - 0.3) < 1e-6).toBe(true)
+    expect(Math.abs(mat1.e - 0) < 1e-6).toBe(true)
+    expect(Math.abs(mat1.f - 0) < 1e-6).toBe(true)
 
-  //   ctx.resetTransform()
-  //   const mat2 = ctx.getTransform()
-  //   expect(mat2.a).toBe(1)
-  //   expect(mat2.d).toBe(1)
+    ctx.resetTransform()
+    const mat2 = ctx.getTransform()
+    expect(Math.abs(mat2.a - 1) < 1e-6).toBe(true)
+    expect(Math.abs(mat2.d - 1) < 1e-6).toBe(true)
 
-  //   const mat3 = mat1
-  //   expect(mat3.a).toBe(0.1)
-  //   expect(mat3.d).toBe(0.3)
+    const mat3 = mat1
+    expect(Math.abs(mat3.a - 0.1) < 1e-6).toBe(true)
+    expect(Math.abs(mat3.d - 0.3) < 1e-6).toBe(true)
 
-  //   ctx.setTransform(ctx.getTransform())
-  //   expect(mat3).toBe(ctx.getTransform())
+    ctx.setTransform(mat3)
+    expect(mat3).toStrictEqual(ctx.getTransform())
 
-  //   ctx.setTransform(mat3.a, mat3.b, mat3.c, mat3.d, mat3.e, mat3.f)
-  //   expect(mat3).toBe(ctx.getTransform())
-  // })
+    ctx.setTransform(mat3.a, mat3.b, mat3.c, mat3.d, mat3.e, mat3.f)
+    expect(mat3).toStrictEqual(ctx.getTransform())
+  })
 
   it('Context2d#createImageData(ImageData)', function () {
     const canvas = new Canvas(20, 20)
