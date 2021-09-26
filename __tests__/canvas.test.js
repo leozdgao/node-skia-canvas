@@ -426,6 +426,7 @@ describe('Canvas', () => {
     }
   })
 
+  // FIXME: segmentfault issue
   // it('Context2d#createPattern(Canvas).setTransform()', function () {
   //   const DOMMatrix = require('../').DOMMatrix
 
@@ -546,49 +547,49 @@ describe('Canvas', () => {
     expect(imageData.data[i + 3]).toBe(255)
   })
 
-  // describe('Context2d#putImageData()', function () {
-  //   it('throws for invalid arguments', function () {
-  //     const canvas = createCanvas(2, 1)
-  //     const ctx = canvas.getContext('2d')
+  describe('Context2d#putImageData()', function () {
+    it('throws for invalid arguments', function () {
+      const canvas = createCanvas(2, 1)
+      const ctx = canvas.getContext('2d')
 
-  //     expect(() => ctx.putImageData({}, 0, 0), TypeError)
-  //     expect(() => ctx.putImageData(undefined, 0, 0), TypeError)
-  //   })
+      expect(() => ctx.putImageData({}, 0, 0)).toThrow(TypeError)
+      expect(() => ctx.putImageData(undefined, 0, 0)).toThrow(TypeError)
+    })
 
-  //   it('works for negative source values', function () {
-  //     const canvas = createCanvas(2, 2)
-  //     const ctx = canvas.getContext('2d')
-  //     const srcImageData = ctx.createImageData(new Uint8ClampedArray([
-  //       1, 2, 3, 255, 5, 6, 7, 255,
-  //       0, 1, 2, 255, 4, 5, 6, 255
-  //     ]), 2)
+    // it('works for negative source values', function () {
+    //   const canvas = createCanvas(2, 2)
+    //   const ctx = canvas.getContext('2d')
+    //   const srcImageData = ctx.createImageData(new Uint8ClampedArray([
+    //     1, 2, 3, 255, 5, 6, 7, 255,
+    //     0, 1, 2, 255, 4, 5, 6, 255
+    //   ]), 2)
 
-  //     ctx.putImageData(srcImageData, -1, -1)
+    //   ctx.putImageData(srcImageData, -1, -1)
 
-  //     const resImageData = ctx.getImageData(0, 0, 2, 2)
-  //     expect(resImageData.data).toBe(new Uint8ClampedArray([
-  //       4, 5, 6, 255, 0, 0, 0, 0,
-  //       0, 0, 0, 0, 0, 0, 0, 0
-  //     ]))
-  //   })
+    //   const resImageData = ctx.getImageData(0, 0, 2, 2)
+    //   expect(resImageData.data).toBe(new Uint8ClampedArray([
+    //     4, 5, 6, 255, 0, 0, 0, 0,
+    //     0, 0, 0, 0, 0, 0, 0, 0
+    //   ]))
+    // })
 
-  //   it('works, RGBA32', function () {
-  //     const canvas = createCanvas(2, 1)
-  //     const ctx = canvas.getContext('2d')
-  //     ctx.fillStyle = '#f00'
-  //     ctx.fillRect(0, 0, 1, 1)
+    it('works, RGBA32', function () {
+      const canvas = createCanvas(2, 1)
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = '#f00'
+      ctx.fillRect(0, 0, 1, 1)
 
-  //     // Copy left pixel to the right pixel
-  //     ctx.putImageData(ctx.getImageData(0, 0, 1, 1), 1, 0)
+      // Copy left pixel to the right pixel
+      ctx.putImageData(ctx.getImageData(0, 0, 1, 1), 1, 0)
 
-  //     const pixel = ctx.getImageData(1, 0, 1, 1)
+      const pixel = ctx.getImageData(1, 0, 1, 1)
 
-  //     expect(pixel.data[0]).toBe(255)
-  //     expect(pixel.data[1]).toBe(0)
-  //     expect(pixel.data[2]).toBe(0)
-  //     expect(pixel.data[3]).toBe(255)
-  //   })
-  // })
+      expect(pixel.data[0]).toBe(255)
+      expect(pixel.data[1]).toBe(0)
+      expect(pixel.data[2]).toBe(0)
+      expect(pixel.data[3]).toBe(255)
+    })
+  })
 
   it('Context2d#fill()', function () {
     const canvas = createCanvas(2, 2)

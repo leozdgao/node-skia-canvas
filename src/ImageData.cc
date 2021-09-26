@@ -4,7 +4,7 @@
 ImageData::ImageData(const Napi::CallbackInfo& info) : Napi::ObjectWrap<ImageData>(info) {
   Napi::Number width = info[0].As<Napi::Number>();
   Napi::Number height = info[1].As<Napi::Number>();
-  Napi::Buffer<unsigned char> data = info[2].As<Napi::Buffer<unsigned char>>();
+  Napi::Buffer<uint8_t> data = info[2].As<Napi::Buffer<uint8_t>>();
 
   width_ = width.Int32Value();
   height_ = height.Int32Value();
@@ -48,7 +48,7 @@ Napi::Value ImageData::CreateInstance(Napi::Env env, size_t width, size_t height
     return constructor.New({
       Napi::Number::New(env, width),
       Napi::Number::New(env, height),
-      Napi::Buffer<unsigned char>::Copy(env, (unsigned char *)data, width * height * 4)
+      Napi::Buffer<uint8_t>::Copy(env, reinterpret_cast<uint8_t*>(data), width * height * 4)
     });
 }
 
@@ -65,10 +65,8 @@ Napi::Value ImageData::GetData(const Napi::CallbackInfo& info) {
   auto buffer = Napi::Uint8Array::New(info.Env(), len, napi_uint8_clamped_array);
   
   for (size_t i = 0; i < len; i++) {
-    buffer[i] = ((unsigned char *)this->data_)[i];
+    buffer[i] = (reinterpret_cast<uint8_t*>(this->data_))[i];
   }
-  
-  // std::cout << this->data_ << std::endl;
 
   return buffer;
 

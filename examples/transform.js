@@ -22,16 +22,16 @@ ctx.fillRect(0, 0, 300, 300)
 // ctx.restore();
 
 // Point of transform origin
-// ctx.arc(0, 0, 5, 0, 2 * Math.PI)
-// ctx.fillStyle = 'blue'
-// ctx.fill()
+ctx.arc(0, 0, 5, 0, 2 * Math.PI)
+ctx.fillStyle = 'blue'
+ctx.fill()
 
 // Non-rotated rectangle
 ctx.fillStyle = 'gray'
 ctx.fillRect(100, 0, 80, 20)
 
 // Rotated rectangle
-ctx.rotate(NaN)
+ctx.rotate(Math.PI / 4)
 // ctx.translate(-100, 50);
 ctx.fillStyle = 'red'
 ctx.fillRect(100, 0, 80, 20)
