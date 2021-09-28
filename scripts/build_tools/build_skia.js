@@ -18,11 +18,41 @@ const yes = () => 'true'
 const no = () => 'false'
 const quote = str => `{${str}}`
 
-const exec = (cmd, cwd = process.cwd()) => {
-  execSync(cmd, {
-    stdio: 'inherit',
+const exec = (cmd, opts) => {
+  const { cwd = process.cwd(), stdio = 'inherit' } = opts || {}
+  return execSync(cmd, {
+    stdio,
     cwd
   })
+}
+const findCflagsByPkgConfig = pkgs => {
+  if (!Array.isArray(pkgs)) {
+    pkgs = [pkgs]
+  }
+
+  const flags = []
+  const libs = []
+
+  for (const pkg of pkgs) {
+    try {
+      const cflags = exec(`pkg-config ${pkg} --cflags`, {
+        stdio: 'pipe'
+      })
+      flags.push(...cflags.toString().trim().split(/\s+/).map(str => `"${str}"`))
+      const clibs = exec(`pkg-config ${pkg} --libs`, {
+        stdio: 'pipe'
+      })
+      libs.push(...clibs.toString().trim().split(/\s+/).map(str => `"${str}"`))
+    } catch (e) {
+      logger.error(`Dependency '${pkg}' could not find.`)
+      process.exit(1)
+    }
+  }
+
+  return {
+    cflags: flags,
+    ldflags: libs
+  }
 }
 
 // ========== START: generate args for gn ==========
@@ -84,15 +114,28 @@ if (FEATURES.webp_decode || FEATURES.webp_encode) {
 // OMIT: android
 
 const cflags = []
+const ldflags = []
 
 if (SYSROOT) {
   cflags.push(`--sysroot=${SYSROOT}`)
 }
 
 // TODO: find jpeg-turbo harfbuzz icu, and add -I{} to args
-// if (SKIA_USE_SYSTEM_LIB) {
+if (SKIA_USE_SYSTEM_LIB) {
+  // need `pkg-config` first
+  try {
+    exec('which pkg-config', {
+      stdio: 'pipe'
+    })
+  } catch (e) {
+    logger.error('Could not find `pkg-config`')
+    process.exit(1)
+  }
 
-// }
+  const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(['harfbuzz', 'icu-uc', 'libpng', 'libturbojpeg'])
+  cflags.push(...clagsFound)
+  ldflags.push(...ldflagsFound)
+}
 
 // TODO: OPT_LEVEL just hard code for production
 // if (!IS_SKIA_DEBUG) {
@@ -101,6 +144,9 @@ if (SYSROOT) {
 
 if (cflags.length > 0) {
   argsForGN.push(['extra_cflags', `[${cflags.join(', ')}]`])
+}
+if (ldflags.length > 0) {
+  argsForGN.push(['extra_ldflags', `[${ldflags.join(', ')}]`])
 }
 
 logger.info(`Get gn args: ${JSON.stringify(argsForGN.reduce((ret, i) => {
@@ -114,7 +160,9 @@ logger.info(`Get gn args: ${JSON.stringify(argsForGN.reduce((ret, i) => {
 if (!SKIA_USE_SYSTEM_LIB) {
   logger.info('Synchronizing Skia dependencies: python2 tools/git-sync-deps')
 
-  exec('python2 tools/git-sync-deps', PATH_SKIA_SOURCE)
+  exec('python2 tools/git-sync-deps', {
+    cwd: PATH_SKIA_SOURCE
+  })
 
   logger.info('After synchronize Skia dependencies')
 }
@@ -123,12 +171,16 @@ if (!SKIA_USE_SYSTEM_LIB) {
 const GN_CONFIG_COMMAND = `${TOOLS.gn()} gen ${PATH_OUTPUT_DIRECTORY} --args='${argsForGN.map(i => i.join('=')).join(' ')}'`
 logger.info(`Config gn: ${GN_CONFIG_COMMAND}`)
 
-exec(GN_CONFIG_COMMAND, PATH_SKIA_SOURCE)
+exec(GN_CONFIG_COMMAND, {
+  cwd: PATH_SKIA_SOURCE
+})
 
 const NINJA_BUILD_COMMAND = `${TOOLS.ninja()} -C ${PATH_OUTPUT_DIRECTORY}`
 logger.info(`Start ninja build: ${NINJA_BUILD_COMMAND}`)
 
-exec(NINJA_BUILD_COMMAND, PATH_SKIA_SOURCE)
+exec(NINJA_BUILD_COMMAND, {
+  cwd: PATH_SKIA_SOURCE
+})
 
 // ========== END: building ==========
 logger.info(`Build success to ${PATH_OUTPUT_DIRECTORY}`)
