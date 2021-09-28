@@ -27,6 +27,8 @@ execute_process(COMMAND which node
 
 string(REPLACE "\n" "" NODE_BIN_PATH ${NODE_BIN_PATH})
 
+# TODO: 区分 Debug 和 Release，Debug 情况下依赖都在 skia/out/Debug 里，但 Release 是类似 External 模式，需要依赖外部库
+
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC} "${CMAKE_SOURCE_DIR}/node_modules/node-addon-api" ${NODE_INCLUDE_PATH})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper harfbuzz icu sfntly ${APP_SERVICES_LIBRARY})
