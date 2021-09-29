@@ -6,8 +6,9 @@
 
 const { execSync } = require('child_process')
 const {
+  DEP_SYS_LIBS,
   FEATURES, SYSROOT, TOOLS,
-  IS_MAC, IS_WINDOWS, IS_SKIA_DEBUG,
+  IS_SKIA_DEBUG,
   SKIA_USE_SYSTEM_LIB,
   PATH_SKIA_SOURCE, PATH_OUTPUT_DIRECTORY
 } = require('./env')
@@ -16,7 +17,6 @@ const logger = require('./logger')
 const yesIf = v => v ? 'true' : 'false'
 const yes = () => 'true'
 const no = () => 'false'
-const quote = str => `{${str}}`
 
 const exec = (cmd, opts) => {
   const { cwd = process.cwd(), stdio = 'inherit' } = opts || {}
@@ -57,6 +57,8 @@ const findCflagsByPkgConfig = pkgs => {
 
 // ========== START: generate args for gn ==========
 const argsForGN = [
+  ['cc', '"clang"'],
+  ['cxx', '"clang++"'],
   ['is_official_build', yesIf(!IS_SKIA_DEBUG)],
   ['is_debug', yesIf(IS_SKIA_DEBUG)],
   ['skia_enable_gpu', yesIf(FEATURES.gpu())],
@@ -65,8 +67,6 @@ const argsForGN = [
   ['skia_use_x11', yesIf(FEATURES.x11)],
   ['skia_use_system_libpng', yesIf(SKIA_USE_SYSTEM_LIB)],
   ['skia_use_system_libjpeg_turbo', yesIf(SKIA_USE_SYSTEM_LIB)],
-  ['skia_use_libwebp_encode', yesIf(FEATURES.webp_encode)],
-  ['skia_use_libwebp_decode', yesIf(FEATURES.webp_decode)],
   ['skia_use_system_zlib', yesIf(SKIA_USE_SYSTEM_LIB)],
   ['skia_use_xps', no()],
   ['skia_use_dng_sdk', yesIf(FEATURES.dng)]
@@ -132,7 +132,7 @@ if (SKIA_USE_SYSTEM_LIB) {
     process.exit(1)
   }
 
-  const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(['harfbuzz', 'icu-uc', 'libpng', 'libturbojpeg'])
+  const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(DEP_SYS_LIBS)
   cflags.push(...clagsFound)
   ldflags.push(...ldflagsFound)
 }
@@ -172,6 +172,12 @@ const GN_CONFIG_COMMAND = `${TOOLS.gn()} gen ${PATH_OUTPUT_DIRECTORY} --args='${
 logger.info(`Config gn: ${GN_CONFIG_COMMAND}`)
 
 exec(GN_CONFIG_COMMAND, {
+  cwd: PATH_SKIA_SOURCE
+})
+
+// output current build args
+exec(`${TOOLS.gn()} args ${PATH_OUTPUT_DIRECTORY} --list --short`, {
+  stdio: 'inherit',
   cwd: PATH_SKIA_SOURCE
 })
 

@@ -20,6 +20,8 @@ const PLATFORM = (() => {
   return platform
 })()
 
+const DEP_SYS_LIBS = ['harfbuzz', 'icu-uc', 'libpng', 'libwebp', 'libturbojpeg']
+
 const IS_MAC = PLATFORM === 'darwin'
 const IS_WINDOWS = PLATFORM === 'windows'
 const IS_SKIA_DEBUG = !!process.env.SKIA_DEBUG
@@ -43,9 +45,7 @@ const FEATURES = (() => {
     metal: featuresFromArgs.includes('metal'),
     d3d: featuresFromArgs.includes('d3d'),
     text_layout: featuresFromArgs.includes('textlayout'),
-    webp_encode: featuresFromArgs.includes('webp-encode'),
-    webp_decode: featuresFromArgs.includes('webp-decode'),
-    lottie: false,
+    lottie: featuresFromArgs.includes('lottie'),
     dng: false,
     particles: false,
     gpu () { return this.gl || this.vulkan || this.metal || this.d3d }
@@ -73,6 +73,7 @@ const TOOLS = {
 const PATH_OUTPUT_DIRECTORY = IS_SKIA_DEBUG ? 'out/Debug' : 'out/Release'
 
 module.exports = {
+  DEP_SYS_LIBS,
   PATH_DEPOT_TOOLS,
   PATH_SKIA_SOURCE,
   PATH_OUTPUT_DIRECTORY,
