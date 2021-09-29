@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leozdgao/node-skia.git"
+    "url": "git+https://github.com/leozdgao/node-skia-canvas.git"
   },
   "binary": {
     "module_name": "node-skia-canvas",
@@ -28,9 +28,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/leozdgao/node-skia/issues"
+    "url": "https://github.com/leozdgao/node-skia-canvas/issues"
   },
-  "homepage": "https://github.com/leozdgao/node-skia#readme",
+  "homepage": "https://github.com/leozdgao/node-skia-canvas#readme",
   "dependencies": {
     "bindings": "^1.5.0",
     "node-addon-api": "^4.0.0"
