@@ -7,7 +7,9 @@
     "build:skia:debug": "SKIA_DEBUG=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
     "build:skia:release": "SKIA_USE_SYSTEM_LIB=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
     "build:dev": "cmake-js configure && cmake-js compile",
-    "test": "jest"
+    "test": "jest",
+    "ci": "npm run build:skia:release && npm run build:dev",
+    "ci:debug": "npm run build:skia:debug && SKIA_DEBUG=1 npm run build:dev"
   },
   "repository": {
     "type": "git",
