@@ -60,6 +60,7 @@ const argsForGN = [
   ['cc', '"clang"'],
   ['cxx', '"clang++"'],
   ['is_official_build', yesIf(!IS_SKIA_DEBUG)],
+  // ['is_component_build', no()], // static link is just enough
   ['is_debug', yesIf(IS_SKIA_DEBUG)],
   ['skia_enable_gpu', yesIf(FEATURES.gpu())],
   ['skia_use_gl', yesIf(FEATURES.gl)],

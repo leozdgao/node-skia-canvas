@@ -20,7 +20,7 @@ const PLATFORM = (() => {
   return platform
 })()
 
-const DEP_SYS_LIBS = ['harfbuzz', 'icu-uc', 'libpng', 'libwebp', 'libturbojpeg']
+const DEP_SYS_LIBS = ['harfbuzz', 'harfbuzz-icu', 'icu-uc', 'libpng', 'libwebp', 'libturbojpeg']
 
 const IS_MAC = PLATFORM === 'darwin'
 const IS_WINDOWS = PLATFORM === 'windows'
