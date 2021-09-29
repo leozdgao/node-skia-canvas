@@ -3,6 +3,7 @@
 !.vscode/launch.json
 !.vscode/tasks.json
 build/
+prebuilds/
 temp_*
 
 

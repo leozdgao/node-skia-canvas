@@ -6,14 +6,23 @@
   "scripts": {
     "build:skia:debug": "SKIA_DEBUG=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
     "build:skia:release": "SKIA_USE_SYSTEM_LIB=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
-    "build:dev": "cmake-js configure && cmake-js compile",
+    "build:dev": "SKIA_DEBUG=1 cmake-js configure && cmake-js compile",
+    "build:pre": "prebuild --backend cmake-js --runtime napi",
     "test": "jest",
-    "ci": "npm run build:skia:release && npm run build:dev",
-    "ci:debug": "npm run build:skia:debug && SKIA_DEBUG=1 npm run build:dev"
+    "ci": "npm run build:skia:release && npm run build:pre && npm run upload",
+    "ci:debug": "npm run build:skia:debug && npm run build:dev"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leozdgao/node-skia.git"
+  },
+  "binary": {
+    "module_name": "node-skia-canvas",
+    "module_path": "build/Release",
+    "napi_versions": [6],
+    "host": "https://github.com/leozdgao/node-skia-canvas/releases/download/",
+    "remote_path": "v{version}",
+    "package_name": "{module_name}-v{version}-napi-v6-{libc}-{arch}.tar.gz"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +45,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^26.6.3",
     "jest-environment-node-single-context": "^26.2.0",
+    "prebuild": "^11.0.0",
     "yargs-parser": "^20.2.9"
   }
 }
