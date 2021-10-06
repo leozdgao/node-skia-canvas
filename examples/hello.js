@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { Canvas, CanvasGradient } = require('../build/Debug/node-skia.node')
+const { Canvas } = require('../build/Debug/node-skia.node')
 
 const c = new Canvas(500, 500)
 console.log(c.width, c.height)
@@ -22,8 +22,8 @@ const ctx = c.getContext('2d')
 // rgradient.addColorStop(0.9, 'white')
 // rgradient.addColorStop(1, 'green')
 
-ctx.fillStyle = '#FFF';
-ctx.fillRect(0, 0, 500, 500);
+ctx.fillStyle = '#FFF'
+ctx.fillRect(0, 0, 500, 500)
 
 // ctx.fillStyle = gradient
 // ctx.fillRect(20, 20, 200, 100)
@@ -36,7 +36,8 @@ ctx.fillRect(0, 0, 500, 500);
 // ctx.fillStyle = "yellowgreen";
 // console.log(ctx.fillStyle);
 
-ctx.fillText('It`s OK', 10, 20);
+ctx.fillStyle = '#000'
+ctx.fillText('Test for text painting', 400, 20)
 
 // ctx.fillStyle = "rgba(0x46,0x82,0xb4)";
 // ctx.fillStyle = "#4682b4"
