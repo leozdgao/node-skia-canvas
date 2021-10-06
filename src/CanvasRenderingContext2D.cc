@@ -1,4 +1,5 @@
 #include <math.h>
+#include <cassert>
 
 #include <include/core/SkImageInfo.h>
 #include <include/core/SkTextBlob.h>

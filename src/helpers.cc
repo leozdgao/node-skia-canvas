@@ -1,3 +1,4 @@
+#include <cassert>
 #include <string>
 #include <regex>
 #include <napi.h>

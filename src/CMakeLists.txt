@@ -54,9 +54,13 @@ add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC} "${CMAKE_SOUR
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
 if (DEFINED ENV{SKIA_DEBUG})
-  target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper harfbuzz icu sfntly ${APP_SERVICES_LIBRARY})
+  target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper harfbuzz icu ${APP_SERVICES_LIBRARY})
 else ()
   target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper PkgConfig::skia_deps ${APP_SERVICES_LIBRARY})
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  target_link_libraries(${PROJECT_NAME} fontconfig)
 endif()
 
 target_link_directories(${PROJECT_NAME} PUBLIC "${CMAKE_SOURCE_DIR}/skia/${SKIA_BUILD_OUTPUT_DIRECTORY}")

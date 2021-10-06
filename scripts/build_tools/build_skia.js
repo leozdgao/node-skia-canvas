@@ -8,6 +8,7 @@ const { execSync } = require('child_process')
 const {
   DEP_SYS_LIBS,
   FEATURES, SYSROOT, TOOLS,
+  IS_LINUX,
   IS_SKIA_DEBUG,
   SKIA_USE_SYSTEM_LIB,
   PATH_SKIA_SOURCE, PATH_OUTPUT_DIRECTORY
@@ -121,22 +122,32 @@ if (SYSROOT) {
   cflags.push(`--sysroot=${SYSROOT}`)
 }
 
-// TODO: find jpeg-turbo harfbuzz icu, and add -I{} to args
-if (SKIA_USE_SYSTEM_LIB) {
-  // need `pkg-config` first
-  try {
-    exec('which pkg-config', {
-      stdio: 'pipe'
-    })
-  } catch (e) {
-    logger.error('Could not find `pkg-config`')
-    process.exit(1)
-  }
+// ========= START: DEPS PREPARE  =========
+// 
+// need `pkg-config` first
+try {
+  exec('which pkg-config', {
+    stdio: 'pipe'
+  })
+} catch (e) {
+  logger.error('Could not find `pkg-config`')
+  process.exit(1)
+}
 
+// need fontconfig on linux whether debug or release
+if (IS_LINUX) {
+  const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(['fontconfig'])
+  cflags.push(...clagsFound)
+  ldflags.push(...ldflagsFound)
+}
+
+if (SKIA_USE_SYSTEM_LIB) {
   const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(DEP_SYS_LIBS)
   cflags.push(...clagsFound)
   ldflags.push(...ldflagsFound)
 }
+
+// ========= END: DEPS PREPARE =========
 
 // TODO: OPT_LEVEL just hard code for production
 // if (!IS_SKIA_DEBUG) {

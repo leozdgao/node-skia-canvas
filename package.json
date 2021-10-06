@@ -6,7 +6,7 @@
   "scripts": {
     "build:skia:debug": "SKIA_DEBUG=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
     "build:skia:release": "SKIA_USE_SYSTEM_LIB=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
-    "build:dev": "SKIA_DEBUG=1 cmake-js configure && cmake-js compile",
+    "build:dev": "SKIA_DEBUG=1 cmake-js configure -D && SKIA_DEBUG=1 cmake-js compile -D",
     "build:pre": "prebuild --backend cmake-js --runtime napi",
     "test": "jest",
     "ci": "npm run build:skia:release && npm run build:pre && npm run upload",
@@ -19,7 +19,9 @@
   "binary": {
     "module_name": "node-skia-canvas",
     "module_path": "build/Release",
-    "napi_versions": [6],
+    "napi_versions": [
+      6
+    ],
     "host": "https://github.com/leozdgao/node-skia-canvas/releases/download/",
     "remote_path": "v{version}",
     "package_name": "{module_name}-v{version}-napi-v6-{libc}-{arch}.tar.gz"

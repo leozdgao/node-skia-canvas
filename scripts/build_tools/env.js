@@ -24,6 +24,7 @@ const DEP_SYS_LIBS = ['harfbuzz', 'harfbuzz-icu', 'icu-uc', 'libpng', 'libwebp',
 
 const IS_MAC = PLATFORM === 'darwin'
 const IS_WINDOWS = PLATFORM === 'windows'
+const IS_LINUX = PLATFORM.startsWith('linux')
 const IS_SKIA_DEBUG = !!process.env.SKIA_DEBUG
 const SKIA_USE_SYSTEM_LIB = !!process.env.SKIA_USE_SYSTEM_LIB
 const SYSROOT = process.env.SYSROOT
@@ -79,6 +80,7 @@ module.exports = {
   PATH_OUTPUT_DIRECTORY,
   IS_MAC,
   IS_WINDOWS,
+  IS_LINUX,
   IS_SKIA_DEBUG,
   SKIA_USE_SYSTEM_LIB,
   FEATURES,

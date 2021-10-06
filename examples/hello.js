@@ -22,8 +22,8 @@ const ctx = c.getContext('2d')
 // rgradient.addColorStop(0.9, 'white')
 // rgradient.addColorStop(1, 'green')
 
-// ctx.fillStyle = '#FFF';
-// ctx.fillRect(0, 0, 500, 500);
+ctx.fillStyle = '#FFF';
+ctx.fillRect(0, 0, 500, 500);
 
 // ctx.fillStyle = gradient
 // ctx.fillRect(20, 20, 200, 100)
@@ -36,7 +36,7 @@ const ctx = c.getContext('2d')
 // ctx.fillStyle = "yellowgreen";
 // console.log(ctx.fillStyle);
 
-// ctx.fillText('It`s OK');
+ctx.fillText('It`s OK', 10, 20);
 
 // ctx.fillStyle = "rgba(0x46,0x82,0xb4)";
 // ctx.fillStyle = "#4682b4"
@@ -137,7 +137,7 @@ ctx.strokeRect(0, 100, 400, 1)
 const data = ctx.getImageData(200, 200, 300, 300)
 console.log(data.width, data.height, data.data)
 
-ctx.putImageData(data, 0, 0)
+// ctx.putImageData(data, 0, 0)
 
 // const dd = ctx.createImageData(2, 2);
 // console.log(dd.width, dd.height, dd.data);
