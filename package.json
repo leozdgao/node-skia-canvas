@@ -13,6 +13,9 @@
     "ci:debug": "npm run build:skia:debug && npm run build:dev",
     "postinstall": "prebuild-install --runtime napi || echo prebuild-install failed"
   },
+  "files": [
+    "lib"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/leozdgao/node-skia-canvas.git"
