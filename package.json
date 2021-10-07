@@ -10,7 +10,8 @@
     "build:pre": "rimraf prebuilds && prebuild --backend cmake-js --runtime napi",
     "test": "jest",
     "ci": "npm run build:skia:release && npm run build:pre",
-    "ci:debug": "npm run build:skia:debug && npm run build:dev"
+    "ci:debug": "npm run build:skia:debug && npm run build:dev",
+    "postinstall": "prebuild-install --runtime napi"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,7 @@
     ],
     "host": "https://github.com/leozdgao/node-skia-canvas/releases/download/",
     "remote_path": "v{version}",
-    "package_name": "{module_name}-v{version}-napi-v6-{libc}-{arch}.tar.gz"
+    "package_name": "{name}-v{version}-{runtime}-v{abi}-{platform}{libc}-{arch}.tar.gz"
   },
   "keywords": [],
   "author": "",
@@ -35,7 +36,8 @@
   "homepage": "https://github.com/leozdgao/node-skia-canvas#readme",
   "dependencies": {
     "bindings": "^1.5.0",
-    "node-addon-api": "^4.0.0"
+    "node-addon-api": "^4.0.0",
+    "prebuild-install": "^6.1.4"
   },
   "devDependencies": {
     "chalk": "^4.1.2",
