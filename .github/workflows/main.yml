@@ -34,6 +34,10 @@ jobs:
         with:
           node-version: 'lts/*'
 
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '2.x'
+
       # Runs a single command using the runners shell
       - name: Install Dependencies
         run: npm install
