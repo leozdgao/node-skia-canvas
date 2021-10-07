@@ -43,7 +43,7 @@ jobs:
         run: npm install
 
       - name: Setup upload config
-        run: echo upload=${{ secrets PREBUILD_UPLOAD_SECRET }} >> ~/.prebuildrc
+        run: echo upload=${{ secrets.PREBUILD_UPLOAD_SECRET }} >> ~/.prebuildrc
 
       # Runs a set of commands using the runners shell
       - name: Git submodule
