@@ -215,7 +215,7 @@ describe('Canvas', () => {
       expect(metrics.alphabeticBaseline > 0).toBeTruthy() // ~4-5
       expect(metrics.actualBoundingBoxAscent > 0).toBeTruthy()
       // On the baseline or slightly above
-      expect(metrics.actualBoundingBoxDescent <= 0).toBeTruthy()
+      expect(metrics.actualBoundingBoxDescent <= 1).toBeTruthy()
     })
   })
 
