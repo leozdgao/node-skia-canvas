@@ -11,7 +11,7 @@
     "test": "jest",
     "ci": "npm run build:skia:release && npm run build:pre",
     "ci:debug": "npm run build:skia:debug && npm run build:dev",
-    "postinstall": "if [ -z \"${CI}\" ]; then prebuild-install --runtime napi;fi"
+    "postinstall": "node -e \"process.env.CI==true\" && prebuild-install --runtime napi"
   },
   "repository": {
     "type": "git",
