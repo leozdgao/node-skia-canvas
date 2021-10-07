@@ -41,4 +41,3 @@ ninja -C out/Debug
 
 Linux 环境下遇到的问题
 * putImageData 直接 segmentfault
-* Release Mode 下 harfbuzz 的 hb-subset.h 找不到

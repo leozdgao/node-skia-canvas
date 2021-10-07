@@ -9,7 +9,7 @@
     "build:dev": "SKIA_DEBUG=1 cmake-js configure -D && SKIA_DEBUG=1 cmake-js compile -D",
     "build:pre": "prebuild --backend cmake-js --runtime napi",
     "test": "jest",
-    "ci": "npm run build:skia:release && npm run build:pre && npm run upload",
+    "ci": "npm run build:skia:release && npm run build:pre",
     "ci:debug": "npm run build:skia:debug && npm run build:dev"
   },
   "repository": {
