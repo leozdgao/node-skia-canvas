@@ -37,7 +37,3 @@ ninja -C out/Debug
 ```
 
 #### Use docker image
-
-
-Linux 环境下遇到的问题
-* putImageData 直接 segmentfault
