@@ -11,7 +11,7 @@
     "test": "jest",
     "ci": "npm run build:skia:release && npm run build:pre",
     "ci:debug": "npm run build:skia:debug && npm run build:dev",
-    "postinstall": "prebuild-install --runtime napi"
+    "postinstall": "[[ -z \"${CI}\" ]] && prebuild-install --runtime napi"
   },
   "repository": {
     "type": "git",
