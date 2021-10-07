@@ -6,11 +6,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(APP_SERVICES_LIBRARY ApplicationServices)
 endif()
 
-find_package(PkgConfig REQUIRED)
+# find_package(PkgConfig REQUIRED)
 
-if (PKG_CONFIG_FOUND)
-  pkg_check_modules(skia_deps REQUIRED IMPORTED_TARGET harfbuzz harfbuzz-icu icu-uc libpng libwebp libturbojpeg)
-endif()
+# if (PKG_CONFIG_FOUND)
+#   pkg_check_modules(skia_deps REQUIRED IMPORTED_TARGET harfbuzz harfbuzz-icu icu-uc libpng libwebp libturbojpeg)
+# endif()
 
 # ============= Source =============
 
@@ -53,11 +53,11 @@ string(REPLACE "\n" "" NODE_BIN_PATH ${NODE_BIN_PATH})
 add_library(${PROJECT_NAME} SHARED ${SOURCE_FILES} ${CMAKE_JS_SRC} "${CMAKE_SOURCE_DIR}/node_modules/node-addon-api" ${NODE_INCLUDE_PATH})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 
-if (DEFINED ENV{SKIA_DEBUG})
+# if (DEFINED ENV{SKIA_DEBUG})
   target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper harfbuzz icu ${APP_SERVICES_LIBRARY})
-else ()
-  target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper PkgConfig::skia_deps ${APP_SERVICES_LIBRARY})
-endif()
+# else ()
+#   target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} skia skparagraph skshaper PkgConfig::skia_deps ${APP_SERVICES_LIBRARY})
+# endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   target_link_libraries(${PROJECT_NAME} fontconfig)

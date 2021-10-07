@@ -5,9 +5,9 @@
   "main": "lib/index.js",
   "scripts": {
     "build:skia:debug": "SKIA_DEBUG=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
-    "build:skia:release": "SKIA_USE_SYSTEM_LIB=1 SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
+    "build:skia:release": "SKIA_FEATURES=textlayout node scripts/build_tools/build_skia.js",
     "build:dev": "SKIA_DEBUG=1 cmake-js configure -D && SKIA_DEBUG=1 cmake-js compile -D",
-    "build:pre": "prebuild --backend cmake-js --runtime napi",
+    "build:pre": "rimraf prebuilds && prebuild --backend cmake-js --runtime napi",
     "test": "jest",
     "ci": "npm run build:skia:release && npm run build:pre",
     "ci:debug": "npm run build:skia:debug && npm run build:dev"
@@ -48,6 +48,7 @@
     "jest": "^26.6.3",
     "jest-environment-node-single-context": "^26.2.0",
     "prebuild": "^11.0.0",
+    "rimraf": "^3.0.2",
     "yargs-parser": "^20.2.9"
   }
 }

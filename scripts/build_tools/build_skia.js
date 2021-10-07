@@ -69,6 +69,7 @@ const argsForGN = [
   ['skia_use_x11', yesIf(FEATURES.x11)],
   ['skia_use_system_libpng', yesIf(SKIA_USE_SYSTEM_LIB)],
   ['skia_use_system_libjpeg_turbo', yesIf(SKIA_USE_SYSTEM_LIB)],
+  ['skia_use_system_libwebp', yesIf(SKIA_USE_SYSTEM_LIB)],
   ['skia_use_system_zlib', yesIf(SKIA_USE_SYSTEM_LIB)],
   ['skia_use_xps', no()],
   ['skia_use_dng_sdk', yesIf(FEATURES.dng)]
@@ -108,10 +109,6 @@ if (FEATURES.text_layout) {
   argsForGN.push(['skia_use_icu', no()])
 }
 
-if (FEATURES.webp_decode || FEATURES.webp_encode) {
-  argsForGN.push('skia_use_system_libwebp', yesIf(SKIA_USE_SYSTEM_LIB))
-}
-
 // OMIT: asmflags
 // OMIT: android
 
@@ -123,7 +120,7 @@ if (SYSROOT) {
 }
 
 // ========= START: DEPS PREPARE  =========
-// 
+//
 // need `pkg-config` first
 try {
   exec('which pkg-config', {
