@@ -13,14 +13,15 @@ const loadImage = async (src) => {
 }
 
 describe('Canvas', () => {
-  // it.only('Prototype and ctor are well-shaped, don\'t hit asserts on accessors (GH-803)', function () {
-  // const c = new Canvas(10, 10)
-  // eslint-disable-next-line no-prototype-builtins
-  // assert(!c.hasOwnProperty('width'))
-  // assert('width' in c)
-  // eslint-disable-next-line no-prototype-builtins
-  // assert(Canvas.prototype.hasOwnProperty('width'))
-  // })
+  it('Prototype and ctor are well-shaped, don\'t hit asserts on accessors (GH-803)', function () {
+    const c = new Canvas(10, 10)
+    // eslint-disable-next-line no-prototype-builtins
+    assert(!c.hasOwnProperty('width'))
+    assert(c instanceof Canvas)
+    assert('width' in c)
+    // eslint-disable-next-line no-prototype-builtins
+    assert(Canvas.prototype.hasOwnProperty('width'))
+  })
 
   it('Canvas#{width,height}=', function () {
     const canvas = new Canvas(100, 200)
