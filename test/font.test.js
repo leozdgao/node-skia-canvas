@@ -1,7 +1,8 @@
-const { registerFont } = require('../')
+const assert = require('assert')
+const { registerFont } = require('../lib')
 const parseFont = require('../lib/parseFont')
 
-test('.parseFont()', function () {
+it('.parseFont()', function () {
   const tests = [
     '20px sans-serif',
     { size: 20, lineHeight: 24, leading: 24, features: {}, weight: 400, style: 'normal', variant: 'normal', stretch: 'normal', family: ['sans-serif'], canonical: 'normal 400 20px/24px sans-serif' },
@@ -49,14 +50,14 @@ test('.parseFont()', function () {
     if (!expected.stretch) expected.stretch = 'normal'
     if (!expected.variant) expected.variant = 'normal'
 
-    expect(actual).toEqual(expected)
+    assert.deepEqual(actual, expected)
   }
 
   // not match
-  expect(parseFont('Helvetica, sans')).toBeNull()
+  assert(parseFont('Helvetica, sans') == null)
 })
 
-test('registerFont', function () {
+it('registerFont', function () {
   // Minimal test to make sure nothing is thrown
   registerFont('./examples/OswaldBold.ttf')
   registerFont('./examples/OswaldRegular.ttf', { family: 'Oswald' })

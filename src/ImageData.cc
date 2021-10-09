@@ -1,4 +1,3 @@
-// #include <iostream>
 #include "ImageData.h"
 
 ImageData::ImageData(const Napi::CallbackInfo& info) : Napi::ObjectWrap<ImageData>(info) {

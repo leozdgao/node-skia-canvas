@@ -1,8 +1,8 @@
-const { Canvas, createCanvas, Image } = require('../')
-
+const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const util = require('util')
+const { Canvas, createCanvas, Image } = require('../lib')
 
 const readFile = util.promisify(fs.readFile)
 const loadImage = async (src) => {
@@ -13,21 +13,21 @@ const loadImage = async (src) => {
 }
 
 describe('Canvas', () => {
-  it('Prototype and ctor are well-shaped, don\'t hit asserts on accessors (GH-803)', function () {
-    const c = new Canvas(10, 10)
-    // eslint-disable-next-line no-prototype-builtins
-    expect(!c.hasOwnProperty('width'))
-    expect('width' in c)
-    // eslint-disable-next-line no-prototype-builtins
-    expect(Canvas.prototype.hasOwnProperty('width'))
-  })
+  // it.only('Prototype and ctor are well-shaped, don\'t hit asserts on accessors (GH-803)', function () {
+  // const c = new Canvas(10, 10)
+  // eslint-disable-next-line no-prototype-builtins
+  // assert(!c.hasOwnProperty('width'))
+  // assert('width' in c)
+  // eslint-disable-next-line no-prototype-builtins
+  // assert(Canvas.prototype.hasOwnProperty('width'))
+  // })
 
   it('Canvas#{width,height}=', function () {
     const canvas = new Canvas(100, 200)
     const context = canvas.getContext('2d')
 
-    expect(canvas.width).toBe(100)
-    expect(canvas.height).toBe(200)
+    assert.equal(canvas.width, 100)
+    assert.equal(canvas.height, 200)
 
     context.globalAlpha = 0.5
     context.fillStyle = '#0f0'
@@ -37,21 +37,21 @@ describe('Canvas', () => {
 
     canvas.width = 50
     canvas.height = 70
-    expect(canvas.width).toBe(50)
-    expect(canvas.height).toBe(70)
+    assert.equal(canvas.width, 50)
+    assert.equal(canvas.height, 70)
 
     canvas.width |= 0
 
-    expect(context.lineWidth).toBe(1)
-    expect(context.globalAlpha).toBe(1)
-    expect(context.fillStyle).toBe('#000000')
-    expect(context.strokeStyle).toBe('#000000')
-    expect(context.font).toBe('10px sans-serif')
-    expect(context.getImageData(0, 0, 1, 1).data.join(',')).toBe('0,0,0,0')
+    assert.equal(context.lineWidth, 1)
+    assert.equal(context.globalAlpha, 1)
+    assert.equal(context.fillStyle, '#000000')
+    assert.equal(context.strokeStyle, '#000000')
+    assert.equal(context.font, '10px sans-serif')
+    assert.equal(context.getImageData(0, 0, 1, 1).data.join(','), '0,0,0,0')
   })
 
   it('Canvas#getContext("invalid")', function () {
-    expect(new Canvas(200, 300).getContext('invalid')).toBeNull()
+    assert(new Canvas(200, 300).getContext('invalid') == null)
   })
 
   it('Context2d#lineWidth=', function () {
@@ -59,59 +59,59 @@ describe('Canvas', () => {
     const ctx = canvas.getContext('2d')
 
     ctx.lineWidth = 10.0
-    expect(ctx.lineWidth).toBe(10)
+    assert.equal(ctx.lineWidth, 10)
     ctx.lineWidth = Infinity
-    expect(ctx.lineWidth).toBe(10)
+    assert.equal(ctx.lineWidth, 10)
     ctx.lineWidth = -Infinity
-    expect(ctx.lineWidth).toBe(10)
+    assert.equal(ctx.lineWidth, 10)
     ctx.lineWidth = -5
-    expect(ctx.lineWidth).toBe(10)
+    assert.equal(ctx.lineWidth, 10)
     ctx.lineWidth = 0
-    expect(ctx.lineWidth).toBe(10)
+    assert.equal(ctx.lineWidth, 10)
   })
 
   // it('Context2d#antiAlias=', function () {
   //   const canvas = new Canvas(200, 200)
   //   const ctx = canvas.getContext('2d')
 
-  //   expect(ctx.antialias).toBe('default')
+  //   assert.equal(ctx.antialias, 'default')
   //   ctx.antialias = 'none'
-  //   expect(ctx.antialias).toBe('none')
+  //   assert.equal(ctx.antialias, 'none')
   //   ctx.antialias = 'gray'
-  //   expect(ctx.antialias).toBe('gray')
+  //   assert.equal(ctx.antialias, 'gray')
   //   ctx.antialias = 'subpixel'
-  //   expect(ctx.antialias).toBe('subpixel')
+  //   assert.equal(ctx.antialias, 'subpixel')
   //   ctx.antialias = 'invalid'
-  //   expect(ctx.antialias).toBe('subpixel')
+  //   assert.equal(ctx.antialias, 'subpixel')
   //   ctx.antialias = 1
-  //   expect(ctx.antialias).toBe('subpixel')
+  //   assert.equal(ctx.antialias, 'subpixel')
   // })
 
   it('Context2d#lineCap=', function () {
     const canvas = new Canvas(200, 200)
     const ctx = canvas.getContext('2d')
 
-    expect(ctx.lineCap).toBe('butt')
+    assert.equal(ctx.lineCap, 'butt')
     ctx.lineCap = 'round'
-    expect(ctx.lineCap).toBe('round')
+    assert.equal(ctx.lineCap, 'round')
   })
 
   it('Context2d#lineJoin=', function () {
     const canvas = new Canvas(200, 200)
     const ctx = canvas.getContext('2d')
 
-    expect(ctx.lineJoin).toBe('miter')
+    assert.equal(ctx.lineJoin, 'miter')
     ctx.lineJoin = 'round'
-    expect(ctx.lineJoin).toBe('round')
+    assert.equal(ctx.lineJoin, 'round')
   })
 
   it('Context2d#globalAlpha=', function () {
     const canvas = new Canvas(200, 200)
     const ctx = canvas.getContext('2d')
 
-    expect(ctx.globalAlpha).toBe(1)
+    assert.equal(ctx.globalAlpha, 1)
     ctx.globalAlpha = 0.5
-    expect(ctx.globalAlpha).toBe(0.5)
+    assert.equal(ctx.globalAlpha, 0.5)
   })
 
   // it('Context2d#isPointInPath()', function () {
@@ -120,52 +120,52 @@ describe('Canvas', () => {
 
   //   ctx.rect(5, 5, 100, 100)
   //   ctx.rect(50, 100, 10, 10)
-  //   expect(ctx.isPointInPath(10, 10)).toBe(true)
+  //   assert.equal(ctx.isPointInPath(10, 10), true)
 
-  //   expect(ctx.isPointInPath(10, 50)).toBe(true)
-  //   expect(ctx.isPointInPath(100, 100)).toBe(true)
-  //   expect(ctx.isPointInPath(105, 105)).toBe(true)
-  //   expect(ctx.isPointInPath(106, 105)).toBe(true)
-  //   expect(ctx.isPointInPath(150, 150)).toBe(true)
-  //   expect(ctx.isPointInPath(50, 110)).toBe(true)
-  //   expect(ctx.isPointInPath(60, 110)).toBe(true)
-  //   expect(ctx.isPointInPath(70, 110)).toBe(true)
-  //   expect(ctx.isPointInPath(50, 120)).toBe(true)
+  //   assert.equal(ctx.isPointInPath(10, 50), true)
+  //   assert.equal(ctx.isPointInPath(100, 100), true)
+  //   assert.equal(ctx.isPointInPath(105, 105), true)
+  //   assert.equal(ctx.isPointInPath(106, 105), true)
+  //   assert.equal(ctx.isPointInPath(150, 150), true)
+  //   assert.equal(ctx.isPointInPath(50, 110), true)
+  //   assert.equal(ctx.isPointInPath(60, 110), true)
+  //   assert.equal(ctx.isPointInPath(70, 110), true)
+  //   assert.equal(ctx.isPointInPath(50, 120), true)
   // })
 
   it('Context2d#textAlign', function () {
     const canvas = new Canvas(200, 200)
     const ctx = canvas.getContext('2d')
 
-    expect(ctx.textAlign).toBe('start')
+    assert.equal(ctx.textAlign, 'start')
     ctx.textAlign = 'center'
-    expect(ctx.textAlign).toBe('center')
+    assert.equal(ctx.textAlign, 'center')
     ctx.textAlign = 'right'
-    expect(ctx.textAlign).toBe('right')
+    assert.equal(ctx.textAlign, 'right')
     ctx.textAlign = 'end'
-    expect(ctx.textAlign).toBe('end')
+    assert.equal(ctx.textAlign, 'end')
     ctx.textAlign = 'fail'
-    expect(ctx.textAlign).toBe('end')
+    assert.equal(ctx.textAlign, 'end')
   })
 
   describe('#toBuffer', function () {
     it('Canvas#toBuffer()', function () {
       const canvas = new Canvas(200, 200)
-      expect(canvas.toBuffer().slice(1, 4).toString()).toBe('PNG')
+      assert.equal(canvas.toBuffer().slice(1, 4).toString(), 'PNG')
     })
 
     it('Canvas#toBuffer("image/png")', function () {
       const buf = new Canvas(200, 200).toBuffer('image/png')
-      expect(buf.slice(1, 4).toString()).toBe('PNG')
+      assert.equal(buf.slice(1, 4).toString(), 'PNG')
     })
 
     it('Canvas#toBuffer("image/jpeg")', function () {
       const buf = new Canvas(200, 200).toBuffer('image/jpeg')
 
-      expect(buf[0]).toBe(0xff)
-      expect(buf[1]).toBe(0xd8)
-      expect(buf[buf.byteLength - 2]).toBe(0xff)
-      expect(buf[buf.byteLength - 1]).toBe(0xd9)
+      assert.equal(buf[0], 0xff)
+      assert.equal(buf[1], 0xd8)
+      assert.equal(buf[buf.byteLength - 2], 0xff)
+      assert.equal(buf[buf.byteLength - 1], 0xd9)
     })
   })
 
@@ -174,14 +174,14 @@ describe('Canvas', () => {
     const ctx = canvas.getContext('2d')
 
     const imageData = ctx.createImageData(2, 6)
-    expect(imageData.width).toBe(2)
-    expect(imageData.height).toBe(6)
-    expect(imageData.data.length).toBe(2 * 6 * 4)
+    assert.equal(imageData.width, 2)
+    assert.equal(imageData.height, 6)
+    assert.equal(imageData.data.length, 2 * 6 * 4)
 
-    expect(imageData.data[0]).toBe(0)
-    expect(imageData.data[1]).toBe(0)
-    expect(imageData.data[2]).toBe(0)
-    expect(imageData.data[3]).toBe(0)
+    assert.equal(imageData.data[0], 0)
+    assert.equal(imageData.data[1], 0)
+    assert.equal(imageData.data[2], 0)
+    assert.equal(imageData.data[3], 0)
   })
 
   describe('Context2d#measureText()', function () {
@@ -189,9 +189,9 @@ describe('Canvas', () => {
       const canvas = new Canvas(20, 20)
       const ctx = canvas.getContext('2d')
 
-      expect(ctx.measureText('foo').width).toBeTruthy()
-      expect(ctx.measureText('foo').width !== ctx.measureText('foobar').width).toBe(true)
-      expect(ctx.measureText('foo').width !== ctx.measureText('  foo').width).toBe(true)
+      assert(ctx.measureText('foo').width)
+      assert.equal(ctx.measureText('foo').width !== ctx.measureText('foobar').width, true)
+      assert.equal(ctx.measureText('foo').width !== ctx.measureText('  foo').width, true)
     })
 
     it('works', function () {
@@ -203,19 +203,19 @@ describe('Canvas', () => {
       let metrics = ctx.measureText('Alphabet')
       // Actual value depends on font library version. Have observed values
       // between 0 and 0.769.
-      expect(metrics.alphabeticBaseline >= 0 && metrics.alphabeticBaseline <= 1).toBeTruthy()
+      assert(metrics.alphabeticBaseline >= 0 && metrics.alphabeticBaseline <= 1)
       // Positive = going up from the baseline
-      expect(metrics.actualBoundingBoxAscent > 0).toBeTruthy()
+      assert(metrics.actualBoundingBoxAscent > 0)
       // Positive = going down from the baseline
-      expect(metrics.actualBoundingBoxDescent > 0).toBeTruthy() // ~4-5
+      assert(metrics.actualBoundingBoxDescent > 0) // ~4-5
 
       ctx.textBaseline = 'bottom'
       metrics = ctx.measureText('Alphabet')
-      expect(ctx.textBaseline).toBe('bottom')
-      expect(metrics.alphabeticBaseline > 0).toBeTruthy() // ~4-5
-      expect(metrics.actualBoundingBoxAscent > 0).toBeTruthy()
+      assert.equal(ctx.textBaseline, 'bottom')
+      assert(metrics.alphabeticBaseline > 0) // ~4-5
+      assert(metrics.actualBoundingBoxAscent > 0)
       // On the baseline or slightly above
-      expect(metrics.actualBoundingBoxDescent <= 1).toBeTruthy()
+      assert(metrics.actualBoundingBoxDescent <= 1)
     })
   })
 
@@ -232,7 +232,7 @@ describe('Canvas', () => {
       ctx.textAlign = 'center'
       ctx.fillText(...args)
 
-      expect(ctx.getImageData(0, 0, 20, 20).data.some(a => a)).toBe(shouldDraw)
+      assert.equal(ctx.getImageData(0, 0, 20, 20).data.some(a => a), shouldDraw)
     })
   })
 
@@ -242,27 +242,27 @@ describe('Canvas', () => {
 
     ctx.scale(0.1, 0.3)
     const mat1 = ctx.getTransform()
-    expect(Math.abs(mat1.a - 0.1) < 1e-6).toBe(true)
-    expect(Math.abs(mat1.b - 0) < 1e-6).toBe(true)
-    expect(Math.abs(mat1.c - 0) < 1e-6).toBe(true)
-    expect(Math.abs(mat1.d - 0.3) < 1e-6).toBe(true)
-    expect(Math.abs(mat1.e - 0) < 1e-6).toBe(true)
-    expect(Math.abs(mat1.f - 0) < 1e-6).toBe(true)
+    assert.equal(Math.abs(mat1.a - 0.1) < 1e-6, true)
+    assert.equal(Math.abs(mat1.b - 0) < 1e-6, true)
+    assert.equal(Math.abs(mat1.c - 0) < 1e-6, true)
+    assert.equal(Math.abs(mat1.d - 0.3) < 1e-6, true)
+    assert.equal(Math.abs(mat1.e - 0) < 1e-6, true)
+    assert.equal(Math.abs(mat1.f - 0) < 1e-6, true)
 
     ctx.resetTransform()
     const mat2 = ctx.getTransform()
-    expect(Math.abs(mat2.a - 1) < 1e-6).toBe(true)
-    expect(Math.abs(mat2.d - 1) < 1e-6).toBe(true)
+    assert.equal(Math.abs(mat2.a - 1) < 1e-6, true)
+    assert.equal(Math.abs(mat2.d - 1) < 1e-6, true)
 
     const mat3 = mat1
-    expect(Math.abs(mat3.a - 0.1) < 1e-6).toBe(true)
-    expect(Math.abs(mat3.d - 0.3) < 1e-6).toBe(true)
+    assert.equal(Math.abs(mat3.a - 0.1) < 1e-6, true)
+    assert.equal(Math.abs(mat3.d - 0.3) < 1e-6, true)
 
     ctx.setTransform(mat3)
-    expect(mat3).toStrictEqual(ctx.getTransform())
+    assert.deepEqual(mat3, ctx.getTransform())
 
     ctx.setTransform(mat3.a, mat3.b, mat3.c, mat3.d, mat3.e, mat3.f)
-    expect(mat3).toStrictEqual(ctx.getTransform())
+    assert.deepEqual(mat3, ctx.getTransform())
   })
 
   it('Context2d#createImageData(ImageData)', function () {
@@ -270,9 +270,9 @@ describe('Canvas', () => {
     const ctx = canvas.getContext('2d')
 
     const imageData = ctx.createImageData(ctx.createImageData(2, 6))
-    expect(imageData.width).toBe(2)
-    expect(imageData.height).toBe(6)
-    expect(imageData.data.length).toBe(2 * 6 * 4)
+    assert.equal(imageData.width, 2)
+    assert.equal(imageData.height, 6)
+    assert.equal(imageData.data.length, 2 * 6 * 4)
   })
 
   describe('Context2d#getImageData()', function () {
@@ -296,58 +296,58 @@ describe('Canvas', () => {
       const ctx = createTestCanvas()
       const imageData = ctx.getImageData(0, 0, 3, 6)
 
-      expect(imageData.width).toBe(3)
-      expect(imageData.height).toBe(6)
-      expect(imageData.data.length).toBe(3 * 6 * 4)
+      assert.equal(imageData.width, 3)
+      assert.equal(imageData.height, 6)
+      assert.equal(imageData.data.length, 3 * 6 * 4)
 
-      expect(imageData.data[0]).toBe(255)
-      expect(imageData.data[1]).toBe(0)
-      expect(imageData.data[2]).toBe(0)
-      expect(imageData.data[3]).toBe(255)
+      assert.equal(imageData.data[0], 255)
+      assert.equal(imageData.data[1], 0)
+      assert.equal(imageData.data[2], 0)
+      assert.equal(imageData.data[3], 255)
 
-      expect(imageData.data[4]).toBe(0)
-      expect(imageData.data[5]).toBe(255)
-      expect(imageData.data[6]).toBe(0)
-      expect(imageData.data[7]).toBe(255)
+      assert.equal(imageData.data[4], 0)
+      assert.equal(imageData.data[5], 255)
+      assert.equal(imageData.data[6], 0)
+      assert.equal(imageData.data[7], 255)
 
-      expect(imageData.data[8]).toBe(0)
-      expect(imageData.data[9]).toBe(0)
-      expect(imageData.data[10]).toBe(255)
-      expect(imageData.data[11]).toBe(255)
+      assert.equal(imageData.data[8], 0)
+      assert.equal(imageData.data[9], 0)
+      assert.equal(imageData.data[10], 255)
+      assert.equal(imageData.data[11], 255)
     })
 
     it('works, slice, RGBA32', function () {
       const ctx = createTestCanvas()
       const imageData = ctx.getImageData(0, 0, 2, 1)
-      expect(imageData.width).toBe(2)
-      expect(imageData.height).toBe(1)
-      expect(imageData.data.length).toBe(8)
+      assert.equal(imageData.width, 2)
+      assert.equal(imageData.height, 1)
+      assert.equal(imageData.data.length, 8)
 
-      expect(imageData.data[0]).toBe(255)
-      expect(imageData.data[1]).toBe(0)
-      expect(imageData.data[2]).toBe(0)
-      expect(imageData.data[3]).toBe(255)
+      assert.equal(imageData.data[0], 255)
+      assert.equal(imageData.data[1], 0)
+      assert.equal(imageData.data[2], 0)
+      assert.equal(imageData.data[3], 255)
 
-      expect(imageData.data[4]).toBe(0)
-      expect(imageData.data[5]).toBe(255)
-      expect(imageData.data[6]).toBe(0)
-      expect(imageData.data[7]).toBe(255)
+      assert.equal(imageData.data[4], 0)
+      assert.equal(imageData.data[5], 255)
+      assert.equal(imageData.data[6], 0)
+      assert.equal(imageData.data[7], 255)
     })
 
     it('works, assignment', function () {
       const ctx = createTestCanvas()
       const data = ctx.getImageData(0, 0, 5, 5).data
       data[0] = 50
-      expect(data[0]).toBe(50)
+      assert.equal(data[0], 50)
       data[0] = 280
-      expect(data[0]).toBe(255)
+      assert.equal(data[0], 255)
       data[0] = -4444
-      expect(data[0]).toBe(0)
+      assert.equal(data[0], 0)
     })
 
     it('throws if indexes are invalid', function () {
       const ctx = createTestCanvas()
-      expect(() => ctx.getImageData(0, 0, 0, 0)).toThrow(/IndexSizeError/)
+      assert.throws(() => ctx.getImageData(0, 0, 0, 0), /IndexSizeError/)
     })
   })
 
@@ -365,35 +365,35 @@ describe('Canvas', () => {
     checkers.fillRect(1, 1, 1, 1)
 
     const imageData = checkers.getImageData(0, 0, 2, 2)
-    expect(imageData.width).toBe(2)
-    expect(imageData.height).toBe(2)
-    expect(imageData.data.length).toBe(16)
+    assert.equal(imageData.width, 2)
+    assert.equal(imageData.height, 2)
+    assert.equal(imageData.data.length, 16)
 
     const data = imageData.data
 
     // (0,0) black
-    expect(data[0]).toBe(0)
-    expect(data[1]).toBe(0)
-    expect(data[2]).toBe(0)
-    expect(data[3]).toBe(255)
+    assert.equal(data[0], 0)
+    assert.equal(data[1], 0)
+    assert.equal(data[2], 0)
+    assert.equal(data[3], 255)
 
     // (1,0) white
-    expect(data[4]).toBe(255)
-    expect(data[5]).toBe(255)
-    expect(data[6]).toBe(255)
-    expect(data[7]).toBe(255)
+    assert.equal(data[4], 255)
+    assert.equal(data[5], 255)
+    assert.equal(data[6], 255)
+    assert.equal(data[7], 255)
 
     // (0,1) white
-    expect(data[8]).toBe(255)
-    expect(data[9]).toBe(255)
-    expect(data[10]).toBe(255)
-    expect(data[11]).toBe(255)
+    assert.equal(data[8], 255)
+    assert.equal(data[9], 255)
+    assert.equal(data[10], 255)
+    assert.equal(data[11], 255)
 
     // (1,1) black
-    expect(data[12]).toBe(0)
-    expect(data[13]).toBe(0)
-    expect(data[14]).toBe(0)
-    expect(data[15]).toBe(255)
+    assert.equal(data[12], 0)
+    assert.equal(data[13], 0)
+    assert.equal(data[14], 0)
+    assert.equal(data[15], 255)
 
     const canvas = createCanvas(20, 20)
     const ctx = canvas.getContext('2d')
@@ -403,23 +403,23 @@ describe('Canvas', () => {
     ctx.fillRect(0, 0, 20, 20)
 
     const imageData1 = ctx.getImageData(0, 0, 20, 20)
-    expect(imageData1.width).toBe(20)
-    expect(imageData1.height).toBe(20)
-    expect(imageData1.data.length).toBe(1600)
+    assert.equal(imageData1.width, 20)
+    assert.equal(imageData1.height, 20)
+    assert.equal(imageData1.data.length, 1600)
 
     const data1 = imageData1.data
     let i = 0; let b = true
     while (i < data1.length) {
       if (b) {
-        expect(data1[i++]).toBe(0)
-        expect(data1[i++]).toBe(0)
-        expect(data1[i++]).toBe(0)
-        expect(data1[i++]).toBe(255)
+        assert.equal(data1[i++], 0)
+        assert.equal(data1[i++], 0)
+        assert.equal(data1[i++], 0)
+        assert.equal(data1[i++], 255)
       } else {
-        expect(data1[i++]).toBe(255)
-        expect(data1[i++]).toBe(255)
-        expect(data1[i++]).toBe(255)
-        expect(data1[i++]).toBe(255)
+        assert.equal(data1[i++], 255)
+        assert.equal(data1[i++], 255)
+        assert.equal(data1[i++], 255)
+        assert.equal(data1[i++], 255)
       }
       // alternate b, except when moving to a new row
       b = i % (imageData1.width * 4) === 0 ? b : !b
@@ -458,7 +458,7 @@ describe('Canvas', () => {
   //     const bmp = ctx.getImageData(0, 0, w, h)
   //     eachPixel(bmp, (i, clr) => {
   //       const [r, g, b, a] = bmp.data.slice(i, i + 4)
-  //       expect(r === clr && g === clr && b === clr && a === 255).toBe(true)
+  //       assert.equal(r === clr && g === clr && b === clr && a === 255, true)
   //     })
   //   }
 
@@ -492,24 +492,24 @@ describe('Canvas', () => {
       ctx.fillRect(0, 0, 20, 20)
 
       const imageData = ctx.getImageData(0, 0, 20, 20)
-      expect(imageData.width).toBe(20)
-      expect(imageData.height).toBe(20)
-      expect(imageData.data.length).toBe(1600)
+      assert.equal(imageData.width, 20)
+      assert.equal(imageData.height, 20)
+      assert.equal(imageData.data.length, 1600)
 
       const data = imageData.data
 
       let i = 0; let b = true
       while (i < data.length) {
         if (b) {
-          expect(data[i++]).toBe(0)
-          expect(data[i++]).toBe(0)
-          expect(data[i++]).toBe(0)
-          expect(data[i++]).toBe(255)
+          assert.equal(data[i++], 0)
+          assert.equal(data[i++], 0)
+          assert.equal(data[i++], 0)
+          assert.equal(data[i++], 255)
         } else {
-          expect(data[i++]).toBe(255)
-          expect(data[i++]).toBe(255)
-          expect(data[i++]).toBe(255)
-          expect(data[i++]).toBe(255)
+          assert.equal(data[i++], 255)
+          assert.equal(data[i++], 255)
+          assert.equal(data[i++], 255)
+          assert.equal(data[i++], 255)
         }
         // alternate b, except when moving to a new row
         b = i % (imageData.width * 4) === 0 ? b : !b
@@ -529,22 +529,22 @@ describe('Canvas', () => {
     ctx.fillRect(0, 0, 20, 1)
 
     const imageData = ctx.getImageData(0, 0, 20, 1)
-    expect(imageData.width).toBe(20)
-    expect(imageData.height).toBe(1)
-    expect(imageData.data.length).toBe(80)
+    assert.equal(imageData.width, 20)
+    assert.equal(imageData.height, 1)
+    assert.equal(imageData.data.length, 80)
 
     // (0,0) white
-    expect(imageData.data[0]).toBe(255)
-    expect(imageData.data[1]).toBe(255)
-    expect(imageData.data[2]).toBe(255)
-    expect(imageData.data[3]).toBe(255)
+    assert.equal(imageData.data[0], 255)
+    assert.equal(imageData.data[1], 255)
+    assert.equal(imageData.data[2], 255)
+    assert.equal(imageData.data[3], 255)
 
     // (20,0) black
     const i = imageData.data.length - 4
-    expect(imageData.data[i + 0]).toBe(0)
-    expect(imageData.data[i + 1]).toBe(0)
-    expect(imageData.data[i + 2]).toBe(0)
-    expect(imageData.data[i + 3]).toBe(255)
+    assert.equal(imageData.data[i + 0], 0)
+    assert.equal(imageData.data[i + 1], 0)
+    assert.equal(imageData.data[i + 2], 0)
+    assert.equal(imageData.data[i + 3], 255)
   })
 
   describe('Context2d#putImageData()', function () {
@@ -552,8 +552,8 @@ describe('Canvas', () => {
       const canvas = createCanvas(2, 1)
       const ctx = canvas.getContext('2d')
 
-      expect(() => ctx.putImageData({}, 0, 0)).toThrow(TypeError)
-      expect(() => ctx.putImageData(undefined, 0, 0)).toThrow(TypeError)
+      assert.throws(() => ctx.putImageData({}, 0, 0), TypeError)
+      assert.throws(() => ctx.putImageData(undefined, 0, 0), TypeError)
     })
 
     // it('works for negative source values', function () {
@@ -567,7 +567,7 @@ describe('Canvas', () => {
     //   ctx.putImageData(srcImageData, -1, -1)
 
     //   const resImageData = ctx.getImageData(0, 0, 2, 2)
-    //   expect(resImageData.data).toBe(new Uint8ClampedArray([
+    //   assert.equal(resImageData.data, new Uint8ClampedArray([
     //     4, 5, 6, 255, 0, 0, 0, 0,
     //     0, 0, 0, 0, 0, 0, 0, 0
     //   ]))
@@ -584,10 +584,10 @@ describe('Canvas', () => {
 
       const pixel = ctx.getImageData(1, 0, 1, 1)
 
-      expect(pixel.data[0]).toBe(255)
-      expect(pixel.data[1]).toBe(0)
-      expect(pixel.data[2]).toBe(0)
-      expect(pixel.data[3]).toBe(255)
+      assert.equal(pixel.data[0], 255)
+      assert.equal(pixel.data[1], 0)
+      assert.equal(pixel.data[2], 0)
+      assert.equal(pixel.data[3], 255)
     })
   })
 
@@ -613,28 +613,28 @@ describe('Canvas', () => {
     imageData = ctx.getImageData(0, 0, 2, 2)
     // (0, 0) black
     n = 0
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (0, 1) white
     n = 1
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 0) white
     n = 2
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 1) black
     n = 3
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
 
     // should not retain previous value 'evenodd'
     ctx.fill()
@@ -644,28 +644,28 @@ describe('Canvas', () => {
     imageData = ctx.getImageData(0, 0, 2, 2)
     // (0, 0) black
     n = 0
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (0, 1) black
     n = 1
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 0) white
     n = 2
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 1) black
     n = 3
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
   })
 
   it('Context2d#clip()', function () {
@@ -691,28 +691,28 @@ describe('Canvas', () => {
     imageData = ctx.getImageData(0, 0, 2, 2)
     // (0, 0) black
     n = 0
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (0, 1) white
     n = 1
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 0) white
     n = 2
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 1) black
     n = 3
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
 
     ctx.clip()
     ctx.fillRect(0, 0, 2, 2)
@@ -722,28 +722,28 @@ describe('Canvas', () => {
     imageData = ctx.getImageData(0, 0, 2, 2)
     // (0, 0) black
     n = 0
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (0, 1) white
     n = 1
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 0) white
     n = 2
-    expect(imageData.data[n * 4 + 0]).toBe(255)
-    expect(imageData.data[n * 4 + 1]).toBe(255)
-    expect(imageData.data[n * 4 + 2]).toBe(255)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 255)
+    assert.equal(imageData.data[n * 4 + 1], 255)
+    assert.equal(imageData.data[n * 4 + 2], 255)
+    assert.equal(imageData.data[n * 4 + 3], 255)
     // (1, 1) black
     n = 3
-    expect(imageData.data[n * 4 + 0]).toBe(0)
-    expect(imageData.data[n * 4 + 1]).toBe(0)
-    expect(imageData.data[n * 4 + 2]).toBe(0)
-    expect(imageData.data[n * 4 + 3]).toBe(255)
+    assert.equal(imageData.data[n * 4 + 0], 0)
+    assert.equal(imageData.data[n * 4 + 1], 0)
+    assert.equal(imageData.data[n * 4 + 2], 0)
+    assert.equal(imageData.data[n * 4 + 3], 255)
   })
 
   // it('Context2d#IsPointInPath()', function () {
@@ -804,10 +804,10 @@ describe('Canvas', () => {
       const sin = Math.sin(expected)
       const cos = Math.cos(expected)
 
-      expect(Math.abs(mat.m11 - cos) < 1e-6).toBe(true)
-      expect(Math.abs(mat.m12 - sin) < 1e-6).toBe(true)
-      expect(Math.abs(mat.m21 + sin) < 1e-6).toBe(true)
-      expect(Math.abs(mat.m22 - cos) < 1e-6).toBe(true)
+      assert.equal(Math.abs(mat.m11 - cos) < 1e-6, true)
+      assert.equal(Math.abs(mat.m12 - sin) < 1e-6, true)
+      assert.equal(Math.abs(mat.m21 + sin) < 1e-6, true)
+      assert.equal(Math.abs(mat.m22 - cos) < 1e-6, true)
     }
   })
 
@@ -830,7 +830,7 @@ describe('Canvas', () => {
       if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0) { count++ }
     }
 
-    expect(count).toBe(10 * 10 * 2)
+    assert.equal(count, 10 * 10 * 2)
 
     // Drawing zero-width image
     ctx.drawImage(canvas, 0, 0, 0, 0, 0, 0, 0, 0)
@@ -847,6 +847,6 @@ describe('Canvas', () => {
       if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) { count++ }
     }
 
-    expect(count).toBe(500 * 500)
+    assert.equal(count, 500 * 500)
   })
 })

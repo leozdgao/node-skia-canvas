@@ -1,9 +1,9 @@
 
-const { createCanvas, Image } = require('../')
-
+const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
 const util = require('util')
+const { createCanvas, Image } = require('../lib')
 
 // const PNG_CHECKERS = path.join(__dirname, './fixtures/checkers.png')
 const PNG_CLOCK = path.join(__dirname, './fixtures/clock.png')
@@ -25,23 +25,23 @@ describe('Image', function () {
     const img = new Image()
 
     // eslint-disable-next-line no-prototype-builtins
-    expect(!img.hasOwnProperty('width')).toBe(true)
-    expect('width' in img).toBe(true)
+    assert.equal(!img.hasOwnProperty('width'), true)
+    assert.equal('width' in img, true)
     // eslint-disable-next-line no-prototype-builtins
-    expect(Image.prototype.hasOwnProperty('width')).toBe(true)
+    assert(Image.prototype.hasOwnProperty('width'))
   })
 
   it('loads JPEG image', function () {
     return loadImage(JPG_FACE).then((img) => {
-      expect(img.width).toBe(485)
-      expect(img.height).toBe(401)
+      assert.equal(img.width, 485)
+      assert.equal(img.height, 401)
     })
   })
 
   it('loads PNG image', function () {
     return loadImage(PNG_CLOCK).then((img) => {
-      expect(img.width).toBe(320)
-      expect(img.height).toBe(320)
+      assert.equal(img.width, 320)
+      assert.equal(img.height, 320)
     })
   })
 
@@ -161,8 +161,8 @@ describe('Image', function () {
   it('Image#src set null', function () {
     return loadImage(PNG_CLOCK).then((img) => {
       img.src = null
-      expect(img.width).toBe(0)
-      expect(img.height).toBe(0)
+      assert.equal(img.width, 0)
+      assert.equal(img.height, 0)
     })
   })
 
@@ -267,22 +267,22 @@ describe('Image', function () {
   describe('supports BMP', function () {
     it('parses 1-bit image', function () {
       return loadImage(path.join(BMP_DIR, '1-bit.bmp')).then((img) => {
-        expect(img.width).toBe(111)
-        expect(img.height).toBe(72)
+        assert.equal(img.width, 111)
+        assert.equal(img.height, 72)
       })
     })
 
     it('parses 4-bit image', function () {
       return loadImage(path.join(BMP_DIR, '4-bit.bmp')).then((img) => {
-        expect(img.width).toBe(32)
-        expect(img.height).toBe(32)
+        assert.equal(img.width, 32)
+        assert.equal(img.height, 32)
       })
     })
 
     it('parses 24-bit image', function () {
       return loadImage(path.join(BMP_DIR, '24-bit.bmp')).then((img) => {
-        expect(img.width).toBe(2)
-        expect(img.height).toBe(2)
+        assert.equal(img.width, 2)
+        assert.equal(img.height, 2)
 
         testImgd(img, [
           0, 0, 255, 255,
@@ -295,8 +295,8 @@ describe('Image', function () {
 
     it('parses 32-bit image', function () {
       return loadImage(path.join(BMP_DIR, '32-bit.bmp')).then((img) => {
-        expect(img.width).toBe(4)
-        expect(img.height).toBe(2)
+        assert.equal(img.width, 4)
+        assert.equal(img.height, 2)
 
         testImgd(img, [
           0, 0, 255, 255,
@@ -313,8 +313,8 @@ describe('Image', function () {
 
     it('parses minimal BMP', function () {
       return loadImage(path.join(BMP_DIR, 'min.bmp')).then((img) => {
-        expect(img.width).toBe(1)
-        expect(img.height).toBe(1)
+        assert.equal(img.width, 1)
+        assert.equal(img.height, 1)
 
         testImgd(img, [
           255, 0, 0, 255
@@ -324,8 +324,8 @@ describe('Image', function () {
 
     it('properly handles negative height', function () {
       return loadImage(path.join(BMP_DIR, 'negative-height.bmp')).then((img) => {
-        expect(img.width).toBe(1)
-        expect(img.height).toBe(2)
+        assert.equal(img.width, 1)
+        assert.equal(img.height, 2)
 
         testImgd(img, [
           255, 0, 0, 255,
@@ -336,15 +336,15 @@ describe('Image', function () {
 
     it('color palette', function () {
       return loadImage(path.join(BMP_DIR, 'palette.bmp')).then((img) => {
-        expect(img.width).toBe(32)
-        expect(img.height).toBe(32)
+        assert.equal(img.width, 32)
+        assert.equal(img.height, 32)
       })
     })
 
     it('V3 header', function () {
       return loadImage(path.join(BMP_DIR, 'v3-header.bmp')).then((img) => {
-        expect(img.width).toBe(256)
-        expect(img.height).toBe(192)
+        assert.equal(img.width, 256)
+        assert.equal(img.height, 192)
       })
     })
 
@@ -366,8 +366,8 @@ describe('Image', function () {
 
     it('BMP bomb', function () {
       return loadImage(path.join(BMP_DIR, 'bomb.bmp')).then((img) => {
-        expect(img.width).toBe(4135)
-        expect(img.height).toBe(4135)
+        assert.equal(img.width, 4135)
+        assert.equal(img.height, 4135)
       })
     })
 
@@ -375,7 +375,8 @@ describe('Image', function () {
       const ctx = createCanvas(img.width, img.height).getContext('2d')
       ctx.drawImage(img, 0, 0)
       const actualData = ctx.getImageData(0, 0, img.width, img.height).data
-      expect(String(actualData)).toBe(String(data))
+
+      assert.equal(String(actualData), String(data))
     }
   })
 })

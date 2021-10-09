@@ -1,7 +1,5 @@
-
-const DOMMatrix = require('../').DOMMatrix
-
 const assert = require('assert')
+const DOMMatrix = require('../lib').DOMMatrix
 
 // This doesn't need to be precise; we're not testing the engine's trig
 // implementations.
