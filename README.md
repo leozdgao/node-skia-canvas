@@ -1,6 +1,6 @@
 <div align="center">
 
-<image src="https://z3.ax1x.com/2021/10/12/5eGh36.png" width=400 />
+<image src="https://z3.ax1x.com/2021/10/12/5eGh36.png" width=300 />
 
 `node-skia-canvas` is a node binding for [skia](https://skia.org/) with <b>Node-API</b>, and expose API [standard Canvas API](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API) for using.
 
