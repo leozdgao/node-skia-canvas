@@ -16,9 +16,9 @@
 
 There is already a Canvas works on node, but here is some enhancement, and take this package as a replacemnt of `node-canvas`:
 
-* use Node-API to solve the ABI issue
+* Using Node-API to solve the ABI issue
 * Some skia module extension, for example: skparagraph, pathkit, sklottie
-* work in node **worker-thread** to provide the possibility of multi-thread processing (Working in progress)
+* Working in node **worker-thread** to provide the possibility of multi-thread processing (Working in progress)
 * GPU context support (Working in progress)
 
 The project is written by C++ style API with `node-addon-api`, and built with `cmake-js`, and use `prebuild` and `prebuild-install` to prevent user enviroment building.
