@@ -113,7 +113,7 @@ Methods:
 [toBuffer]: #tobufferformat
 [toDataURL_mdn]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
 
-##### `toBuffer(format)`
+##### ✨ `toBuffer(format)`
 
 
 ### CanvasRenderingContext2D
@@ -243,7 +243,7 @@ Methods:
 [transform()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform
 [translate()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate
 
-##### `fillText(x, y, text, [maxWidth])`
+##### ✨ `fillText(x, y, text, [maxWidth])`
 
 ### Image
 ```
