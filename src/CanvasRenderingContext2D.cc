@@ -765,7 +765,13 @@ napi_value CanvasRenderingContext2D::Arc(napi_env env, napi_callback_info info) 
     ctx->states_.top().path_.moveTo(move_point);
     ctx->states_.top().last_move_point_ = &move_point;
 
-    ctx->states_.top().path_.arcTo(oval, start_angle, end_angle - start_angle, true);
+    SkScalar sweep_angle = end_angle - start_angle;
+
+    if (sweep_angle == 360) {
+      sweep_angle -= 1;
+    }
+
+    ctx->states_.top().path_.arcTo(oval, start_angle, sweep_angle, true);
 
     return nullptr;
 }
@@ -971,6 +977,8 @@ napi_value CanvasRenderingContext2D::Ellipse(napi_env env, napi_callback_info in
 
 
     ctx->states_.top().path_.transform(matrix);
+
+    return nullptr;
 }
 
 napi_value CanvasRenderingContext2D::Fill(napi_env env, napi_callback_info info) {

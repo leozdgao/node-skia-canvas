@@ -2,7 +2,7 @@
 
 <image src="https://z3.ax1x.com/2021/10/12/5eGh36.png" width=300 />
 
-`node-skia-canvas` is a node binding for [skia](https://skia.org/) with <b>Node-API</b>, and expose API [standard Canvas API](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API) for using.
+`node-skia-canvas` is a node binding for [skia](https://skia.org/) with <b>Node-API</b>, and expose [standard Canvas API](https://developer.mozilla.org/zh-CN/docs/Web/API/Canvas_API) for using.
 
 
 [![xx](https://img.shields.io/github/workflow/status/leozdgao/node-skia-canvas/CI)]()
@@ -35,6 +35,41 @@ npm install --save node-canvas-skia
 
 ```js
 const { createCanvas } = require('node-skia-canvas')
+
+const canvas = createCanvas(256, 256)
+const ctx = canvas.getContext('2d')
+
+ctx.fillStyle = '#FFF'
+ctx.fillRect(0, 0, 256, 256)
+
+ctx.fillStyle = '#4285F4'
+ctx.fillRect(10, 10, 100, 160)
+
+ctx.fillStyle = '#0F9D58'
+ctx.beginPath()
+ctx.arc(180, 50, 25, 0, 2 * Math.PI)
+ctx.closePath()
+ctx.fill()
+
+ctx.fillStyle = '#DB4437'
+ctx.beginPath()
+ctx.ellipse(100, 160, 50, 80, 0, 0, 2 * Math.PI)
+ctx.closePath()
+ctx.fill()
+
+ctx.lineWidth = 5
+ctx.strokeStyle = '#F4B400'
+ctx.strokeRect(80, 50, 100, 160)
+```
+
+And get result:
+
+![5uiU2R.png](https://z3.ax1x.com/2021/10/13/5uiU2R.png)
+
+You could run example by the script in `scripts` folder:
+
+```bash
+node scripts/run_example.js skia_showcase
 ```
 
 ## API Documentation
