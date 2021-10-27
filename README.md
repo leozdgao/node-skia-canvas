@@ -27,7 +27,7 @@ Consider about the complex host environment, so this package decide to let skia 
 ## Install
 
 ```bash
-npm install --save node-canvas-skia
+npm install --save node-skia-canvas
 ```
 
 ## Example
