@@ -113,7 +113,17 @@ Methods:
 [toBuffer]: #tobufferformat
 [toDataURL_mdn]: https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
 
-##### ✨ `toBuffer(format)`
+##### ✨ `toBuffer(mimeType = 'image/png')`
+Not like canvas tag in browser, we need get real buffer information as result on server, so you could use this API, and it now support JPEG/PNG by pass mimeType, `image/png` will be used if format is not specified.
+
+```js
+const canvas = new Canvas(300, 300)
+const ctx = canvas.getContext('2d')
+
+// some canvas operation...
+
+canvas.toBuffer('image/png') // or image/jpeg
+```
 
 
 ### CanvasRenderingContext2D
