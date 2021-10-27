@@ -244,22 +244,48 @@ Methods:
 [translate()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate
 
 ##### ✨ `fillText(x, y, text, [maxWidth])`
+Provide extra parameter `maxWidth` to provide word-wrap typography, it is documented on [MDN](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText), but not implemented in most browser, but this library implemented this extra parameter.
 
 ### Image
-```
+Here is a helper class for image usage, and used in `drawImage` as parameter:
 
+```js
+const fs = require('fs')
+const { Image } = require('node-skia-canvas')
+
+const imgData = fs.readFileSync('./examples/leize.jpeg')
+const image = new Image()
+image.src = imgData
+
+const canvas = createCanvas(image.width, image.height)
+const ctx = canvas.getContext('2d')
+ctx.drawImage(img, 0, 0, image.width, image.height)
 ```
 
 Properties
-* width
-* height
-* src
+* [width](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img#attr-width)
+* [height](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img#attr-height)
+* [src](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Element/img#attr-src)
 
 #### About loadImage
-
+There is an API `loadImage` provided by `node-canvas`, but you may have your own favorite network library like: `urllib`、`universal-fetch`, etc. So this `loadImage` helper api may not that helpful, so it will not be provided currently. 
 
 ### Font Management
+We provide font management API and compat with `node-canvas`:
 
+##### ✨ `registerFont(path, [{ family, weight }])`
+
+Register font to canvas, if `family` or `weight` is not provided, it will be parsed from font file automatically.
+
+```js
+const { registerFont } = require('node-skia-canvas')
+
+registerFont(path.join(__dirname, './OswaldRegular.ttf'), {
+  family: 'Oswald'
+})
+registerFont(path.join(__dirname, './OswaldLight.ttf'))
+registerFont(path.join(__dirname, './OswaldBold.ttf'))
+```
 
 ## Acknowledgements
 

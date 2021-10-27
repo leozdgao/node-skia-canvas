@@ -9,7 +9,7 @@
         "request": "launch",
         "name": "lldb:node",
         "program": "node",
-        "args": ["${workspaceFolder}/examples/skia_showcase.js"],
+        "args": ["${workspaceFolder}/scripts/run_example.js", "skia_showcase"],
         "cwd": "${workspaceFolder}"
       },
       {
