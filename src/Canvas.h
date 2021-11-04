@@ -34,9 +34,5 @@ private:
     int height_;
     sk_sp<SkSurface> rasterSurface_;
 
-    /**
-     * `napi_unwrap` will failed with `napi_invalid_arg` in Canvas instance callback
-     */
-    napi_value ctx_ = nullptr;
     CanvasRenderingContext2D* inner_ctx = nullptr;
 };

@@ -77,20 +77,15 @@ Napi::Value Canvas::GetContext(const Napi::CallbackInfo& info) {
     napi_status status;
     std::string cc = info[0].As<Napi::String>().Utf8Value();
 
-    napi_valuetype ctx_type;
-    status = napi_typeof(info.Env(), this->ctx_, &ctx_type);
+    napi_value ctx;
+    status = CanvasRenderingContext2D::NewInstance(info.Env(), &ctx);
 
-    // NOTE: 这里判断 == nullptr 会有问题，后续挖一下为什么
-    if (ctx_type != napi_object) {
-        status = CanvasRenderingContext2D::NewInstance(info.Env(), &this->ctx_);
-
-        CanvasRenderingContext2D* inner_ctx;
-        status = napi_unwrap(info.Env(), this->ctx_, reinterpret_cast<void**>(&inner_ctx));
-        this->inner_ctx = inner_ctx;
-        inner_ctx->setCanvas(this->rasterSurface_->getCanvas());
-    }
+    CanvasRenderingContext2D* inner_ctx;
+    status = napi_unwrap(info.Env(), ctx, reinterpret_cast<void**>(&inner_ctx));
+    this->inner_ctx = inner_ctx;
+    inner_ctx->setCanvas(this->rasterSurface_->getCanvas());
     
-    return Napi::Value::From(info.Env(), this->ctx_);
+    return Napi::Value::From(info.Env(), ctx);
 }
 
 Napi::Value Canvas::ToBuffer(const Napi::CallbackInfo& info) {

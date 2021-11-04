@@ -51,6 +51,15 @@ describe('Canvas', () => {
     assert.equal(context.getImageData(0, 0, 1, 1).data.join(','), '0,0,0,0')
   })
 
+  it('Canvas#getContext()', function () {
+    const canvas = new Canvas(200, 300)
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = '#808080'
+
+    const ctx2 = canvas.getContext('2d')
+    assert.equal(ctx2.fillStyle, '#808080')
+  })
+
   it('Canvas#getContext("invalid")', function () {
     assert(new Canvas(200, 300).getContext('invalid') == null)
   })
