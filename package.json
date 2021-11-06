@@ -1,6 +1,6 @@
 {
   "name": "node-skia-canvas",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Skia based graphics canvas run on node.js, written in Node-API",
   "main": "lib/index.js",
   "scripts": {
