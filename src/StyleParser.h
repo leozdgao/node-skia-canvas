@@ -8,6 +8,8 @@
 #include "modules/skparagraph/include/ParagraphStyle.h"
 
 using std::string;
+using skia::textlayout::TextDecoration;
+using skia::textlayout::TextDecorationStyle;
 using skia::textlayout::TextAlign;
 using skia::textlayout::ParagraphStyle;
 
@@ -40,6 +42,10 @@ public:
     static void fillTileModeWithRepetition(string& repetition, SkTileMode* result);
     static SkFontStyle::Slant fromStrToFontSlant(string& slant);
     static SkFontStyle::Width fromStrToFontStrecth(string& stretch);
+    static string fromTextDecorationStyleToStr(TextDecorationStyle& style);
+    static TextDecorationStyle fromStrToTextDecorationStyle(string& style);
+    static string fromTextDecorationTypeToStr(TextDecoration& style);
+    static TextDecoration fromStrToTextDecorationType(string& mode);
 
     static SkScalar getTextBaselineOffset(SkFontMetrics& metrics, TextBaseline baseline);
     static SkScalar getTextAlignFactor(ParagraphStyle& style);

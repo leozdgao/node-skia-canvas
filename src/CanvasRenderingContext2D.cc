@@ -21,6 +21,7 @@
 #include "W3CSkColorParser.h"
 #include "helpers.h"
 
+using skia::textlayout::Decoration;
 using skia::textlayout::FontCollection;
 using skia::textlayout::ParagraphBuilder;
 using skia::textlayout::Paragraph;
@@ -90,6 +91,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
         DECLARE_NAPI_PROPERTY("strokeStyle", GetStrokeStyle, SetStrokeStyle),
         DECLARE_NAPI_PROPERTY("textAlign", GetTextAlign, SetTextAlign),
         DECLARE_NAPI_PROPERTY("textBaseline", GetTextBaseline, SetTextBaseline),
+        DECLARE_NAPI_PROPERTY("textDecoration", GetTextDecoration, SetTextDecoration),
         // methods
         DECLARE_NAPI_METHOD("arc", Arc),
         DECLARE_NAPI_METHOD("arcTo", ArcTo),
@@ -128,7 +130,7 @@ napi_status CanvasRenderingContext2D::Init(napi_env env, napi_value exports) {
     };
 
     napi_value cons;
-    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 50, properties, &cons);
+    status = napi_define_class(env, "CanvasRenderingContext2D", NAPI_AUTO_LENGTH, New, nullptr, 51, properties, &cons);
     assert(status == napi_ok);
 
     napi_ref* constructor = new napi_ref;
@@ -733,6 +735,56 @@ napi_value CanvasRenderingContext2D::SetTextBaseline(napi_env env, napi_callback
     ctx->states_.top().text_baseline_ = StyleParser::fromStrToTextBaseline(text_baseline);
 
     return nullptr;
+}
+
+napi_value CanvasRenderingContext2D::GetTextDecoration(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+
+    CanvasState state = ctx->states_.top();
+    Decoration decoration = state.text_style_.getDecoration();
+    Napi::Array result = Napi::Array::New(env);
+
+    result.Set((uint32_t)0, StyleParser::fromTextDecorationStyleToStr(decoration.fStyle));
+    result.Set(1, StyleParser::fromTextDecorationTypeToStr(decoration.fType));
+
+    Napi::Array color_arr = Napi::Array::New(env);
+    SkColor4f color = SkColor4f::FromColor(decoration.fColor);
+    color_arr.Set((uint32_t)0, color.fR);
+    color_arr.Set(1, color.fG);
+    color_arr.Set(2, color.fB);
+    color_arr.Set(3, color.fA);
+
+    result.Set(2, color_arr);
+    result.Set(3, decoration.fThicknessMultiplier);
+
+    return result;
+}
+
+napi_value CanvasRenderingContext2D::SetTextDecoration(napi_env env, napi_callback_info info) {
+    napi_status status;
+    GET_CB_INFO(env, info, status, 1)
+    
+    CanvasRenderingContext2D* ctx;
+    status = napi_unwrap(env, jsthis, reinterpret_cast<void**>(&ctx));
+    Napi::Array values = Napi::Value::From(env, argv[0]).As<Napi::Array>();
+    Napi::String type = values.Get((uint32_t)0).As<Napi::String>();
+    Napi::String style = values.Get(1).As<Napi::String>();
+    Napi::String color = values.Get(2).As<Napi::String>();
+    Napi::Number thickness = values.Get(3).As<Napi::Number>();
+
+    string type_str = type.Utf8Value();
+    string style_str = style.Utf8Value();
+    string color_str = color.Utf8Value();
+    shared_ptr<SkColor4f> sk_color = W3CSkColorParser::rgba_from_string(color_str);
+
+    ctx->states_.top().text_style_.setDecorationStyle(StyleParser::fromStrToTextDecorationStyle(style_str));
+    ctx->states_.top().text_style_.setDecoration(StyleParser::fromStrToTextDecorationType(type_str));
+    ctx->states_.top().text_style_.setDecorationColor(sk_color->toSkColor());
+    ctx->states_.top().text_style_.setDecorationThicknessMultiplier(thickness.FloatValue());
 }
 
 // ================================== Methods ==================================

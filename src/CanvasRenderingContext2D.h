@@ -119,6 +119,8 @@ private:
     static napi_value SetTextAlign(napi_env env, napi_callback_info info);
     static napi_value GetTextBaseline(napi_env env, napi_callback_info info);
     static napi_value SetTextBaseline(napi_env env, napi_callback_info info);
+    static napi_value GetTextDecoration(napi_env env, napi_callback_info info);
+    static napi_value SetTextDecoration(napi_env env, napi_callback_info info);
 
     // ================================== Methods ==================================
 

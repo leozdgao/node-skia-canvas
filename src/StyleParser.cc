@@ -1,6 +1,8 @@
 #include "include/effects/SkImageFilters.h"
 #include "StyleParser.h"
 
+using skia::textlayout::TextDecoration;
+using skia::textlayout::TextDecorationStyle;
 using skia::textlayout::TextDirection;
 
 namespace node_skia {
@@ -268,6 +270,66 @@ SkScalar StyleParser::getTextAlignFactor(ParagraphStyle& style) {
     }
 
     return 0;
+}
+
+string StyleParser::fromTextDecorationStyleToStr(TextDecorationStyle& style) {
+    if (style == TextDecorationStyle::kSolid) {
+        return "solid";
+    } else if (style == TextDecorationStyle::kDashed) {
+        return "dashed";
+    } else if (style == TextDecorationStyle::kDotted) {
+        return "dotted";
+    } else if (style == TextDecorationStyle::kDouble) {
+        return "double";
+    } else if (style == TextDecorationStyle::kWavy) {
+        return "wavy";
+    }
+
+    return "solid";
+}
+
+TextDecorationStyle StyleParser::fromStrToTextDecorationStyle(string& style) {
+    if (style == "solid") {
+        return TextDecorationStyle::kSolid;
+    } else if (style == "dashed") {
+        return TextDecorationStyle::kDashed;
+    } else if (style == "dotted") {
+        return TextDecorationStyle::kDotted;
+    } else if (style == "double") {
+        return TextDecorationStyle::kDouble;
+    } else if (style == "wavy") {
+        return TextDecorationStyle::kWavy;
+    }
+
+    return TextDecorationStyle::kSolid;
+}
+
+string StyleParser::fromTextDecorationTypeToStr(TextDecoration& style) {
+    if (style == TextDecoration::kLineThrough) {
+        return "line-through";
+    } else if (style == TextDecoration::kNoDecoration) {
+        return "none";
+    } else if (style == TextDecoration::kOverline) {
+        return "overline";
+    } else if (style == TextDecoration::kUnderline) {
+        return "underline";
+    }
+
+    return "none";
+}
+
+TextDecoration StyleParser::fromStrToTextDecorationType(string& mode) {
+    if (mode == "line-through") {
+        return TextDecoration::kLineThrough;
+    } else if (mode == "none") {
+        return TextDecoration::kNoDecoration;
+    } else if (mode == "overline") {
+        return TextDecoration::kOverline;
+    } else if (mode == "underline") {
+        return TextDecoration::kUnderline;
+    }
+
+    return TextDecoration::kNoDecoration;
 }
 
 }

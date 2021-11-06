@@ -6,3 +6,9 @@ insert_final_newline = true
 charset = utf-8
 indent_style = space
 indent_size = 2
+
+[*.cc]
+indent_size = 4
+
+[*.h]
+indent_size = 4
