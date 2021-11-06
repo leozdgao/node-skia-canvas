@@ -155,6 +155,7 @@ Properties:
 * [strokeStyle][strokeStyle]
 * [textAlign][textAlign]
 * [textBaseline][textBaseline]
+* [textDecoration ✨][textDecoration]
 
 Methods:
 * [arc()][arc()]
@@ -211,6 +212,7 @@ Methods:
 [strokeStyle]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeStyle
 [textAlign]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textAlign
 [textBaseline]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/textBaseline
+[textDecoration]: https://developer.mozilla.org/zh-CN/docs/Web/CSS/text-decoration
 [arc()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arc
 [arcTo()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/arcTo
 [beginPath()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/beginPath
@@ -252,6 +254,19 @@ Methods:
 [strokeText()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/strokeText
 [transform()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform
 [translate()]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/translate
+
+#### ✨ `textDecoration`
+Enhanced feature for text rendering, provide `text-decoration` property and use just like [the property in CSS](https://developer.mozilla.org/zh-CN/docs/Web/CSS/text-decoration): `<'text-decoration-line'> || <'text-decoration-style'> || <'text-decoration-color'> || <'text-decoration-thickness'>`
+
+```js
+const canvas = createCanvas(image.width, image.height)
+const ctx = canvas.getContext('2d')
+
+ctx.fillStyle = '#000'
+ctx.textBaseline = 'top'
+ctx.font = '24px/1.2 "PingFang SC"'
+ctx.textDecoration = 'line-through'
+```
 
 ##### ✨ `fillText(x, y, text, [maxWidth])`
 Provide extra parameter `maxWidth` to provide word-wrap typography, it is documented on [MDN](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/fillText), but not implemented in most browser, but this library implemented this extra parameter.
