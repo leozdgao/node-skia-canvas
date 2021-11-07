@@ -10,6 +10,7 @@
 #include "modules/skparagraph/include/ParagraphStyle.h"
 #include "modules/skparagraph/include/TextStyle.h"
 #include "StyleParser.h"
+#include "TextMetrics.h"
 
 using std::stack;
 using std::string;
@@ -83,7 +84,7 @@ private:
     void fill_with_dye(SkPaint& paint, Napi::Value dye);
     void render_text(SkPaint& paint, string text, SkScalar x, SkScalar y, SkScalar maxWidth);
     void render_to_canvas(SkPaint& paint, std::function<void (SkPaint&)> f);
-    vector<double> measure_text(SkPaint& paint, string text, SkScalar maxWidth);
+    vector<double> measure_text(SkPaint& paint, string text, SkScalar maxWidth, vector<TextLineMetrics>* lines = nullptr);
 
     // ================================== Properties ==================================
 

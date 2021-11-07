@@ -5,11 +5,18 @@
 
 using std::vector;
 
+struct TextLineMetrics {
+    size_t startIndex;
+    size_t endIndex;
+    double width;
+    double height;
+};
+
 class TextMetrics : public Napi::ObjectWrap<TextMetrics> {
 public:
     static Napi::Object Init(Napi::Env env, Napi::Object exports);
     static Napi::Value CreateInstance(Napi::Env env, vector<double> values);
-    static Napi::Object CreateObject(Napi::Env env, vector<double> values);
+    static Napi::Object CreateObject(Napi::Env env, vector<double> values, vector<TextLineMetrics> lines);
     static Napi::FunctionReference constructor;
 
     TextMetrics(const Napi::CallbackInfo& info);

@@ -1461,9 +1461,10 @@ napi_value CanvasRenderingContext2D::MeasureText(napi_env env, napi_callback_inf
     Napi::Number maxWidth = Napi::Value::From(env, argv[1]).As<Napi::Number>();
     SkScalar s_maxWidth = maxWidth.IsNumber() ? maxWidth.DoubleValue() : 10 * 10000;
 
-    vector<double> values = ctx->measure_text(ctx->states_.top().paint_for_fill_, text.Utf8Value(), s_maxWidth);
+    vector<TextLineMetrics> lines = {};
+    vector<double> values = ctx->measure_text(ctx->states_.top().paint_for_fill_, text.Utf8Value(), s_maxWidth, &lines);
 
-    return TextMetrics::CreateObject(env, values);
+    return TextMetrics::CreateObject(env, values, lines);
 }
 
 napi_value CanvasRenderingContext2D::Transform(napi_env env, napi_callback_info info) {
@@ -1512,7 +1513,7 @@ napi_value CanvasRenderingContext2D::Translate(napi_env env, napi_callback_info 
 
 // ======================= Private =======================
 
-vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string text, SkScalar maxWidth) {
+vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string text, SkScalar maxWidth, vector<TextLineMetrics>* lines) {
     TextStyle text_style = this->states_.top().text_style_;
     text_style.setForegroundColor(paint);
 
@@ -1553,7 +1554,7 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     SkScalar ascent = norm - metrics.fAscent;
     SkScalar descent = metrics.fDescent - norm;
 
-    vector<double> result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    vector<double> result = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     
     if (paragraph->lineNumber() == 0) {
         return result;
@@ -1587,6 +1588,20 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     result[10] = hang;
     // ideographicBaseline
     result[11] = ideo;
+
+    double height = 0.0;
+
+    for (LineMetrics metrics: line_metrics) {
+        height += metrics.fHeight;
+
+        if (lines != nullptr) {
+            TextLineMetrics line = { metrics.fStartIndex, metrics.fEndIndex, metrics.fWidth, metrics.fHeight };
+            lines->push_back(line);
+        }
+    }
+
+    // height
+    result[12] = height;
 
     return result;
 }
