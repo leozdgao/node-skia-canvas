@@ -785,6 +785,8 @@ napi_value CanvasRenderingContext2D::SetTextDecoration(napi_env env, napi_callba
     ctx->states_.top().text_style_.setDecoration(StyleParser::fromStrToTextDecorationType(type_str));
     ctx->states_.top().text_style_.setDecorationColor(sk_color->toSkColor());
     ctx->states_.top().text_style_.setDecorationThicknessMultiplier(thickness.FloatValue());
+
+    return nullptr;
 }
 
 // ================================== Methods ==================================
@@ -1564,8 +1566,23 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     paragraph->getLineMetrics(line_metrics);
 
     LineMetrics first_line = line_metrics[0];
+    double width = 0.0;
+    double height = 0.0;
+
+    for (LineMetrics metrics: line_metrics) {
+        width = std::max(width, metrics.fWidth);
+        height += metrics.fHeight;
+
+        if (lines != nullptr) {
+            TextLineMetrics line = {
+                metrics.fStartIndex, metrics.fEndIndex, metrics.fWidth, metrics.fHeight, metrics.fHardBreak
+            };
+            lines->push_back(line);
+        }
+    }
+
     // width
-    result[0] = first_line.fWidth;
+    result[0] = width;
     // actualBoundingBoxLeft
     result[1] = StyleParser::getTextAlignFactor(pragh_style) * first_line.fWidth;
     // actualBoundingBoxRight
@@ -1588,18 +1605,6 @@ vector<double> CanvasRenderingContext2D::measure_text(SkPaint& paint, string tex
     result[10] = hang;
     // ideographicBaseline
     result[11] = ideo;
-
-    double height = 0.0;
-
-    for (LineMetrics metrics: line_metrics) {
-        height += metrics.fHeight;
-
-        if (lines != nullptr) {
-            TextLineMetrics line = { metrics.fStartIndex, metrics.fEndIndex, metrics.fWidth, metrics.fHeight };
-            lines->push_back(line);
-        }
-    }
-
     // height
     result[12] = height;
 

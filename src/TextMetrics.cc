@@ -35,6 +35,7 @@ Napi::Object TextMetrics::CreateObject(Napi::Env env, vector<double> values, vec
         jsLineMetrics.Set("endIndex", line.endIndex);
         jsLineMetrics.Set("width", line.width);
         jsLineMetrics.Set("height", line.height);
+        jsLineMetrics.Set("hasHardBreak", line.hasHardBreak);
 
         jsLines.Set(i, jsLineMetrics);
     }

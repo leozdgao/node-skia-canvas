@@ -10,6 +10,7 @@ struct TextLineMetrics {
     size_t endIndex;
     double width;
     double height;
+    bool hasHardBreak;
 };
 
 class TextMetrics : public Napi::ObjectWrap<TextMetrics> {
