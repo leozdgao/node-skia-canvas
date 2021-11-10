@@ -22,7 +22,7 @@ private:
   size_t width_;
   size_t height_;
   size_t len_;
-  void* data_;
+  void* data_ = nullptr;
 
   sk_sp<SkImage> image_ = nullptr;
 };

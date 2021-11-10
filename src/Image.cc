@@ -31,7 +31,11 @@ Napi::Value Image::GetHeight(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Image::GetSource(const Napi::CallbackInfo& info) {
-  return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)data_, len_);
+    if (data_ == nullptr) {
+        return info.Env().Undefined();
+    }
+
+    return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)data_, len_);
 }
 
 void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) {
@@ -43,7 +47,13 @@ void Image::SetSource(const Napi::CallbackInfo& info, const Napi::Value& value) 
     height_ = 0;
   } else {
     Napi::Buffer buffer = value.As<Napi::Buffer<unsigned char>>();
-    data_ = buffer.Data();
+
+    if (data_ != nullptr) {
+        free(data_);
+    }
+    
+    data_ = malloc(buffer.Length() * sizeof(unsigned char));
+    memcpy(data_, buffer.Data(), buffer.Length() * sizeof(unsigned char));
     len_ = buffer.Length();
 
     image_ = SkImage::MakeFromEncoded(
