@@ -27,6 +27,7 @@ const IS_WINDOWS = PLATFORM === 'windows'
 const IS_LINUX = PLATFORM.startsWith('linux')
 const IS_SKIA_DEBUG = !!process.env.SKIA_DEBUG
 const SKIA_USE_SYSTEM_LIB = !!process.env.SKIA_USE_SYSTEM_LIB
+const OMIT_SYNC_DEPS = !!process.env.OMIT_SYNC_DEPS
 const SYSROOT = process.env.SYSROOT
 
 const FEATURES = (() => {

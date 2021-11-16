@@ -19,16 +19,16 @@ const PREBUILD_UPLOAD_SECRET = process.argv[2] || process.env.PREBUILD_UPLOAD_SE
 
 exec(`echo upload=${PREBUILD_UPLOAD_SECRET} >> ~/.prebuildrc`)
 
-exec('git clone --depth=1 https://github.com/leozdgao/node-skia-canvas.git')
+// exec('git clone --depth=1 https://github.com/leozdgao/node-skia-canvas.git')
 
-const workDirectory = path.join(process.cwd(), 'node-skia-canvas')
+const workDirectory = path.join(__dirname, '../node-skia-canvas')
 
-exec('git submodule init && git submodule update', {
-    cwd: workDirectory
-})
-exec('npm install', {
-  cwd: workDirectory
-})
+// exec('git submodule init && git submodule update', {
+//     cwd: workDirectory
+// })
+// exec('npm install', {
+//   cwd: workDirectory
+// })
 exec('npm run ci && npm test', {
     cwd: workDirectory
 })

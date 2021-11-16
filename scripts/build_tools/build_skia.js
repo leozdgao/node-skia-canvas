@@ -6,6 +6,7 @@
 
 const { execSync } = require('child_process')
 const {
+  OMIT_SYNC_DEPS,
   DEP_SYS_LIBS,
   FEATURES, SYSROOT, TOOLS,
   IS_LINUX,
@@ -166,7 +167,7 @@ logger.info(`Get gn args: ${JSON.stringify(argsForGN.reduce((ret, i) => {
 // ========== END: generate args for gn ==========
 
 // ========== START: building ==========
-if (!SKIA_USE_SYSTEM_LIB) {
+if (!SKIA_USE_SYSTEM_LIB && !OMIT_SYNC_DEPS) {
   logger.info('Synchronizing Skia dependencies: python2 tools/git-sync-deps')
 
   exec('python2 tools/git-sync-deps', {
