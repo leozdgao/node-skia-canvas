@@ -26,6 +26,9 @@ const workDirectory = path.join(process.cwd(), 'node-skia-canvas')
 exec('git submodule init && git submodule update', {
     cwd: workDirectory
 })
+exec('npm install', {
+  cwd: workDirectory
+})
 exec('npm run ci && npm test', {
     cwd: workDirectory
 })
