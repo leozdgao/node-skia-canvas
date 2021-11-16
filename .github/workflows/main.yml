@@ -15,8 +15,15 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./scripts/centos7_build_action # Uses an action in the root directory
+        with:
+          upload-secret: ${{ secrets.PREBUILD_UPLOAD_SECRET }}
   # This workflow contains a single job called "build"
-  build:
+  build-mac-win:
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:

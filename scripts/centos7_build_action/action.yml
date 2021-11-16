@@ -1,0 +1,12 @@
+# action.yml
+name: 'Build on centos7'
+description: 'Build on centos7'
+inputs:
+  upload-secret:  # id of input
+    description: 'github secret for prebuild upload'
+    required: true
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.upload-secret }}
