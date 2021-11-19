@@ -10,7 +10,7 @@ RUN git submodule init && git submodule update
 RUN npm install
 
 WORKDIR /work/node-skia-canvas/skia
-RUN tar -zxvf /work/externals.tar.gz -C /work/node-skia-canvas/skia/third_party
+RUN tar -zxf /work/externals.tar.gz -C /work/node-skia-canvas/skia/third_party
 
 ENV OMIT_SYNC_DEPS=true
 
