@@ -14,4 +14,4 @@ RUN tar -zxf /work/externals.tar.gz -C /work/node-skia-canvas/skia/third_party
 
 ENV OMIT_SYNC_DEPS=true
 
-ENTRYPOINT [ "node", "/work/build.js" ]
+# ENTRYPOINT [ "node", "/work/build.js" ]
