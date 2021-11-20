@@ -1,6 +1,7 @@
 // Before build this package, we need build skia first
 // use `depot_tools` from google git to ensure stable source of building tools
 
+const { execSync } = require('child_process')
 const os = require('os')
 const path = require('path')
 const argv = require('yargs-parser')(process.argv.slice(2))
@@ -30,6 +31,18 @@ const IS_SKIA_DEBUG = !!process.env.SKIA_DEBUG
 const SKIA_USE_SYSTEM_LIB = !!process.env.SKIA_USE_SYSTEM_LIB
 const OMIT_SYNC_DEPS = !!process.env.OMIT_SYNC_DEPS
 const SYSROOT = process.env.SYSROOT
+const IS_CENTOS7 = (() => {
+  if (!IS_LINUX) {
+    return false
+  }
+
+  try {
+    const version = execSync('cat /etc/centos-release').toString().trim()
+    return /^CentOS Linux release 7/.test(version)
+  } catch(e) {
+    return false
+  }
+})()
 
 const FEATURES = (() => {
   // env first, then argv
@@ -56,9 +69,18 @@ const FEATURES = (() => {
 })()
 
 const TOOLS = {
-  gn: () => path.join(PATH_DEPOT_TOOLS, 'gn'),
+  gn: () => {
+    if (IS_CENTOS7) {
+      return 'gn'
+    }
+    return path.join(PATH_DEPOT_TOOLS, 'gn')
+  },
   ninja: () => {
     let name = 'ninja'
+
+    if (IS_CENTOS7) {
+      return 'ninja'
+    }
 
     switch (PLATFORM) {
       case 'darwin': name = 'ninja-mac'; break
@@ -83,6 +105,7 @@ const ENV = {
   IS_MAC,
   IS_WINDOWS,
   IS_LINUX,
+  IS_CENTOS7,
   IS_SKIA_DEBUG,
   SKIA_USE_SYSTEM_LIB,
   FEATURES,
