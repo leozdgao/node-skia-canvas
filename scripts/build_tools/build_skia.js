@@ -12,7 +12,8 @@ const {
   IS_LINUX,
   IS_SKIA_DEBUG,
   SKIA_USE_SYSTEM_LIB,
-  PATH_SKIA_SOURCE, PATH_OUTPUT_DIRECTORY
+  PATH_SKIA_SOURCE, PATH_OUTPUT_DIRECTORY,
+  toString: envToString
 } = require('./env')
 const logger = require('./logger')
 
@@ -56,6 +57,8 @@ const findCflagsByPkgConfig = pkgs => {
     ldflags: libs
   }
 }
+
+logger.info(envToString())
 
 // ========== START: generate args for gn ==========
 const argsForGN = [

@@ -4,6 +4,7 @@
 const os = require('os')
 const path = require('path')
 const argv = require('yargs-parser')(process.argv.slice(2))
+const logger = require('./logger')
 
 const PATH_WORKSPACE = path.join(__dirname, '../../')
 const PATH_SKIA_SOURCE = path.join(PATH_WORKSPACE, 'skia')
@@ -73,12 +74,12 @@ const TOOLS = {
 }
 
 const PATH_OUTPUT_DIRECTORY = IS_SKIA_DEBUG ? 'out/Debug' : 'out/Release'
-
-module.exports = {
+const ENV = {
   DEP_SYS_LIBS,
   PATH_DEPOT_TOOLS,
   PATH_SKIA_SOURCE,
   PATH_OUTPUT_DIRECTORY,
+  OMIT_SYNC_DEPS,
   IS_MAC,
   IS_WINDOWS,
   IS_LINUX,
@@ -86,5 +87,11 @@ module.exports = {
   SKIA_USE_SYSTEM_LIB,
   FEATURES,
   SYSROOT,
-  TOOLS
 }
+
+module.exports = Object.assign({}, ENV, {
+  TOOLS,
+  toString() {
+    return JSON.stringify(ENV, null, 4)
+  }
+})

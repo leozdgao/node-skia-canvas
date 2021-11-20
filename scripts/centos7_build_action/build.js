@@ -19,6 +19,6 @@ const PREBUILD_UPLOAD_SECRET = process.argv[2] || process.env.PREBUILD_UPLOAD_SE
 
 exec(`echo upload=${PREBUILD_UPLOAD_SECRET} >> ~/.prebuildrc`)
 
-exec('npm run ci && npm test', {
+exec('OMIT_SYNC_DEPS=true npm run ci && npm test', {
     cwd: '/work/node-skia-canvas'
 })
