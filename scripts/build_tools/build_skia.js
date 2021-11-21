@@ -142,7 +142,7 @@ if (IS_LINUX) {
 
   // conflict for sys libpng
   if (clagsFound.some(flag => /libpng15/.test(flag))) {
-    clagsFound.unshift('-I/usr/local/include/libpng16')
+    clagsFound.unshift('"-I/usr/local/include/libpng16"')
   }
 
   cflags.push(...clagsFound)
