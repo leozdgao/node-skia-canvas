@@ -4,6 +4,7 @@
 // for debug, set SKIA_DEBUG=1 and do not set SKIA_USE_SYSTEM_LIB
 // for release, do not set SKIA_DEBUG and SKIA_USE_SYSTEM_LIB=1
 
+const path = require('path')
 const { execSync } = require('child_process')
 const {
   OMIT_SYNC_DEPS,
@@ -138,6 +139,12 @@ try {
 // need fontconfig on linux whether debug or release
 if (IS_LINUX) {
   const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(['fontconfig'])
+
+  // conflict for sys libpng
+  if (clagsFound.some(flag => /libpng15/.test(flag))) {
+    clagsFound.unshift('-I/usr/local/include/libpng16')
+  }
+
   cflags.push(...clagsFound)
   ldflags.push(...ldflagsFound)
 }
