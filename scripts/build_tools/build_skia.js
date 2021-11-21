@@ -141,11 +141,13 @@ if (IS_LINUX) {
   const { cflags: clagsFound, ldflags: ldflagsFound } = findCflagsByPkgConfig(['fontconfig'])
 
   // conflict for sys libpng
-  if (clagsFound.some(flag => /libpng15/.test(flag))) {
-    clagsFound.unshift('"-I/usr/local/include/libpng16"')
-  }
+  // if () {
+  //   // clagsFound.unshift('"-I/usr/local/include/libpng16"')
+  // }
 
-  cflags.push(...clagsFound)
+  const cflagsForReal = clagsFound.filter(flag => !/libpng15/.test(flag))
+
+  cflags.push(...cflagsForReal)
   ldflags.push(...ldflagsFound)
 }
 
