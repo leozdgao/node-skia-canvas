@@ -1204,13 +1204,18 @@ napi_value CanvasRenderingContext2D::PutImageData(napi_env env, napi_callback_in
 
     int dx, dy;
     ImageData* imgData;
-    
-    status = napi_unwrap(env, argv[0], reinterpret_cast<void**>(&imgData));
-    status = napi_get_value_int32(env, argv[1], &dx);
-    status = napi_get_value_int32(env, argv[2], &dy);
 
-    SkImageInfo image_info = SkImageInfo::Make(SkISize::Make(imgData->getWidth(), imgData->getHeight()), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
-    ctx->canvas_->writePixels(image_info, imgData->getData(), image_info.minRowBytes(), dx, dy);
+    Napi::Object data = Napi::Value::From(env, argv[0]).As<Napi::Object>();
+    Napi::Value dataValue = data.Get("data");
+
+    if (dataValue.IsTypedArray()) {
+        status = napi_unwrap(env, argv[0], reinterpret_cast<void**>(&imgData));
+        status = napi_get_value_int32(env, argv[1], &dx);
+        status = napi_get_value_int32(env, argv[2], &dy);
+
+        SkImageInfo image_info = SkImageInfo::Make(SkISize::Make(imgData->getWidth(), imgData->getHeight()), kRGBA_8888_SkColorType, kUnpremul_SkAlphaType);
+        ctx->canvas_->writePixels(image_info, dataValue.As<Napi::Uint8Array>().Data(), image_info.minRowBytes(), dx, dy);
+    }
 
     return nullptr;
 }
@@ -1690,6 +1695,8 @@ void CanvasRenderingContext2D::fill_with_dye(SkPaint& paint, Napi::Value value) 
                 }
                 
                 paint.setShader(shader);
+                // set a non-transparent color here
+                paint.setColor4f(SkColors::kBlack);
             } else if (pos_count == 1) {
                 paint.setShader(nullptr);
                 paint.setColor4f(gradient->colors[0].color);

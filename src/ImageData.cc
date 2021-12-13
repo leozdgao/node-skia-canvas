@@ -8,6 +8,16 @@ ImageData::ImageData(const Napi::CallbackInfo& info) : Napi::ObjectWrap<ImageDat
   width_ = width.Int32Value();
   height_ = height.Int32Value();
   data_ = data.Data();
+
+  size_t len = this->width_ * this->height_ * 4;
+  auto buffer = Napi::Uint8Array::New(info.Env(), len, napi_uint8_clamped_array);
+  
+  for (size_t i = 0; i < len; i++) {
+    buffer[i] = (reinterpret_cast<uint8_t*>(this->data_))[i];
+  }
+
+  Napi::Object instance = this->Value();
+  instance.Set("data", buffer);
 }
 
 Napi::FunctionReference ImageData::constructor;
@@ -32,7 +42,6 @@ Napi::Object ImageData::Init(Napi::Env env, Napi::Object exports) {
   Napi::Function func = DefineClass(env, "ImageData", {
       InstanceAccessor<&ImageData::GetWidth>("width"),
       InstanceAccessor<&ImageData::GetHeight>("height"),
-      InstanceAccessor<&ImageData::GetData>("data"),
   });
 
   constructor = Napi::Persistent(func);
@@ -57,19 +66,4 @@ Napi::Value ImageData::GetWidth(const Napi::CallbackInfo& info) {
 
 Napi::Value ImageData::GetHeight(const Napi::CallbackInfo& info) {
   return Napi::Number::New(info.Env(), this->height_);
-}
-
-Napi::Value ImageData::GetData(const Napi::CallbackInfo& info) {
-  size_t len = this->width_ * this->height_ * 4;
-  auto buffer = Napi::Uint8Array::New(info.Env(), len, napi_uint8_clamped_array);
-  
-  for (size_t i = 0; i < len; i++) {
-    buffer[i] = (reinterpret_cast<uint8_t*>(this->data_))[i];
-  }
-
-  return buffer;
-
-  // Napi::ArrayBuffer ab = Napi::ArrayBuffer::New(info.Env(), this->data_, this->width_ * this->height_ * 4);
-  // return Napi::Uint8Array::New(info.Env(), this->width_ * this->height_, ab, 0, napi_uint8_clamped_array);
-  // return Napi::Buffer<unsigned char>::Copy(info.Env(), (unsigned char *)this->data_, this->width_ * this->height_ * 4);
 }
